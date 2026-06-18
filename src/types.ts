@@ -74,8 +74,8 @@ export type CoursePackage = {
   name: string
   currency: string
   price: number
-  validStart: string // 有效期开始时间 YYYY-MM-DD
-  validEnd: string // 有效期结束时间 YYYY-MM-DD
+  validStart: string // 有效期开始时间 YYYY-MM-DD HH:mm:ss
+  validEnd: string // 有效期结束时间 YYYY-MM-DD HH:mm:ss
   creator: string
   status: PackageStatus
   createdAt: string

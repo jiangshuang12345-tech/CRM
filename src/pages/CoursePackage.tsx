@@ -80,8 +80,8 @@ export default function CoursePackagePage() {
         name: v.name,
         currency: v.currency,
         price: v.price,
-        validStart: validStart.format('YYYY-MM-DD'),
-        validEnd: validEnd.format('YYYY-MM-DD'),
+        validStart: validStart.format('YYYY-MM-DD HH:mm:ss'),
+        validEnd: validEnd.format('YYYY-MM-DD HH:mm:ss'),
         creator: session?.email ?? 'admin@dinoai.ai',
         status: '上架',
         createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -99,8 +99,8 @@ export default function CoursePackagePage() {
                 name: v.name,
                 currency: v.currency,
                 price: v.price,
-                validStart: validStart.format('YYYY-MM-DD'),
-                validEnd: validEnd.format('YYYY-MM-DD'),
+                validStart: validStart.format('YYYY-MM-DD HH:mm:ss'),
+                validEnd: validEnd.format('YYYY-MM-DD HH:mm:ss'),
               }
             : p,
         ),
@@ -141,7 +141,7 @@ export default function CoursePackagePage() {
     {
       title: '有效期',
       key: 'valid',
-      width: 220,
+      width: 340,
       render: (_, r) => (
         <Text type="secondary">
           {r.validStart} ~ {r.validEnd}
@@ -210,7 +210,7 @@ export default function CoursePackagePage() {
         rowKey="id"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1200 }}
+        scroll={{ x: 1440 }}
         pagination={{ showTotal: (t) => `共 ${t} 条`, showSizeChanger: true }}
       />
 
@@ -241,7 +241,12 @@ export default function CoursePackagePage() {
             <InputNumber style={{ width: '100%' }} min={0} placeholder="请输入价格" />
           </Form.Item>
           <Form.Item name="validRange" label="有效期" rules={[{ required: true, message: '请选择有效期' }]}>
-            <RangePicker style={{ width: '100%' }} placeholder={['开始时间', '结束时间']} />
+            <RangePicker
+              showTime
+              format="YYYY-MM-DD HH:mm:ss"
+              style={{ width: '100%' }}
+              placeholder={['开始时间', '结束时间']}
+            />
           </Form.Item>
         </Form>
       </Modal>
