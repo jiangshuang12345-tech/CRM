@@ -13,6 +13,7 @@ import {
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout, useSession } from '../auth'
 import { resetState } from '../store'
+import { LOGO } from '../logo'
 
 const { Header, Sider, Content } = Layout
 const { Text } = Typography
@@ -76,7 +77,7 @@ export default function AppLayout() {
             overflow: 'hidden',
           }}
         >
-          <img src="/dino.svg" width={26} height={26} alt="logo" />
+          <img src={LOGO} width={26} height={26} alt="logo" />
           {!collapsed && <span>DinoAI 运营平台</span>}
         </div>
         <Menu

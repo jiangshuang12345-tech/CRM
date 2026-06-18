@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Button, Card, Form, Input, Tabs, Typography, message } from 'antd'
 import { MailOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
 import { EMAIL_SUFFIX, login } from '../auth'
+import { LOGO } from '../logo'
 
 const { Text, Title } = Typography
 
@@ -65,7 +66,7 @@ export default function Login() {
       <Card style={{ width: 420, boxShadow: '0 12px 40px rgba(31,99,255,0.12)', borderRadius: 16 }} bordered={false}>
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
           <div className="brand-row" style={{ justifyContent: 'center', marginBottom: 8 }}>
-            <img src="/dino.svg" width={38} height={38} alt="logo" />
+            <img src={LOGO} width={38} height={38} alt="logo" />
             <Title level={3} style={{ margin: 0 }}>
               DinoAI 运营管理平台
             </Title>

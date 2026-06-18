@@ -1,4 +1,4 @@
-import { Navigate, Route, BrowserRouter, Routes } from 'react-router-dom'
+import { Navigate, Route, HashRouter, Routes } from 'react-router-dom'
 import { useSession } from './auth'
 import Login from './pages/Login'
 import AppLayout from './components/AppLayout'
@@ -17,7 +17,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 export default function App() {
   const session = useSession()
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route
           path="/login"
@@ -40,6 +40,6 @@ export default function App() {
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
