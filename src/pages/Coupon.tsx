@@ -3,6 +3,7 @@ import {
   Button,
   Card,
   DatePicker,
+  Descriptions,
   Divider,
   Form,
   Input,
@@ -270,6 +271,9 @@ export default function CouponPage() {
   const [extendCoupon, setExtendCoupon] = useState<Coupon | null>(null)
   const [extendTime, setExtendTime] = useState<Dayjs | null>(null)
 
+  // 详情弹窗
+  const [detailCoupon, setDetailCoupon] = useState<Coupon | null>(null)
+
   const data = useMemo(
     () =>
       coupons.filter((c) => {
@@ -379,10 +383,13 @@ export default function CouponPage() {
     {
       title: '操作',
       key: 'action',
-      width: 240,
+      width: 290,
       fixed: 'right',
       render: (_, r) => (
         <Space size={0} wrap>
+          <Button type="link" size="small" onClick={() => setDetailCoupon(r)}>
+            详情
+          </Button>
           <Button type="link" size="small" onClick={() => openEdit(r)}>
             编辑
           </Button>
@@ -531,6 +538,86 @@ export default function CouponPage() {
                 style={{ width: 260 }}
               />
             </Space>
+          </div>
+        )}
+      </Modal>
+
+      {/* 券详情 */}
+      <Modal
+        open={!!detailCoupon}
+        title="优惠券详情"
+        footer={[
+          <Button key="close" onClick={() => setDetailCoupon(null)}>
+            关闭
+          </Button>,
+        ]}
+        width={680}
+        onCancel={() => setDetailCoupon(null)}
+      >
+        {detailCoupon && (
+          <div style={{ marginTop: 12 }}>
+            <Divider orientation="left" plain style={{ marginTop: 0 }}>
+              券基本信息
+            </Divider>
+            <Descriptions column={2} bordered size="small">
+              <Descriptions.Item label="券ID">{detailCoupon.id}</Descriptions.Item>
+              <Descriptions.Item label="券码">
+                <Text code>{detailCoupon.code}</Text>
+              </Descriptions.Item>
+              <Descriptions.Item label="券名称" span={2}>
+                {detailCoupon.name}
+              </Descriptions.Item>
+              <Descriptions.Item label="业务线">
+                <Tag color="geekblue">{detailCoupon.businessLine}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="券类型">{detailCoupon.couponType}</Descriptions.Item>
+              <Descriptions.Item label="币种">{detailCoupon.currency}</Descriptions.Item>
+              <Descriptions.Item label="创建人">{detailCoupon.creator}</Descriptions.Item>
+              <Descriptions.Item label="领取状态">
+                <Tag color={detailCoupon.status === '已生效' ? 'green' : 'default'}>{detailCoupon.status}</Tag>
+              </Descriptions.Item>
+              <Descriptions.Item label="创建时间">{detailCoupon.createdAt}</Descriptions.Item>
+            </Descriptions>
+
+            <Divider orientation="left" plain>
+              发放及领取规则
+            </Divider>
+            <Descriptions column={2} bordered size="small">
+              <Descriptions.Item label="券总量">{detailCoupon.total.toLocaleString()}</Descriptions.Item>
+              <Descriptions.Item label="剩余数量">{detailCoupon.remaining.toLocaleString()}</Descriptions.Item>
+              <Descriptions.Item label="领取有效期" span={2}>
+                {detailCoupon.claimStart} ~ {detailCoupon.claimEnd}
+              </Descriptions.Item>
+            </Descriptions>
+
+            <Divider orientation="left" plain>
+              使用规则
+            </Divider>
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label="使用有效期">
+                {detailCoupon.useStart} ~ {detailCoupon.useEnd}
+              </Descriptions.Item>
+              <Descriptions.Item label="满减规则">
+                满 {detailCoupon.thresholdAmount.toLocaleString()}，减 {detailCoupon.deductAmount.toLocaleString()}（
+                {detailCoupon.currency}）
+              </Descriptions.Item>
+            </Descriptions>
+            <div style={{ marginTop: 12 }}>
+              <Text strong>可用商品</Text>
+              <Table
+                style={{ marginTop: 8 }}
+                rowKey="id"
+                size="small"
+                pagination={false}
+                dataSource={detailCoupon.products}
+                locale={{ emptyText: '暂无数据' }}
+                columns={[
+                  { title: 'ID', dataIndex: 'id', width: 100 },
+                  { title: '用户侧名称', dataIndex: 'name' },
+                  { title: '现价', dataIndex: 'price', width: 120, render: (v) => v.toLocaleString() },
+                ]}
+              />
+            </div>
           </div>
         )}
       </Modal>

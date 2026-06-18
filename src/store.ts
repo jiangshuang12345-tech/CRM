@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v1'
+const KEY = 'dinoai_crm_state_v2'
 
 export type AppState = {
   channels: ChannelType[]
@@ -201,15 +201,18 @@ function seed(): AppState {
   const packages: CoursePackage[] = [
     {
       id: 'PKG1001', businessLine: '韩国', name: 'DinoAI 启蒙季度课包', currency: LINE_CURRENCY['韩国'].code,
-      price: 99000, validDays: 90, creator: 'admin@dinoai.ai', status: '上架', createdAt: now.subtract(10, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      price: 99000, validStart: now.subtract(10, 'day').format('YYYY-MM-DD'), validEnd: now.add(80, 'day').format('YYYY-MM-DD'),
+      creator: 'admin@dinoai.ai', status: '上架', createdAt: now.subtract(10, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       id: 'PKG1002', businessLine: '沙特', name: 'DinoAI 月度体验课包', currency: LINE_CURRENCY['沙特'].code,
-      price: 149, validDays: 30, creator: 'admin@dinoai.ai', status: '上架', createdAt: now.subtract(7, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      price: 149, validStart: now.subtract(7, 'day').format('YYYY-MM-DD'), validEnd: now.add(23, 'day').format('YYYY-MM-DD'),
+      creator: 'admin@dinoai.ai', status: '上架', createdAt: now.subtract(7, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       id: 'PKG1003', businessLine: '越南', name: 'DinoAI 年度畅学课包', currency: LINE_CURRENCY['越南'].code,
-      price: 2990000, validDays: 365, creator: 'admin@dinoai.ai', status: '下架', createdAt: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      price: 2990000, validStart: now.subtract(15, 'day').format('YYYY-MM-DD'), validEnd: now.add(350, 'day').format('YYYY-MM-DD'),
+      creator: 'admin@dinoai.ai', status: '下架', createdAt: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
   ]
 

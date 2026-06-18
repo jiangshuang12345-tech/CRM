@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import {
   Button,
   Card,
+  DatePicker,
   Descriptions,
   Form,
   Input,
@@ -16,13 +17,14 @@ import {
 } from 'antd'
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
+import dayjs, { Dayjs } from 'dayjs'
 import { setState, useStore } from '../store'
 import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
 import type { BusinessLine, CoursePackage } from '../types'
 import { useSession } from '../auth'
 
 const { Text } = Typography
+const { RangePicker } = DatePicker
 
 function currencyOptions(line?: BusinessLine) {
   const opts = [{ label: '美元 (USD)', value: 'USD' }]
@@ -59,11 +61,18 @@ export default function CoursePackagePage() {
   }
   const openEdit = (record: CoursePackage) => {
     setModal({ mode: 'edit', record })
-    form.setFieldsValue(record)
+    form.setFieldsValue({
+      businessLine: record.businessLine,
+      name: record.name,
+      currency: record.currency,
+      price: record.price,
+      validRange: [dayjs(record.validStart), dayjs(record.validEnd)],
+    })
   }
 
   const submit = async () => {
     const v = await form.validateFields()
+    const [validStart, validEnd] = v.validRange as [Dayjs, Dayjs]
     if (modal?.mode === 'add') {
       const pkg: CoursePackage = {
         id: `PKG${Math.floor(1000 + Math.random() * 9000)}`,
@@ -71,7 +80,8 @@ export default function CoursePackagePage() {
         name: v.name,
         currency: v.currency,
         price: v.price,
-        validDays: v.validDays,
+        validStart: validStart.format('YYYY-MM-DD'),
+        validEnd: validEnd.format('YYYY-MM-DD'),
         creator: session?.email ?? 'admin@dinoai.ai',
         status: '上架',
         createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -83,7 +93,15 @@ export default function CoursePackagePage() {
         ...prev,
         packages: prev.packages.map((p) =>
           p.id === modal.record!.id
-            ? { ...p, businessLine: v.businessLine, name: v.name, currency: v.currency, price: v.price, validDays: v.validDays }
+            ? {
+                ...p,
+                businessLine: v.businessLine,
+                name: v.name,
+                currency: v.currency,
+                price: v.price,
+                validStart: validStart.format('YYYY-MM-DD'),
+                validEnd: validEnd.format('YYYY-MM-DD'),
+              }
             : p,
         ),
       }))
@@ -120,7 +138,16 @@ export default function CoursePackagePage() {
         </Text>
       ),
     },
-    { title: '有效期', dataIndex: 'validDays', width: 100, render: (v) => `${v} 天` },
+    {
+      title: '有效期',
+      key: 'valid',
+      width: 220,
+      render: (_, r) => (
+        <Text type="secondary">
+          {r.validStart} ~ {r.validEnd}
+        </Text>
+      ),
+    },
     { title: '创建人', dataIndex: 'creator', width: 180 },
     {
       title: '课包状态',
@@ -213,8 +240,8 @@ export default function CoursePackagePage() {
           <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
             <InputNumber style={{ width: '100%' }} min={0} placeholder="请输入价格" />
           </Form.Item>
-          <Form.Item name="validDays" label="有效期（天）" rules={[{ required: true, message: '请输入有效期' }]}>
-            <InputNumber style={{ width: '100%' }} min={1} placeholder="请输入有效期天数" />
+          <Form.Item name="validRange" label="有效期" rules={[{ required: true, message: '请选择有效期' }]}>
+            <RangePicker style={{ width: '100%' }} placeholder={['开始时间', '结束时间']} />
           </Form.Item>
         </Form>
       </Modal>
@@ -228,7 +255,9 @@ export default function CoursePackagePage() {
             <Descriptions.Item label="价格">
               {detail.currency} {detail.price.toLocaleString()}
             </Descriptions.Item>
-            <Descriptions.Item label="有效期">{detail.validDays} 天</Descriptions.Item>
+            <Descriptions.Item label="有效期">
+              {detail.validStart} ~ {detail.validEnd}
+            </Descriptions.Item>
             <Descriptions.Item label="创建人">{detail.creator}</Descriptions.Item>
             <Descriptions.Item label="课包状态">
               <Tag color={detail.status === '上架' ? 'green' : 'default'}>{detail.status}</Tag>
