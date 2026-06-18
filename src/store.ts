@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v2'
+const KEY = 'dinoai_crm_state_v3'
 
 export type AppState = {
   channels: ChannelType[]
@@ -183,16 +183,16 @@ function seed(): AppState {
 
   const orders: Order[] = [
     {
-      orderId: 'DN2026061800001', productName: 'DinoAI 季度会员', studentId: '50001', userStatus: '付费',
+      orderId: 'DN2026061800001', productName: 'Dino English 季度会员', studentId: '50001', userStatus: '付费',
       orderStatus: '已支付', originalPrice: 119000, paidAmount: 99000, payMethod: 'App Store', currency: 'KRW',
       paidTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      orderId: 'DN2026061800002', productName: 'DinoAI 月度会员', studentId: '50002', userStatus: '体验',
+      orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '50002', userStatus: '体验',
       orderStatus: '待支付', originalPrice: 39, paidAmount: 0, payMethod: 'Google Play', currency: 'USD',
     },
     {
-      orderId: 'DN2026061700015', productName: 'DinoAI 年度会员', studentId: '50004', userStatus: '流失',
+      orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '50004', userStatus: '流失',
       orderStatus: '已退款', originalPrice: 388, paidAmount: 388, payMethod: 'Stripe', currency: 'MYR',
       paidTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
@@ -200,17 +200,17 @@ function seed(): AppState {
 
   const packages: CoursePackage[] = [
     {
-      id: 'PKG1001', businessLine: '韩国', name: 'DinoAI 启蒙季度课包', currency: LINE_CURRENCY['韩国'].code,
+      id: 'PKG1001', businessLine: '韩国', name: 'Dino English 启蒙季度课包', currency: LINE_CURRENCY['韩国'].code,
       price: 99000, validStart: now.subtract(10, 'day').format('YYYY-MM-DD'), validEnd: now.add(80, 'day').format('YYYY-MM-DD'),
       creator: 'admin@dinoai.ai', status: '上架', createdAt: now.subtract(10, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      id: 'PKG1002', businessLine: '沙特', name: 'DinoAI 月度体验课包', currency: LINE_CURRENCY['沙特'].code,
+      id: 'PKG1002', businessLine: '沙特', name: 'Dino English 月度体验课包', currency: LINE_CURRENCY['沙特'].code,
       price: 149, validStart: now.subtract(7, 'day').format('YYYY-MM-DD'), validEnd: now.add(23, 'day').format('YYYY-MM-DD'),
       creator: 'admin@dinoai.ai', status: '上架', createdAt: now.subtract(7, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      id: 'PKG1003', businessLine: '越南', name: 'DinoAI 年度畅学课包', currency: LINE_CURRENCY['越南'].code,
+      id: 'PKG1003', businessLine: '越南', name: 'Dino English 年度畅学课包', currency: LINE_CURRENCY['越南'].code,
       price: 2990000, validStart: now.subtract(15, 'day').format('YYYY-MM-DD'), validEnd: now.add(350, 'day').format('YYYY-MM-DD'),
       creator: 'admin@dinoai.ai', status: '下架', createdAt: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
@@ -222,7 +222,7 @@ function seed(): AppState {
       currency: 'KRW', creator: 'admin@dinoai.ai', total: 100000, remaining: 99229,
       claimStart: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), claimEnd: now.add(12, 'day').format('YYYY-MM-DD HH:mm:ss'),
       useStart: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), useEnd: now.add(30, 'day').format('YYYY-MM-DD HH:mm:ss'),
-      products: [{ id: 'PKG1001', name: 'DinoAI 启蒙季度课包', price: 99000 }],
+      products: [{ id: 'PKG1001', name: 'Dino English 启蒙季度课包', price: 99000 }],
       thresholdAmount: 99000, deductAmount: 20000, status: '已生效',
       createdAt: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
@@ -231,7 +231,7 @@ function seed(): AppState {
       currency: 'USD', creator: 'admin@dinoai.ai', total: 100000, remaining: 97781,
       claimStart: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'), claimEnd: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
       useStart: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'), useEnd: now.add(10, 'day').format('YYYY-MM-DD HH:mm:ss'),
-      products: [{ id: 'PKG1002', name: 'DinoAI 月度体验课包', price: 149 }],
+      products: [{ id: 'PKG1002', name: 'Dino English 月度体验课包', price: 149 }],
       thresholdAmount: 149, deductAmount: 30, status: '已结束',
       createdAt: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },

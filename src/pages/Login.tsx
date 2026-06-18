@@ -68,7 +68,7 @@ export default function Login() {
           <div className="brand-row" style={{ justifyContent: 'center', marginBottom: 8 }}>
             <img src={LOGO} width={38} height={38} alt="logo" />
             <Title level={3} style={{ margin: 0 }}>
-              DinoAI 运营管理平台
+              Dino English 运营管理平台
             </Title>
           </div>
           <Text type="secondary">邮箱验证码登录 · 仅限 @{EMAIL_SUFFIX}</Text>

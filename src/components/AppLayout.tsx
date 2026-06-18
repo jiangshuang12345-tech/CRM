@@ -78,7 +78,7 @@ export default function AppLayout() {
           }}
         >
           <img src={LOGO} width={26} height={26} alt="logo" />
-          {!collapsed && <span>DinoAI 运营平台</span>}
+          {!collapsed && <span>Dino English 运营平台</span>}
         </div>
         <Menu
           theme="dark"
@@ -100,7 +100,7 @@ export default function AppLayout() {
           }}
         >
           <Text strong style={{ fontSize: 18 }}>
-            {TITLES[location.pathname] ?? 'DinoAI 运营平台'}
+            {TITLES[location.pathname] ?? 'Dino English 运营平台'}
           </Text>
           <Dropdown
             menu={{
