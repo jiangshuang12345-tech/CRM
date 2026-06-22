@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v5'
+const KEY = 'dinoai_crm_state_v6'
 
 export type AppState = {
   channels: ChannelType[]
@@ -166,7 +166,7 @@ function seed(): AppState {
     },
     {
       studentId: '50002', name: 'Abdullah Al-Saud', localName: 'عبدالله', gender: '男',
-      birthday: '2015-09-03', loginMethod: 'Facebook', account: 'fb_abdullah.alsaud', businessLine: '沙特', registerChannel: 'landingpage / Meta',
+      birthday: '2015-09-03', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta',
       countryCode: '+966', channelCode: 'landingpage_sa_meta_a93kd1', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验',
     },
     {
@@ -176,7 +176,7 @@ function seed(): AppState {
     },
     {
       studentId: '50004', name: 'Tan Wei Ming', localName: '陈伟明', gender: '男',
-      birthday: '2016-11-08', loginMethod: 'AppID', account: 'AppID-8829301', businessLine: '马来', registerChannel: '自然流量',
+      birthday: '2016-11-08', loginMethod: 'AppID', account: 'weiming.tan@icloud.com', businessLine: '马来', registerChannel: '自然流量',
       countryCode: '+60', channelCode: 'natural_my_aso_2k1d9x', registerTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '流失',
     },
     {
