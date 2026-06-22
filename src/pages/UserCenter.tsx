@@ -122,7 +122,6 @@ export default function UserCenter() {
       width: 160,
       render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
     },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag color="geekblue">{v}</Tag> },
     { title: t('user.col.channel'), dataIndex: 'registerChannel', width: 160 },
     { title: t('user.col.countryCode'), dataIndex: 'countryCode', width: 110 },
     { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
@@ -185,7 +184,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1880 }}
+        scroll={{ x: 1770 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
