@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v8'
+const KEY = 'dinoai_crm_state_v9'
 
 export type AppState = {
   channels: ChannelType[]
@@ -200,6 +200,10 @@ function seed(): AppState {
       orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '50004', userStatus: '流失',
       orderStatus: '已退款', originalPrice: 388, paidAmount: 388, payMethod: 'Stripe', currency: 'MYR',
       paidTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '50005', userStatus: '流失',
+      orderStatus: '已取消', originalPrice: 119000, paidAmount: 0, payMethod: 'App Store', currency: 'KRW',
     },
   ]
 
