@@ -35,14 +35,28 @@ export type ChannelType = {
 
 export type UserStatus = '注册' | '体验' | '付费' | '流失'
 
+export type LoginMethod = '谷歌邮箱' | 'Facebook' | 'kakao' | '手机号' | 'AppID'
+
+export const LOGIN_METHODS: LoginMethod[] = ['谷歌邮箱', 'Facebook', 'kakao', '手机号', 'AppID']
+
+// 是否带手机号（谷歌邮箱 / Facebook / AppID 无手机号）
+export const METHOD_HAS_PHONE: Record<LoginMethod, boolean> = {
+  谷歌邮箱: false,
+  Facebook: false,
+  kakao: true,
+  手机号: true,
+  AppID: false,
+}
+
 export type Student = {
   studentId: string
   name: string
-  enName?: string
   localName?: string
   gender?: '男' | '女' | '其他'
   birthday?: string // YYYY-MM-DD
-  phone: string
+  loginMethod: LoginMethod
+  account: string // 登录账号：邮箱 / FB / kakao ID / AppID / 手机号
+  phone?: string // 仅 kakao / 手机号 方式有
   businessLine: BusinessLine
   registerChannel: string
   countryCode: string

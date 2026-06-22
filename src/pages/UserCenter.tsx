@@ -17,7 +17,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
 import { BUSINESS_LINES } from '../types'
-import type { Student, UserStatus } from '../types'
+import type { LoginMethod, Student, UserStatus } from '../types'
 
 const { Text } = Typography
 
@@ -26,6 +26,14 @@ const STATUS_COLOR: Record<UserStatus, string> = {
   体验: 'blue',
   付费: 'green',
   流失: 'red',
+}
+
+const METHOD_COLOR: Record<LoginMethod, string> = {
+  谷歌邮箱: 'red',
+  Facebook: 'blue',
+  kakao: 'gold',
+  手机号: 'green',
+  AppID: 'purple',
 }
 
 export default function UserCenter() {
@@ -43,8 +51,9 @@ export default function UserCenter() {
         const matchKw =
           !kw ||
           s.studentId.toLowerCase().includes(kw) ||
-          s.name.toLowerCase().includes(kw) ||
-          s.phone.toLowerCase().includes(kw)
+          (s.localName ?? s.name).toLowerCase().includes(kw) ||
+          s.account.toLowerCase().includes(kw) ||
+          (s.phone ?? '').toLowerCase().includes(kw)
         const matchLine = !lineFilter || s.businessLine === lineFilter
         const matchStatus = !statusFilter || s.status === statusFilter
         return matchKw && matchLine && matchStatus
@@ -86,20 +95,28 @@ export default function UserCenter() {
     { title: '学生ID', dataIndex: 'studentId', width: 90, fixed: 'left' },
     {
       title: '学生姓名',
-      dataIndex: 'name',
-      width: 150,
-      render: (_, r) => (
-        <div>
-          <div>{r.name}</div>
-          {r.localName && (
-            <Text type="secondary" style={{ fontSize: 12 }}>
-              {r.localName}
-            </Text>
-          )}
-        </div>
-      ),
+      dataIndex: 'localName',
+      width: 140,
+      render: (_, r) => <span>{r.localName || r.name}</span>,
     },
-    { title: '手机号', dataIndex: 'phone', width: 160 },
+    {
+      title: '注册方式',
+      dataIndex: 'loginMethod',
+      width: 110,
+      render: (v: LoginMethod) => <Tag color={METHOD_COLOR[v]}>{v}</Tag>,
+    },
+    {
+      title: '登录账号',
+      dataIndex: 'account',
+      width: 200,
+      render: (v) => <Text>{v}</Text>,
+    },
+    {
+      title: '手机号',
+      dataIndex: 'phone',
+      width: 160,
+      render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+    },
     { title: '所属业务线', dataIndex: 'businessLine', width: 110, render: (v) => <Tag color="geekblue">{v}</Tag> },
     { title: '注册渠道', dataIndex: 'registerChannel', width: 160 },
     { title: '注册地国家码', dataIndex: 'countryCode', width: 110 },
@@ -130,7 +147,7 @@ export default function UserCenter() {
         <Input
           allowClear
           prefix={<SearchOutlined />}
-          placeholder="学生ID / 姓名 / 手机号"
+          placeholder="学生ID / 姓名 / 登录账号 / 手机号"
           style={{ width: 240 }}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
@@ -157,7 +174,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1500 }}
+        scroll={{ x: 1700 }}
         pagination={{ showTotal: (t) => `共 ${t} 条`, showSizeChanger: true }}
       />
 
