@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v6'
+const KEY = 'dinoai_crm_state_v7'
 
 export type AppState = {
   channels: ChannelType[]
@@ -181,7 +181,7 @@ function seed(): AppState {
     },
     {
       studentId: '50005', name: 'Seo-yeon Park', localName: '박서연', gender: '女',
-      birthday: '2017-03-22', loginMethod: 'kakao', account: 'kakao_seoyeon', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram',
+      birthday: '2017-03-22', loginMethod: 'kakao', account: '+82 10-9876-5432', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram',
       countryCode: '+82', channelCode: 'kol_kr_ig_72ab5c', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费',
     },
   ]
