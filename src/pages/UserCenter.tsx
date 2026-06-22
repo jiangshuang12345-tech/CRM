@@ -16,7 +16,6 @@ import { EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import { BUSINESS_LINES } from '../types'
 import type { LoginMethod, Student, UserStatus } from '../types'
 import { useSession } from '../auth'
 import { useI18n } from '../i18n'
@@ -43,10 +42,15 @@ export default function UserCenter() {
   const students = useStore((s) => s.students)
   const session = useSession()
   const [keyword, setKeyword] = useState('')
-  const [lineFilter, setLineFilter] = useState<string | undefined>()
+  const [codeFilter, setCodeFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [form] = Form.useForm()
+
+  const countryCodes = useMemo(
+    () => Array.from(new Set(students.map((s) => s.countryCode))).sort(),
+    [students],
+  )
 
   const data = useMemo(
     () =>
@@ -58,11 +62,11 @@ export default function UserCenter() {
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
           s.account.toLowerCase().includes(kw) ||
           (s.phone ?? '').toLowerCase().includes(kw)
-        const matchLine = !lineFilter || s.businessLine === lineFilter
+        const matchCode = !codeFilter || s.countryCode === codeFilter
         const matchStatus = !statusFilter || s.status === statusFilter
-        return matchKw && matchLine && matchStatus
+        return matchKw && matchCode && matchStatus
       }),
-    [students, keyword, lineFilter, statusFilter],
+    [students, keyword, codeFilter, statusFilter],
   )
 
   const openEdit = (s: Student) => {
@@ -71,7 +75,7 @@ export default function UserCenter() {
       localName: s.localName,
       gender: s.gender,
       birthday: s.birthday ? dayjs(s.birthday) : undefined,
-      businessLine: s.businessLine,
+      countryCode: s.countryCode,
     })
   }
 
@@ -87,7 +91,7 @@ export default function UserCenter() {
               localName: v.localName,
               gender: v.gender,
               birthday: v.birthday ? v.birthday.format('YYYY-MM-DD') : undefined,
-              businessLine: v.businessLine,
+              countryCode: v.countryCode,
               lastModifier: session?.email ?? 'admin@dinoai.ai',
             }
           : s,
@@ -164,11 +168,11 @@ export default function UserCenter() {
         />
         <Select
           allowClear
-          placeholder={t('user.filterLine')}
+          placeholder={t('user.col.countryCode')}
           style={{ width: 150 }}
-          value={lineFilter}
-          onChange={setLineFilter}
-          options={BUSINESS_LINES.map((l) => ({ label: l, value: l }))}
+          value={codeFilter}
+          onChange={setCodeFilter}
+          options={countryCodes.map((c) => ({ label: c, value: c }))}
         />
         <Select
           allowClear
@@ -211,8 +215,12 @@ export default function UserCenter() {
           <Form.Item name="birthday" label={t('user.label.birthday')}>
             <DatePicker style={{ width: '100%' }} placeholder={t('user.birthdayPlaceholder')} />
           </Form.Item>
-          <Form.Item name="businessLine" label={t('user.label.line')} rules={[{ required: true, message: t('user.lineRequired') }]}>
-            <Select options={BUSINESS_LINES.map((l) => ({ label: l, value: l }))} />
+          <Form.Item name="countryCode" label={t('user.col.countryCode')} rules={[{ required: true, message: t('common.pleaseSelect') }]}>
+            <Select
+              showSearch
+              placeholder={t('common.pleaseSelect')}
+              options={countryCodes.map((c) => ({ label: c, value: c }))}
+            />
           </Form.Item>
         </Form>
       </Modal>
