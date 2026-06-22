@@ -4,6 +4,7 @@ import { SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useStore } from '../store'
 import type { Order, OrderStatus, UserStatus } from '../types'
+import { useI18n } from '../i18n'
 
 const { Text } = Typography
 
@@ -25,6 +26,7 @@ function fmtMoney(amount: number, currency: string) {
 }
 
 export default function OrderCenter() {
+  const { t } = useI18n()
   const orders = useStore((s) => s.orders)
   const [keyword, setKeyword] = useState('')
   const [orderStatus, setOrderStatus] = useState<string | undefined>()
@@ -49,66 +51,66 @@ export default function OrderCenter() {
   )
 
   const columns: ColumnsType<Order> = [
-    { title: '订单ID', dataIndex: 'orderId', width: 180, fixed: 'left' },
-    { title: '商品名称', dataIndex: 'productName', width: 180 },
-    { title: '学生ID', dataIndex: 'studentId', width: 100 },
+    { title: t('order.col.id'), dataIndex: 'orderId', width: 180, fixed: 'left' },
+    { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
+    { title: t('order.col.studentId'), dataIndex: 'studentId', width: 100 },
     {
-      title: '用户状态',
+      title: t('order.col.userStatus'),
       dataIndex: 'userStatus',
       width: 100,
-      render: (v: UserStatus) => <Tag color={USER_STATUS_COLOR[v]}>{v}</Tag>,
+      render: (v: UserStatus) => <Tag color={USER_STATUS_COLOR[v]}>{t(`enum.status.${v}`)}</Tag>,
     },
     {
-      title: '订单状态',
+      title: t('order.col.orderStatus'),
       dataIndex: 'orderStatus',
       width: 100,
-      render: (v: OrderStatus) => <Tag color={ORDER_STATUS_COLOR[v]}>{v}</Tag>,
+      render: (v: OrderStatus) => <Tag color={ORDER_STATUS_COLOR[v]}>{t(`enum.order.${v}`)}</Tag>,
     },
     {
-      title: '原价',
+      title: t('order.col.original'),
       dataIndex: 'originalPrice',
       width: 140,
       align: 'right',
       render: (v, r) => <Text type="secondary">{fmtMoney(v, r.currency)}</Text>,
     },
     {
-      title: '实际付款金额',
+      title: t('order.col.paid'),
       dataIndex: 'paidAmount',
       width: 150,
       align: 'right',
       render: (v, r) => <Text strong>{fmtMoney(v, r.currency)}</Text>,
     },
     {
-      title: '支付方式',
+      title: t('order.col.payMethod'),
       dataIndex: 'payMethod',
       width: 130,
       render: (v) => <Tag>{v}</Tag>,
     },
-    { title: '成功支付时间', dataIndex: 'paidTime', width: 180, render: (v) => v || <Text type="secondary">—</Text> },
+    { title: t('order.col.paidTime'), dataIndex: 'paidTime', width: 180, render: (v) => v || <Text type="secondary">—</Text> },
   ]
 
   return (
-    <Card className="page-card" bordered={false} title={<span className="section-title">订单中心</span>}>
+    <Card className="page-card" bordered={false} title={<span className="section-title">{t('order.title')}</span>}>
       <Space wrap style={{ marginBottom: 16 }}>
         <Input
           allowClear
           prefix={<SearchOutlined />}
-          placeholder="订单ID / 学生ID / 商品名称"
+          placeholder={t('order.searchPlaceholder')}
           style={{ width: 260 }}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
         <Select
           allowClear
-          placeholder="订单状态"
+          placeholder={t('order.filterStatus')}
           style={{ width: 150 }}
           value={orderStatus}
           onChange={setOrderStatus}
-          options={(['待支付', '已支付', '已退款', '已取消'] as OrderStatus[]).map((l) => ({ label: l, value: l }))}
+          options={(['待支付', '已支付', '已退款', '已取消'] as OrderStatus[]).map((l) => ({ label: t(`enum.order.${l}`), value: l }))}
         />
         <Select
           allowClear
-          placeholder="支付方式"
+          placeholder={t('order.filterPay')}
           style={{ width: 160 }}
           value={payMethod}
           onChange={setPayMethod}
@@ -121,7 +123,7 @@ export default function OrderCenter() {
         columns={columns}
         dataSource={data}
         scroll={{ x: 1400 }}
-        pagination={{ showTotal: (t) => `共 ${t} 条`, showSizeChanger: true }}
+        pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
     </Card>
   )

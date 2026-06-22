@@ -24,9 +24,9 @@ import {
 import type { DataNode } from 'antd/es/tree'
 import { genChannelCode, setState, uid, useStore } from '../store'
 import type { ChannelLevelNode, ChannelType } from '../types'
+import { useI18n } from '../i18n'
 
 const { Text } = Typography
-const LEVEL_LABEL = ['', '一级渠道', '二级渠道', '三级渠道']
 const LEVEL_COLOR = ['', 'blue', 'cyan', 'green']
 
 type AddCtx =
@@ -34,16 +34,18 @@ type AddCtx =
   | { kind: 'child'; typeId: string; parentId?: string; nextLevel: 1 | 2 | 3 }
 
 export default function ChannelManagement() {
+  const { t } = useI18n()
   const channels = useStore((s) => s.channels)
   const [addCtx, setAddCtx] = useState<AddCtx | null>(null)
   const [renameNode, setRenameNode] = useState<{ id: string; name: string } | null>(null)
   const [form] = Form.useForm()
 
-  // 修改某个 type 树
+  const levelLabel = (level: 1 | 2 | 3) => t(`ch.level${level}`)
+
   const updateType = (typeId: string, fn: (t: ChannelType) => ChannelType) =>
     setState((prev) => ({
       ...prev,
-      channels: prev.channels.map((t) => (t.id === typeId ? fn(t) : t)),
+      channels: prev.channels.map((tp) => (tp.id === typeId ? fn(tp) : tp)),
     }))
 
   const walk = (
@@ -60,7 +62,6 @@ export default function ChannelManagement() {
       .filter((n) => n.id !== targetId)
       .map((n) => ({ ...n, children: removeNode(n.children, targetId) }))
 
-  // ---- 新增类型 / 渠道 ----
   const openAdd = (ctx: AddCtx) => {
     setAddCtx(ctx)
     form.resetFields()
@@ -74,7 +75,7 @@ export default function ChannelManagement() {
         ...prev,
         channels: [...prev.channels, { id: uid('ct_'), name, children: [] }],
       }))
-      message.success('渠道类型已创建')
+      message.success(t('ch.typeCreated'))
     } else {
       const node: ChannelLevelNode = {
         id: uid('c_'),
@@ -82,26 +83,25 @@ export default function ChannelManagement() {
         level: addCtx.nextLevel,
         children: [],
       }
-      updateType(addCtx.typeId, (t) => {
-        if (!addCtx.parentId) return { ...t, children: [...t.children, node] }
-        return { ...t, children: walk(t.children, addCtx.parentId, (p) => ({ ...p, children: [...p.children, node] })) }
+      updateType(addCtx.typeId, (tp) => {
+        if (!addCtx.parentId) return { ...tp, children: [...tp.children, node] }
+        return { ...tp, children: walk(tp.children, addCtx.parentId, (p) => ({ ...p, children: [...p.children, node] })) }
       })
-      message.success(`${LEVEL_LABEL[addCtx.nextLevel]}已创建`)
+      message.success(t('ch.levelCreated', { level: levelLabel(addCtx.nextLevel) }))
     }
     setAddCtx(null)
   }
 
-  // ---- 生成 / 查看 code ----
   const generateCode = (typeId: string, node: ChannelLevelNode) => {
-    const type = channels.find((t) => t.id === typeId)
+    const type = channels.find((tp) => tp.id === typeId)
     const prefix = `${type?.name ?? 'ch'}`.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'ch'
     const code = node.code ?? genChannelCode(prefix)
-    updateType(typeId, (t) => ({ ...t, children: walk(t.children, node.id, (n) => ({ ...n, code })) }))
+    updateType(typeId, (tp) => ({ ...tp, children: walk(tp.children, node.id, (n) => ({ ...n, code })) }))
     Modal.success({
-      title: node.code ? '渠道 Code' : '渠道 Code 已生成',
+      title: node.code ? t('ch.codeTitleView') : t('ch.codeTitleGen'),
       content: (
         <div style={{ marginTop: 8 }}>
-          <Text type="secondary">该渠道实际应用的 code：</Text>
+          <Text type="secondary">{t('ch.codeDesc')}</Text>
           <div
             style={{
               marginTop: 8,
@@ -121,10 +121,10 @@ export default function ChannelManagement() {
               icon={<CopyOutlined />}
               onClick={() => {
                 navigator.clipboard?.writeText(code)
-                message.success('已复制')
+                message.success(t('common.copied'))
               }}
             >
-              复制
+              {t('common.copy')}
             </Button>
           </div>
         </div>
@@ -132,22 +132,20 @@ export default function ChannelManagement() {
     })
   }
 
-  // ---- 重命名 / 删除 ----
   const submitRename = async () => {
     const { name } = await form.validateFields()
     if (!renameNode) return
-    // type 还是 level node?
-    const isType = channels.some((t) => t.id === renameNode.id)
+    const isType = channels.some((tp) => tp.id === renameNode.id)
     if (isType) {
       setState((prev) => ({
         ...prev,
-        channels: prev.channels.map((t) => (t.id === renameNode.id ? { ...t, name } : t)),
+        channels: prev.channels.map((tp) => (tp.id === renameNode.id ? { ...tp, name } : tp)),
       }))
     } else {
-      const typeId = channels.find((t) => containsNode(t.children, renameNode.id))?.id
-      if (typeId) updateType(typeId, (t) => ({ ...t, children: walk(t.children, renameNode.id, (n) => ({ ...n, name })) }))
+      const typeId = channels.find((tp) => containsNode(tp.children, renameNode.id))?.id
+      if (typeId) updateType(typeId, (tp) => ({ ...tp, children: walk(tp.children, renameNode.id, (n) => ({ ...n, name })) }))
     }
-    message.success('已重命名')
+    message.success(t('ch.renamed'))
     setRenameNode(null)
   }
 
@@ -156,25 +154,28 @@ export default function ChannelManagement() {
 
   const deleteType = (typeId: string) =>
     Modal.confirm({
-      title: '删除渠道类型',
-      content: '该类型下的所有渠道与 code 将一并删除，确认删除？',
+      title: t('ch.delTypeTitle'),
+      content: t('ch.delTypeContent'),
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
       okButtonProps: { danger: true },
-      onOk: () => setState((prev) => ({ ...prev, channels: prev.channels.filter((t) => t.id !== typeId) })),
+      onOk: () => setState((prev) => ({ ...prev, channels: prev.channels.filter((tp) => tp.id !== typeId) })),
     })
 
   const deleteLevel = (typeId: string, nodeId: string) =>
     Modal.confirm({
-      title: '删除渠道',
-      content: '该渠道及其下级渠道、code 将一并删除，确认删除？',
+      title: t('ch.delLevelTitle'),
+      content: t('ch.delLevelContent'),
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
       okButtonProps: { danger: true },
-      onOk: () => updateType(typeId, (t) => ({ ...t, children: removeNode(t.children, nodeId) })),
+      onOk: () => updateType(typeId, (tp) => ({ ...tp, children: removeNode(tp.children, nodeId) })),
     })
 
-  // ---- 构建 Tree ----
   const renderLevelTitle = (typeId: string, n: ChannelLevelNode) => (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
       <Tag color={LEVEL_COLOR[n.level]} style={{ margin: 0 }}>
-        {LEVEL_LABEL[n.level]}
+        {levelLabel(n.level)}
       </Tag>
       <span>{n.name}</span>
       {n.code && (
@@ -184,7 +185,7 @@ export default function ChannelManagement() {
       )}
       <Space size={2} className="node-actions">
         {n.level < 3 && (
-          <Tooltip title={`新增${LEVEL_LABEL[(n.level + 1) as 1 | 2 | 3]}`}>
+          <Tooltip title={t('ch.addChild', { level: levelLabel((n.level + 1) as 1 | 2 | 3) })}>
             <Button
               type="text"
               size="small"
@@ -195,7 +196,7 @@ export default function ChannelManagement() {
             />
           </Tooltip>
         )}
-        <Tooltip title={n.code ? '查看 code' : '生成 code'}>
+        <Tooltip title={n.code ? t('ch.codeView') : t('ch.codeGen')}>
           <Button
             type="text"
             size="small"
@@ -204,7 +205,7 @@ export default function ChannelManagement() {
             onClick={() => generateCode(typeId, n)}
           />
         </Tooltip>
-        <Tooltip title="重命名">
+        <Tooltip title={t('ch.rename')}>
           <Button
             type="text"
             size="small"
@@ -215,7 +216,7 @@ export default function ChannelManagement() {
             }}
           />
         </Tooltip>
-        <Tooltip title="删除">
+        <Tooltip title={t('common.delete')}>
           <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLevel(typeId, n.id)} />
         </Tooltip>
       </Space>
@@ -228,51 +229,51 @@ export default function ChannelManagement() {
     children: n.children.map((c) => toDataNode(typeId, c)),
   })
 
-  const treeData: DataNode[] = channels.map((t) => ({
-    key: t.id,
+  const treeData: DataNode[] = channels.map((tp) => ({
+    key: tp.id,
     title: (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
         <Tag color="purple" style={{ margin: 0 }}>
-          渠道类型
+          {t('ch.type')}
         </Tag>
-        <Text strong>{t.name}</Text>
+        <Text strong>{tp.name}</Text>
         <Space size={2} className="node-actions">
-          <Tooltip title="新增一级渠道">
+          <Tooltip title={t('ch.addChild', { level: levelLabel(1) })}>
             <Button
               type="text"
               size="small"
               icon={<PlusSquareOutlined />}
-              onClick={() => openAdd({ kind: 'child', typeId: t.id, nextLevel: 1 })}
+              onClick={() => openAdd({ kind: 'child', typeId: tp.id, nextLevel: 1 })}
             />
           </Tooltip>
-          <Tooltip title="重命名">
+          <Tooltip title={t('ch.rename')}>
             <Button
               type="text"
               size="small"
               icon={<EditOutlined />}
               onClick={() => {
-                setRenameNode({ id: t.id, name: t.name })
-                form.setFieldsValue({ name: t.name })
+                setRenameNode({ id: tp.id, name: tp.name })
+                form.setFieldsValue({ name: tp.name })
               }}
             />
           </Tooltip>
-          <Tooltip title="删除">
-            <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteType(t.id)} />
+          <Tooltip title={t('common.delete')}>
+            <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteType(tp.id)} />
           </Tooltip>
         </Space>
       </span>
     ),
-    children: t.children.map((c) => toDataNode(t.id, c)),
+    children: tp.children.map((c) => toDataNode(tp.id, c)),
   }))
 
   return (
     <Card
       className="page-card"
       bordered={false}
-      title={<span className="section-title">渠道层级管理</span>}
+      title={<span className="section-title">{t('ch.title')}</span>}
       extra={
         <Button type="primary" icon={<PlusOutlined />} onClick={() => openAdd({ kind: 'type' })}>
-          新增渠道类型
+          {t('ch.addType')}
         </Button>
       }
     >
@@ -283,42 +284,40 @@ export default function ChannelManagement() {
         .ant-tree .ant-tree-treenode { padding: 4px 0; align-items: center; }
       `}</style>
       <div style={{ marginBottom: 12 }}>
-        <Text type="secondary">
-          渠道结构：渠道类型（自然流量 / landingpage / KOL…） → 一级渠道 → 二级渠道 → 三级渠道（一期支持至三级，可扩展）。在任意级渠道上可生成实际应用的渠道 code。
-        </Text>
+        <Text type="secondary">{t('ch.intro')}</Text>
       </div>
       {channels.length === 0 ? (
-        <Empty description="暂无渠道，请先新增渠道类型" />
+        <Empty description={t('ch.empty')} />
       ) : (
         <Tree treeData={treeData} defaultExpandAll blockNode selectable={false} />
       )}
 
       <Modal
         open={!!addCtx}
-        title={addCtx?.kind === 'type' ? '新增渠道类型' : `新增${addCtx ? LEVEL_LABEL[addCtx.nextLevel] : ''}`}
+        title={addCtx?.kind === 'type' ? t('ch.addType') : t('ch.addChild', { level: addCtx ? levelLabel(addCtx.nextLevel) : '' })}
         onCancel={() => setAddCtx(null)}
         onOk={submitAdd}
-        okText="确定"
-        cancelText="取消"
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
           {addCtx?.kind === 'type' ? (
             <Form.Item
               name="name"
-              label="渠道类型名称"
-              rules={[{ required: true, message: '请输入渠道类型名称' }]}
-              extra="例如：自然流量、landingpage、KOL"
+              label={t('ch.typeNameLabel')}
+              rules={[{ required: true, message: t('ch.typeNamePlaceholder') }]}
+              extra={t('ch.typeNameExtra')}
             >
-              <Input placeholder="请输入渠道类型名称" />
+              <Input placeholder={t('ch.typeNamePlaceholder')} />
             </Form.Item>
           ) : (
             <Form.Item
               name="name"
-              label={`${addCtx ? LEVEL_LABEL[addCtx.nextLevel] : ''}名称`}
-              rules={[{ required: true, message: '请输入渠道名称' }]}
+              label={t('ch.levelNameLabel', { level: addCtx ? levelLabel(addCtx.nextLevel) : '' })}
+              rules={[{ required: true, message: t('ch.nameRequired') }]}
             >
-              <Input placeholder="请输入渠道名称（如国家、媒体、达人等）" />
+              <Input placeholder={t('ch.levelNamePlaceholder')} />
             </Form.Item>
           )}
         </Form>
@@ -326,15 +325,15 @@ export default function ChannelManagement() {
 
       <Modal
         open={!!renameNode}
-        title="重命名"
+        title={t('ch.rename')}
         onCancel={() => setRenameNode(null)}
         onOk={submitRename}
-        okText="确定"
-        cancelText="取消"
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
-          <Form.Item name="name" label="名称" rules={[{ required: true, message: '请输入名称' }]}>
+          <Form.Item name="name" label={t('ch.nameLabel')} rules={[{ required: true, message: t('ch.nameRequired') }]}>
             <Input />
           </Form.Item>
         </Form>

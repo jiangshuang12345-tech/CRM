@@ -18,6 +18,8 @@ import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
 import { BUSINESS_LINES } from '../types'
 import type { LoginMethod, Student, UserStatus } from '../types'
+import { useSession } from '../auth'
+import { useI18n } from '../i18n'
 
 const { Text } = Typography
 
@@ -37,7 +39,9 @@ const METHOD_COLOR: Record<LoginMethod, string> = {
 }
 
 export default function UserCenter() {
+  const { t } = useI18n()
   const students = useStore((s) => s.students)
+  const session = useSession()
   const [keyword, setKeyword] = useState('')
   const [lineFilter, setLineFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
@@ -84,6 +88,7 @@ export default function UserCenter() {
               gender: v.gender,
               birthday: v.birthday ? v.birthday.format('YYYY-MM-DD') : undefined,
               businessLine: v.businessLine,
+              lastModifier: session?.email ?? 'admin@dinoai.ai',
             }
           : s,
       ),
@@ -92,69 +97,75 @@ export default function UserCenter() {
   }
 
   const columns: ColumnsType<Student> = [
-    { title: '学生ID', dataIndex: 'studentId', width: 90, fixed: 'left' },
+    { title: t('user.col.id'), dataIndex: 'studentId', width: 90, fixed: 'left' },
     {
-      title: '学生姓名',
+      title: t('user.col.name'),
       dataIndex: 'localName',
       width: 140,
       render: (_, r) => <span>{r.localName || r.name}</span>,
     },
     {
-      title: '注册方式',
+      title: t('user.col.method'),
       dataIndex: 'loginMethod',
-      width: 110,
-      render: (v: LoginMethod) => <Tag color={METHOD_COLOR[v]}>{v}</Tag>,
+      width: 120,
+      render: (v: LoginMethod) => <Tag color={METHOD_COLOR[v]}>{t(`enum.method.${v}`)}</Tag>,
     },
     {
-      title: '登录账号',
+      title: t('user.col.account'),
       dataIndex: 'account',
       width: 200,
       render: (v) => <Text>{v}</Text>,
     },
     {
-      title: '手机号',
+      title: t('user.col.phone'),
       dataIndex: 'phone',
       width: 160,
       render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
     },
-    { title: '所属业务线', dataIndex: 'businessLine', width: 110, render: (v) => <Tag color="geekblue">{v}</Tag> },
-    { title: '注册渠道', dataIndex: 'registerChannel', width: 160 },
-    { title: '注册地国家码', dataIndex: 'countryCode', width: 110 },
-    { title: '渠道 code', dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
-    { title: '注册时间 (Beijing)', dataIndex: 'registerTime', width: 180 },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag color="geekblue">{v}</Tag> },
+    { title: t('user.col.channel'), dataIndex: 'registerChannel', width: 160 },
+    { title: t('user.col.countryCode'), dataIndex: 'countryCode', width: 110 },
+    { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
+    { title: t('user.col.regTime'), dataIndex: 'registerTime', width: 180 },
     {
-      title: '用户状态',
+      title: t('user.col.status'),
       dataIndex: 'status',
       width: 100,
-      render: (v: UserStatus) => <Tag color={STATUS_COLOR[v]}>{v}</Tag>,
+      render: (v: UserStatus) => <Tag color={STATUS_COLOR[v]}>{t(`enum.status.${v}`)}</Tag>,
     },
     {
-      title: '操作',
+      title: t('user.col.modifier'),
+      dataIndex: 'lastModifier',
+      width: 180,
+      render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+    },
+    {
+      title: t('common.action'),
       key: 'action',
       width: 120,
       fixed: 'right',
       render: (_, r) => (
         <Button type="link" icon={<EditOutlined />} onClick={() => openEdit(r)}>
-          修改信息
+          {t('user.editInfo')}
         </Button>
       ),
     },
   ]
 
   return (
-    <Card className="page-card" bordered={false} title={<span className="section-title">用户中心</span>}>
+    <Card className="page-card" bordered={false} title={<span className="section-title">{t('user.title')}</span>}>
       <Space wrap style={{ marginBottom: 16 }}>
         <Input
           allowClear
           prefix={<SearchOutlined />}
-          placeholder="学生ID / 姓名 / 登录账号 / 手机号"
-          style={{ width: 240 }}
+          placeholder={t('user.searchPlaceholder')}
+          style={{ width: 280 }}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
         <Select
           allowClear
-          placeholder="所属业务线"
+          placeholder={t('user.filterLine')}
           style={{ width: 150 }}
           value={lineFilter}
           onChange={setLineFilter}
@@ -162,11 +173,11 @@ export default function UserCenter() {
         />
         <Select
           allowClear
-          placeholder="用户状态"
+          placeholder={t('user.filterStatus')}
           style={{ width: 150 }}
           value={statusFilter}
           onChange={setStatusFilter}
-          options={(['注册', '体验', '付费', '流失'] as UserStatus[]).map((l) => ({ label: l, value: l }))}
+          options={(['注册', '体验', '付费', '流失'] as UserStatus[]).map((l) => ({ label: t(`enum.status.${l}`), value: l }))}
         />
       </Space>
 
@@ -174,38 +185,34 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1700 }}
-        pagination={{ showTotal: (t) => `共 ${t} 条`, showSizeChanger: true }}
+        scroll={{ x: 1880 }}
+        pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
       <Modal
         open={!!editing}
-        title={`修改学生信息 · ${editing?.studentId ?? ''}`}
+        title={t('user.modalTitle', { id: editing?.studentId ?? '' })}
         onCancel={() => setEditing(null)}
         onOk={submitEdit}
-        okText="保存"
-        cancelText="取消"
+        okText={t('common.save')}
+        cancelText={t('common.cancel')}
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false} style={{ marginTop: 12 }}>
-          <Form.Item name="localName" label="本地名">
-            <Input placeholder="本地语言姓名" />
+          <Form.Item name="localName" label={t('user.label.localName')}>
+            <Input placeholder={t('user.localNamePlaceholder')} />
           </Form.Item>
-          <Form.Item name="gender" label="性别">
+          <Form.Item name="gender" label={t('user.label.gender')}>
             <Select
               allowClear
-              placeholder="请选择"
-              options={[
-                { label: '男', value: '男' },
-                { label: '女', value: '女' },
-                { label: '其他', value: '其他' },
-              ]}
+              placeholder={t('common.pleaseSelect')}
+              options={(['男', '女', '其他'] as const).map((g) => ({ label: t(`enum.gender.${g}`), value: g }))}
             />
           </Form.Item>
-          <Form.Item name="birthday" label="出生年-月-日">
-            <DatePicker style={{ width: '100%' }} placeholder="选择出生日期" />
+          <Form.Item name="birthday" label={t('user.label.birthday')}>
+            <DatePicker style={{ width: '100%' }} placeholder={t('user.birthdayPlaceholder')} />
           </Form.Item>
-          <Form.Item name="businessLine" label="所属业务线" rules={[{ required: true, message: '请选择业务线' }]}>
+          <Form.Item name="businessLine" label={t('user.label.line')} rules={[{ required: true, message: t('user.lineRequired') }]}>
             <Select options={BUSINESS_LINES.map((l) => ({ label: l, value: l }))} />
           </Form.Item>
         </Form>

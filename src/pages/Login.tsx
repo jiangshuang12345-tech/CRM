@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, Card, Form, Input, Tabs, Typography, message } from 'antd'
-import { MailOutlined, SafetyCertificateOutlined } from '@ant-design/icons'
-import { EMAIL_SUFFIX, login } from '../auth'
+import { Button, Card, Dropdown, Form, Input, Tabs, Typography, message } from 'antd'
+import { GlobalOutlined, MailOutlined, SafetyCertificateOutlined, DownOutlined } from '@ant-design/icons'
+import { EMAIL_SUFFIXES, isValidWorkEmail, login } from '../auth'
 import { LOGO } from '../logo'
+import { LANGS, useI18n } from '../i18n'
 
 const { Text, Title } = Typography
 
+const SUFFIX_LABEL = EMAIL_SUFFIXES.join(' / ')
+
 export default function Login() {
+  const { t, lang, setLang } = useI18n()
   const [form] = Form.useForm()
   const [tab, setTab] = useState<'login' | 'register'>('login')
   const [countdown, setCountdown] = useState(0)
@@ -15,19 +19,16 @@ export default function Login() {
 
   useEffect(() => () => window.clearInterval(timer.current), [])
 
-  const isValidEmail = (email?: string) =>
-    !!email && email.toLowerCase().endsWith(`@${EMAIL_SUFFIX}`) && email.length > EMAIL_SUFFIX.length + 1
-
   const sendCode = async () => {
     try {
       const { email } = await form.validateFields(['email'])
-      if (!isValidEmail(email)) {
-        message.error(`仅支持 @${EMAIL_SUFFIX} 邮箱`)
+      if (!isValidWorkEmail(email)) {
+        message.error(t('login.onlySuffix', { suffix: SUFFIX_LABEL }))
         return
       }
       const code = String(Math.floor(100000 + Math.random() * 900000))
       setSentCode(code)
-      message.success(`验证码已发送至 ${email}（演示验证码：${code}）`)
+      message.success(t('login.codeSent', { email, code }))
       setCountdown(60)
       timer.current = window.setInterval(() => {
         setCountdown((c) => {
@@ -45,33 +46,47 @@ export default function Login() {
 
   const onSubmit = async () => {
     const values = await form.validateFields()
-    if (!isValidEmail(values.email)) {
-      message.error(`仅支持 @${EMAIL_SUFFIX} 邮箱`)
+    if (!isValidWorkEmail(values.email)) {
+      message.error(t('login.onlySuffix', { suffix: SUFFIX_LABEL }))
       return
     }
     if (!sentCode) {
-      message.error('请先获取验证码')
+      message.error(t('login.needCode'))
       return
     }
     if (values.code !== sentCode) {
-      message.error('验证码错误')
+      message.error(t('login.codeError'))
       return
     }
-    message.success(tab === 'register' ? '注册成功，正在进入...' : '登录成功')
+    message.success(tab === 'register' ? t('login.registerOk') : t('login.loginOk'))
     login(values.email)
   }
 
+  const currentLang = LANGS.find((l) => l.value === lang)
+
   return (
     <div className="login-bg">
+      <div style={{ position: 'fixed', top: 20, right: 20 }}>
+        <Dropdown
+          menu={{
+            selectedKeys: [lang],
+            items: LANGS.map((l) => ({ key: l.value, label: `${l.flag}  ${l.label}`, onClick: () => setLang(l.value) })),
+          }}
+        >
+          <Button icon={<GlobalOutlined />}>
+            {currentLang?.flag} {currentLang?.label} <DownOutlined style={{ fontSize: 10 }} />
+          </Button>
+        </Dropdown>
+      </div>
       <Card style={{ width: 420, boxShadow: '0 12px 40px rgba(31,99,255,0.12)', borderRadius: 16 }} bordered={false}>
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
           <div className="brand-row" style={{ justifyContent: 'center', marginBottom: 8 }}>
             <img src={LOGO} width={38} height={38} alt="logo" />
             <Title level={3} style={{ margin: 0 }}>
-              Dino English 运营管理平台
+              {t('login.brandTitle')}
             </Title>
           </div>
-          <Text type="secondary">邮箱验证码登录 · 仅限 @{EMAIL_SUFFIX}</Text>
+          <Text type="secondary">{t('login.subtitle', { suffix: SUFFIX_LABEL })}</Text>
         </div>
 
         <Tabs
@@ -79,39 +94,41 @@ export default function Login() {
           activeKey={tab}
           onChange={(k) => setTab(k as 'login' | 'register')}
           items={[
-            { key: 'login', label: '登录' },
-            { key: 'register', label: '注册' },
+            { key: 'login', label: t('login.tab.login') },
+            { key: 'register', label: t('login.tab.register') },
           ]}
         />
 
         <Form form={form} layout="vertical" requiredMark={false} onFinish={onSubmit}>
           <Form.Item
             name="email"
-            label="邮箱"
+            label={t('login.email')}
             rules={[
-              { required: true, message: '请输入邮箱' },
+              { required: true, message: t('login.emailRequired') },
               {
                 validator: (_, v) =>
-                  isValidEmail(v) ? Promise.resolve() : Promise.reject(new Error(`请输入 @${EMAIL_SUFFIX} 邮箱`)),
+                  isValidWorkEmail(v)
+                    ? Promise.resolve()
+                    : Promise.reject(new Error(t('login.emailInvalid', { suffix: SUFFIX_LABEL }))),
               },
             ]}
           >
-            <Input size="large" prefix={<MailOutlined />} placeholder={`yourname@${EMAIL_SUFFIX}`} />
+            <Input size="large" prefix={<MailOutlined />} placeholder={`yourname@${EMAIL_SUFFIXES[0]}`} />
           </Form.Item>
 
-          <Form.Item label="验证码" required>
+          <Form.Item label={t('login.code')} required>
             <div style={{ display: 'flex', gap: 8 }}>
-              <Form.Item name="code" noStyle rules={[{ required: true, message: '请输入验证码' }]}>
-                <Input size="large" prefix={<SafetyCertificateOutlined />} placeholder="6 位验证码" maxLength={6} />
+              <Form.Item name="code" noStyle rules={[{ required: true, message: t('login.codeRequired') }]}>
+                <Input size="large" prefix={<SafetyCertificateOutlined />} placeholder={t('login.codePlaceholder')} maxLength={6} />
               </Form.Item>
-              <Button size="large" onClick={sendCode} disabled={countdown > 0} style={{ width: 130, flex: '0 0 auto' }}>
-                {countdown > 0 ? `${countdown}s 后重发` : '获取验证码'}
+              <Button size="large" onClick={sendCode} disabled={countdown > 0} style={{ width: 140, flex: '0 0 auto' }}>
+                {countdown > 0 ? t('login.resend', { n: countdown }) : t('login.getCode')}
               </Button>
             </div>
           </Form.Item>
 
           <Button type="primary" size="large" block htmlType="submit" style={{ marginTop: 6 }}>
-            {tab === 'register' ? '注册并登录' : '登录'}
+            {tab === 'register' ? t('login.submitRegister') : t('login.submitLogin')}
           </Button>
         </Form>
       </Card>

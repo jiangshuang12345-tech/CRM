@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v7'
+const KEY = 'dinoai_crm_state_v8'
 
 export type AppState = {
   channels: ChannelType[]
@@ -162,7 +162,7 @@ function seed(): AppState {
     {
       studentId: '50001', name: 'Ji-woo Kim', localName: '김지우', gender: '男',
       birthday: '2016-05-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO',
-      countryCode: '+82', channelCode: 'natural_kr_aso_4f9k2a', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费',
+      countryCode: '+82', channelCode: 'natural_kr_aso_4f9k2a', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', lastModifier: 'admin@dinoai.ai',
     },
     {
       studentId: '50002', name: 'Abdullah Al-Saud', localName: 'عبدالله', gender: '男',

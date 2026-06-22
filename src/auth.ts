@@ -43,4 +43,12 @@ export function useSession() {
   )
 }
 
-export const EMAIL_SUFFIX = 'dinoai.ai'
+export const EMAIL_SUFFIXES = ['dinoai.ai', 'vipkid.com.cn']
+
+export function isValidWorkEmail(email?: string) {
+  if (!email) return false
+  const lower = email.toLowerCase()
+  return EMAIL_SUFFIXES.some(
+    (suffix) => lower.endsWith(`@${suffix}`) && lower.length > suffix.length + 1,
+  )
+}

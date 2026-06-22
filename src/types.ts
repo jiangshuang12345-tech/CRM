@@ -63,6 +63,7 @@ export type Student = {
   channelCode: string
   registerTime: string // Beijing
   status: UserStatus
+  lastModifier?: string // 最近修改人
 }
 
 export type OrderStatus = '待支付' | '已支付' | '已退款' | '已取消'

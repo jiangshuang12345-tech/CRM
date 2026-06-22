@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Layout, Menu, Avatar, Dropdown, Modal, Typography } from 'antd'
+import { Layout, Menu, Avatar, Dropdown, Modal, Typography, Button } from 'antd'
 import {
   ApartmentOutlined,
   TeamOutlined,
@@ -9,56 +9,61 @@ import {
   LogoutOutlined,
   DownOutlined,
   RedoOutlined,
+  GlobalOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout, useSession } from '../auth'
 import { resetState } from '../store'
 import { LOGO } from '../logo'
+import { LANGS, useI18n } from '../i18n'
 
 const { Header, Sider, Content } = Layout
 const { Text } = Typography
-
-const NAV = [
-  { key: '/channels', icon: <ApartmentOutlined />, label: '渠道管理' },
-  { key: '/users', icon: <TeamOutlined />, label: '用户中心' },
-  { key: '/orders', icon: <ProfileOutlined />, label: '订单中心' },
-  { key: '/packages', icon: <AppstoreOutlined />, label: '课包管理' },
-  { key: '/coupons', icon: <TagsOutlined />, label: '优惠券管理' },
-]
-
-const TITLES: Record<string, string> = {
-  '/channels': '渠道管理',
-  '/users': '用户中心',
-  '/orders': '订单中心',
-  '/packages': '课包管理',
-  '/coupons': '优惠券管理',
-}
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const session = useSession()
+  const { t, lang, setLang } = useI18n()
+
+  const NAV = [
+    { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
+    { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
+    { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
+    { key: '/packages', icon: <AppstoreOutlined />, label: t('app.nav.packages') },
+    { key: '/coupons', icon: <TagsOutlined />, label: t('app.nav.coupons') },
+  ]
+
+  const TITLES: Record<string, string> = {
+    '/channels': t('app.nav.channels'),
+    '/users': t('app.nav.users'),
+    '/orders': t('app.nav.orders'),
+    '/packages': t('app.nav.packages'),
+    '/coupons': t('app.nav.coupons'),
+  }
 
   const onLogout = () => {
     Modal.confirm({
-      title: '确认登出',
-      content: '是否退出当前账号？',
-      okText: '退出',
-      cancelText: '取消',
+      title: t('app.logout.title'),
+      content: t('app.logout.content'),
+      okText: t('app.logout.ok'),
+      cancelText: t('common.cancel'),
       onOk: () => logout(),
     })
   }
 
   const onReset = () => {
     Modal.confirm({
-      title: '重置演示数据',
-      content: '将恢复所有渠道、用户、订单、课包、优惠券到初始演示数据。',
-      okText: '重置',
-      cancelText: '取消',
+      title: t('app.reset.title'),
+      content: t('app.reset.content'),
+      okText: t('app.reset.ok'),
+      cancelText: t('common.cancel'),
       onOk: () => resetState(),
     })
   }
+
+  const currentLang = LANGS.find((l) => l.value === lang)
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -78,7 +83,7 @@ export default function AppLayout() {
           }}
         >
           <img src={LOGO} width={26} height={26} alt="logo" />
-          {!collapsed && <span>Dino English 运营平台</span>}
+          {!collapsed && <span>{t('app.brand')}</span>}
         </div>
         <Menu
           theme="dark"
@@ -100,23 +105,39 @@ export default function AppLayout() {
           }}
         >
           <Text strong style={{ fontSize: 18 }}>
-            {TITLES[location.pathname] ?? 'Dino English 运营平台'}
+            {TITLES[location.pathname] ?? t('app.brand')}
           </Text>
-          <Dropdown
-            menu={{
-              items: [
-                { key: 'reset', icon: <RedoOutlined />, label: '重置演示数据', onClick: onReset },
-                { type: 'divider' },
-                { key: 'logout', icon: <LogoutOutlined />, label: '登出', danger: true, onClick: onLogout },
-              ],
-            }}
-          >
-            <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
-              <Avatar style={{ background: '#2F6BFF' }}>{session?.email?.[0]?.toUpperCase()}</Avatar>
-              <Text>{session?.email}</Text>
-              <DownOutlined style={{ fontSize: 12, color: '#999' }} />
-            </div>
-          </Dropdown>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Dropdown
+              menu={{
+                selectedKeys: [lang],
+                items: LANGS.map((l) => ({
+                  key: l.value,
+                  label: `${l.flag}  ${l.label}`,
+                  onClick: () => setLang(l.value),
+                })),
+              }}
+            >
+              <Button type="text" icon={<GlobalOutlined />}>
+                {currentLang?.flag} {currentLang?.label} <DownOutlined style={{ fontSize: 10 }} />
+              </Button>
+            </Dropdown>
+            <Dropdown
+              menu={{
+                items: [
+                  { key: 'reset', icon: <RedoOutlined />, label: t('app.menu.resetData'), onClick: onReset },
+                  { type: 'divider' },
+                  { key: 'logout', icon: <LogoutOutlined />, label: t('app.menu.logout'), danger: true, onClick: onLogout },
+                ],
+              }}
+            >
+              <div style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Avatar style={{ background: '#2F6BFF' }}>{session?.email?.[0]?.toUpperCase()}</Avatar>
+                <Text>{session?.email}</Text>
+                <DownOutlined style={{ fontSize: 12, color: '#999' }} />
+              </div>
+            </Dropdown>
+          </div>
         </Header>
         <Content style={{ margin: 20, overflow: 'auto' }}>
           <Outlet />

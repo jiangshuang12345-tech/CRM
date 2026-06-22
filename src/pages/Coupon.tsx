@@ -29,6 +29,7 @@ import { genCouponCode, getState, setState, useStore } from '../store'
 import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
 import type { BusinessLine, Coupon, CouponProduct, CouponStatus } from '../types'
 import { useSession } from '../auth'
+import { useI18n } from '../i18n'
 
 const { Text, Title } = Typography
 const { RangePicker } = DatePicker
@@ -39,7 +40,7 @@ function currencyOptions(line: BusinessLine) {
   return opts
 }
 
-// ====== 可用商品搜索框（输入课包ID，回车搜索，可多次添加） ======
+// 可用商品搜索框（输入课包ID，回车搜索，可多次添加）
 function ProductPicker({
   value = [],
   onChange,
@@ -47,19 +48,20 @@ function ProductPicker({
   value?: CouponProduct[]
   onChange?: (v: CouponProduct[]) => void
 }) {
+  const { t } = useI18n()
   const [text, setText] = useState('')
 
   const add = () => {
     const id = text.trim()
     if (!id) return
     if (value.some((p) => p.id.toLowerCase() === id.toLowerCase())) {
-      message.warning('该商品已添加')
+      message.warning(t('cp.prodExists'))
       setText('')
       return
     }
     const pkg = getState().packages.find((p) => p.id.toLowerCase() === id.toLowerCase())
     if (!pkg) {
-      message.error(`未找到课包：${id}`)
+      message.error(t('cp.prodNotFound', { id }))
       return
     }
     onChange?.([...value, { id: pkg.id, name: pkg.name, price: pkg.price }])
@@ -69,16 +71,16 @@ function ProductPicker({
   const remove = (id: string) => onChange?.(value.filter((p) => p.id !== id))
 
   const columns: ColumnsType<CouponProduct> = [
-    { title: 'ID', dataIndex: 'id', width: 120 },
-    { title: '用户侧名称', dataIndex: 'name' },
-    { title: '现价', dataIndex: 'price', width: 140, render: (v) => v.toLocaleString() },
+    { title: t('cp.prod.id'), dataIndex: 'id', width: 120 },
+    { title: t('cp.prod.name'), dataIndex: 'name' },
+    { title: t('cp.prod.price'), dataIndex: 'price', width: 140, render: (v) => v.toLocaleString() },
     {
-      title: '操作',
+      title: t('common.action'),
       key: 'op',
       width: 90,
       render: (_, r) => (
         <Button type="link" danger size="small" icon={<DeleteOutlined />} onClick={() => remove(r.id)}>
-          删除
+          {t('common.delete')}
         </Button>
       ),
     },
@@ -87,14 +89,14 @@ function ProductPicker({
   return (
     <div>
       <Input
-        placeholder="输入课程包ID，回车搜索，可多次添加"
+        placeholder={t('cp.productsPlaceholder')}
         prefix={<SearchOutlined />}
         value={text}
         onChange={(e) => setText(e.target.value)}
         onPressEnter={add}
         suffix={
           <Button type="link" size="small" onClick={add} style={{ padding: 0 }}>
-            添加
+            {t('cp.addProduct')}
           </Button>
         }
       />
@@ -105,14 +107,15 @@ function ProductPicker({
         columns={columns}
         dataSource={value}
         pagination={false}
-        locale={{ emptyText: '暂无数据' }}
+        locale={{ emptyText: t('common.noData') }}
       />
     </div>
   )
 }
 
-// ====== 生成券表单 ======
+// 生成券表单
 function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void }) {
+  const { t } = useI18n()
   const session = useSession()
   const [form] = Form.useForm()
 
@@ -141,7 +144,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     }
     setState((prev) => ({ ...prev, coupons: [coupon, ...prev.coupons] }))
-    message.success('优惠券已生成')
+    message.success(t('cp.genOk'))
     onBack()
   }
 
@@ -153,7 +156,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         <Space>
           <Button icon={<ArrowLeftOutlined />} onClick={onBack} size="small" />
           <span className="section-title" style={{ borderLeft: 'none', paddingLeft: 0 }}>
-            生成券 · {line}
+            {t('cp.create.title', { line })}
           </span>
         </Space>
       }
@@ -171,68 +174,64 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
           creator: session?.email ?? 'admin@dinoai.ai',
         }}
       >
-        <Title level={5}>券基本信息</Title>
-        <Form.Item name="businessLine" label="业务类型">
+        <Title level={5}>{t('cp.basic')}</Title>
+        <Form.Item name="businessLine" label={t('cp.businessType')}>
           <Select disabled options={[{ label: line, value: line }]} />
         </Form.Item>
-        <Form.Item name="couponType" label="券类型" tooltip="一期仅支持满减券">
-          <Select disabled options={[{ label: '满减券', value: '满减券' }]} />
+        <Form.Item name="couponType" label={t('cp.couponType')} tooltip={t('cp.couponTypeTip')}>
+          <Select disabled options={[{ label: t('enum.couponType.满减券'), value: '满减券' }]} />
         </Form.Item>
-        <Form.Item name="currency" label="币种" rules={[{ required: true, message: '请选择币种' }]}>
-          <Select placeholder="请选择币种" options={currencyOptions(line)} style={{ maxWidth: 280 }} />
+        <Form.Item name="currency" label={t('cp.currency')} rules={[{ required: true, message: t('cp.currencyRequired') }]}>
+          <Select placeholder={t('cp.currencyPlaceholder')} options={currencyOptions(line)} style={{ maxWidth: 280 }} />
         </Form.Item>
-        <Form.Item name="name" label="券名称" rules={[{ required: true, message: '请输入券名称' }]}>
-          <Input placeholder="请输入券名称" maxLength={30} showCount />
+        <Form.Item name="name" label={t('cp.name')} rules={[{ required: true, message: t('cp.nameRequired') }]}>
+          <Input placeholder={t('cp.namePlaceholder')} maxLength={30} showCount />
         </Form.Item>
-        <Form.Item name="creator" label="创建人">
+        <Form.Item name="creator" label={t('cp.creator')}>
           <Input disabled />
         </Form.Item>
 
         <Divider />
-        <Title level={5}>券发放及领取规则</Title>
-        <Form.Item name="total" label="券发放数量" rules={[{ required: true, message: '请输入发放数量' }]}>
-          <InputNumber style={{ width: 280 }} min={1} placeholder="请输入发放数量" />
+        <Title level={5}>{t('cp.issueRule')}</Title>
+        <Form.Item name="total" label={t('cp.totalQty')} rules={[{ required: true, message: t('cp.totalRequired') }]}>
+          <InputNumber style={{ width: 280 }} min={1} placeholder={t('cp.totalPlaceholder')} />
         </Form.Item>
-        <Form.Item name="claimRange" label="券领取有效期" rules={[{ required: true, message: '请选择领取有效期' }]}>
-          <RangePicker showTime style={{ width: 400 }} placeholder={['开始时间', '结束时间']} />
+        <Form.Item name="claimRange" label={t('cp.claimValid')} rules={[{ required: true, message: t('cp.claimRequired') }]}>
+          <RangePicker showTime style={{ width: 400 }} placeholder={[t('pkg.startTime'), t('pkg.endTime')]} />
         </Form.Item>
 
         <Divider />
-        <Title level={5}>券使用规则</Title>
-        <Form.Item name="useRange" label="券使用有效期" rules={[{ required: true, message: '请选择使用有效期' }]}>
-          <RangePicker showTime style={{ width: 400 }} placeholder={['开始时间', '结束时间']} />
+        <Title level={5}>{t('cp.useRule')}</Title>
+        <Form.Item name="useRange" label={t('cp.useValid')} rules={[{ required: true, message: t('cp.useRequired') }]}>
+          <RangePicker showTime style={{ width: 400 }} placeholder={[t('pkg.startTime'), t('pkg.endTime')]} />
         </Form.Item>
-        <Form.Item
-          name="products"
-          label="可用商品"
-          rules={[{ required: true, message: '请至少添加一个可用商品' }]}
-        >
+        <Form.Item name="products" label={t('cp.products')} rules={[{ required: true, message: t('cp.productsRequired') }]}>
           <ProductPicker />
         </Form.Item>
 
         <Divider />
-        <Title level={5}>券权益规则</Title>
-        <Form.Item label="满减规则" required style={{ marginBottom: 0 }}>
+        <Title level={5}>{t('cp.benefitRule')}</Title>
+        <Form.Item label={t('cp.fullMinus')} required style={{ marginBottom: 0 }}>
           <Space align="baseline" wrap>
-            <span>满</span>
-            <Form.Item name="thresholdAmount" rules={[{ required: true, message: '请输入门槛金额' }]}>
-              <InputNumber min={0} placeholder="门槛金额" style={{ width: 160 }} />
+            <span>{t('cp.full')}</span>
+            <Form.Item name="thresholdAmount" rules={[{ required: true, message: t('cp.thresholdRequired') }]}>
+              <InputNumber min={0} placeholder={t('cp.threshold')} style={{ width: 160 }} />
             </Form.Item>
-            <span>减</span>
+            <span>{t('cp.minus')}</span>
             <Form.Item
               name="deductAmount"
               dependencies={['thresholdAmount']}
               rules={[
-                { required: true, message: '请输入抵扣金额' },
+                { required: true, message: t('cp.deductRequired') },
                 ({ getFieldValue }) => ({
                   validator: (_, val) =>
                     val == null || val <= (getFieldValue('thresholdAmount') ?? Infinity)
                       ? Promise.resolve()
-                      : Promise.reject(new Error('抵扣金额不能大于门槛金额')),
+                      : Promise.reject(new Error(t('cp.deductInvalid'))),
                 }),
               ]}
             >
-              <InputNumber min={0} placeholder="抵扣金额" style={{ width: 160 }} />
+              <InputNumber min={0} placeholder={t('cp.deduct')} style={{ width: 160 }} />
             </Form.Item>
           </Space>
         </Form.Item>
@@ -240,9 +239,9 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         <Divider />
         <div style={{ textAlign: 'center' }}>
           <Space>
-            <Button onClick={onBack}>返回</Button>
+            <Button onClick={onBack}>{t('common.back')}</Button>
             <Button type="primary" onClick={submit}>
-              确定生成
+              {t('cp.submitGen')}
             </Button>
           </Space>
         </div>
@@ -251,8 +250,8 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
   )
 }
 
-// ====== 优惠券主页面 ======
 export default function CouponPage() {
+  const { t } = useI18n()
   const coupons = useStore((s) => s.coupons)
   const [view, setView] = useState<'list' | 'create'>('list')
   const [createLine, setCreateLine] = useState<BusinessLine>('韩国')
@@ -263,15 +262,12 @@ export default function CouponPage() {
   const [lineFilter, setLineFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
 
-  // 编辑可用商品弹窗
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null)
   const [editProducts, setEditProducts] = useState<CouponProduct[]>([])
 
-  // 延长时间弹窗
   const [extendCoupon, setExtendCoupon] = useState<Coupon | null>(null)
   const [extendTime, setExtendTime] = useState<Dayjs | null>(null)
 
-  // 详情弹窗
   const [detailCoupon, setDetailCoupon] = useState<Coupon | null>(null)
 
   const data = useMemo(
@@ -294,7 +290,7 @@ export default function CouponPage() {
 
   const confirmPickLine = () => {
     if (!pickedLine) {
-      message.error('请选择业务类型')
+      message.error(t('cp.pickLineError'))
       return
     }
     setCreateLine(pickedLine)
@@ -309,14 +305,14 @@ export default function CouponPage() {
   const saveEdit = () => {
     if (!editCoupon) return
     if (editProducts.length === 0) {
-      message.error('请至少配置一个可用商品')
+      message.error(t('cp.saveProductsErr'))
       return
     }
     setState((prev) => ({
       ...prev,
       coupons: prev.coupons.map((c) => (c.id === editCoupon.id ? { ...c, products: editProducts } : c)),
     }))
-    message.success('已保存可用商品')
+    message.success(t('cp.saveProductsOk'))
     setEditCoupon(null)
   }
 
@@ -326,7 +322,7 @@ export default function CouponPage() {
   }
   const saveExtend = () => {
     if (!extendCoupon || !extendTime) {
-      message.error('请选择更改后的时间')
+      message.error(t('cp.extendNeedTime'))
       return
     }
     setState((prev) => ({
@@ -341,17 +337,17 @@ export default function CouponPage() {
           : c,
       ),
     }))
-    message.success('领取截止时间已更新')
+    message.success(t('cp.extendOk'))
     setExtendCoupon(null)
   }
 
   const stopIssue = (c: Coupon) =>
     Modal.confirm({
-      title: '停止发放',
-      content: `确认停止发放「${c.name}」？停止后领取状态将变为「已结束」，用户无法继续领取。`,
-      okText: '确认停止',
+      title: t('cp.stopTitle'),
+      content: t('cp.stopContent', { name: c.name }),
+      okText: t('cp.stopOk'),
       okButtonProps: { danger: true },
-      cancelText: '取消',
+      cancelText: t('common.cancel'),
       onOk: () =>
         setState((prev) => ({
           ...prev,
@@ -360,44 +356,44 @@ export default function CouponPage() {
     })
 
   const columns: ColumnsType<Coupon> = [
-    { title: '券ID', dataIndex: 'id', width: 90, fixed: 'left' },
-    { title: '券名称', dataIndex: 'name', width: 200 },
-    { title: '券码', dataIndex: 'code', width: 150, render: (v) => <Text code>{v}</Text> },
-    { title: '业务线', dataIndex: 'businessLine', width: 90, render: (v) => <Tag color="geekblue">{v}</Tag> },
-    { title: '币种', dataIndex: 'currency', width: 80 },
-    { title: '券总量', dataIndex: 'total', width: 100, align: 'right', render: (v) => v.toLocaleString() },
+    { title: t('cp.col.id'), dataIndex: 'id', width: 90, fixed: 'left' },
+    { title: t('cp.col.name'), dataIndex: 'name', width: 200 },
+    { title: t('cp.col.code'), dataIndex: 'code', width: 150, render: (v) => <Text code>{v}</Text> },
+    { title: t('cp.col.line'), dataIndex: 'businessLine', width: 90, render: (v) => <Tag color="geekblue">{v}</Tag> },
+    { title: t('cp.col.currency'), dataIndex: 'currency', width: 80 },
+    { title: t('cp.col.total'), dataIndex: 'total', width: 100, align: 'right', render: (v) => v.toLocaleString() },
     {
-      title: '剩余数量',
+      title: t('cp.col.remaining'),
       dataIndex: 'remaining',
       width: 100,
       align: 'right',
       render: (v) => v.toLocaleString(),
     },
-    { title: '创建人', dataIndex: 'creator', width: 170 },
+    { title: t('cp.col.creator'), dataIndex: 'creator', width: 170 },
     {
-      title: '领取状态',
+      title: t('cp.col.status'),
       dataIndex: 'status',
       width: 100,
-      render: (v: CouponStatus) => <Tag color={v === '已生效' ? 'green' : 'default'}>{v}</Tag>,
+      render: (v: CouponStatus) => <Tag color={v === '已生效' ? 'green' : 'default'}>{t(`enum.coupon.${v}`)}</Tag>,
     },
     {
-      title: '操作',
+      title: t('common.action'),
       key: 'action',
       width: 290,
       fixed: 'right',
       render: (_, r) => (
         <Space size={0} wrap>
           <Button type="link" size="small" onClick={() => setDetailCoupon(r)}>
-            详情
+            {t('common.detail')}
           </Button>
           <Button type="link" size="small" onClick={() => openEdit(r)}>
-            编辑
+            {t('common.edit')}
           </Button>
           <Button type="link" size="small" onClick={() => openExtend(r)}>
-            延长时间
+            {t('cp.extend')}
           </Button>
           <Button type="link" size="small" danger disabled={r.status === '已结束'} onClick={() => stopIssue(r)}>
-            停止发放
+            {t('cp.stop')}
           </Button>
         </Space>
       ),
@@ -412,7 +408,7 @@ export default function CouponPage() {
     <Card
       className="page-card"
       bordered={false}
-      title={<span className="section-title">优惠券管理</span>}
+      title={<span className="section-title">{t('cp.title')}</span>}
       extra={
         <Button
           type="primary"
@@ -422,7 +418,7 @@ export default function CouponPage() {
             setPickLineOpen(true)
           }}
         >
-          生成券
+          {t('cp.genBtn')}
         </Button>
       }
     >
@@ -430,14 +426,14 @@ export default function CouponPage() {
         <Input
           allowClear
           prefix={<SearchOutlined />}
-          placeholder="券ID / 券名称 / 券码"
+          placeholder={t('cp.searchPlaceholder')}
           style={{ width: 240 }}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
         <Select
           allowClear
-          placeholder="业务线"
+          placeholder={t('cp.filterLine')}
           style={{ width: 140 }}
           value={lineFilter}
           onChange={setLineFilter}
@@ -445,11 +441,11 @@ export default function CouponPage() {
         />
         <Select
           allowClear
-          placeholder="领取状态"
+          placeholder={t('cp.filterStatus')}
           style={{ width: 140 }}
           value={statusFilter}
           onChange={setStatusFilter}
-          options={(['已生效', '已结束'] as CouponStatus[]).map((l) => ({ label: l, value: l }))}
+          options={(['已生效', '已结束'] as CouponStatus[]).map((l) => ({ label: t(`enum.coupon.${l}`), value: l }))}
         />
       </Space>
 
@@ -458,17 +454,17 @@ export default function CouponPage() {
         columns={columns}
         dataSource={data}
         scroll={{ x: 1500 }}
-        pagination={{ showTotal: (t) => `共 ${t} 条`, showSizeChanger: true }}
+        pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
-      {/* 选择业务类型弹窗 */}
+      {/* 选择业务类型 */}
       <Modal
         open={pickLineOpen}
-        title="请选择业务类型"
+        title={t('cp.pickLineTitle')}
         onCancel={() => setPickLineOpen(false)}
         onOk={confirmPickLine}
-        okText="确定"
-        cancelText="取消"
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         width={460}
       >
         <Radio.Group
@@ -486,18 +482,18 @@ export default function CouponPage() {
         </Radio.Group>
       </Modal>
 
-      {/* 编辑 - 券使用规则（可用商品） */}
+      {/* 编辑 - 可用商品 */}
       <Modal
         open={!!editCoupon}
-        title="券使用规则"
+        title={t('cp.editRuleTitle')}
         onCancel={() => setEditCoupon(null)}
         width={760}
         footer={[
           <Button key="back" onClick={() => setEditCoupon(null)}>
-            返回
+            {t('common.back')}
           </Button>,
           <Button key="ok" type="primary" onClick={saveEdit}>
-            确定
+            {t('common.confirm')}
           </Button>,
         ]}
       >
@@ -506,7 +502,7 @@ export default function CouponPage() {
             <Text strong style={{ color: '#ff4d4f' }}>
               *
             </Text>{' '}
-            <Text strong>可用商品：</Text>
+            <Text strong>{t('cp.products')}：</Text>
           </div>
           <ProductPicker value={editProducts} onChange={setEditProducts} />
         </div>
@@ -515,26 +511,26 @@ export default function CouponPage() {
       {/* 延长时间 */}
       <Modal
         open={!!extendCoupon}
-        title="延长时间"
+        title={t('cp.extendTitle')}
         onCancel={() => setExtendCoupon(null)}
         onOk={saveExtend}
-        okText="确定"
-        cancelText="取消"
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         width={460}
       >
         {extendCoupon && (
           <div style={{ marginTop: 8 }}>
             <div style={{ marginBottom: 16 }}>
-              <Text type="secondary">当前领取截止时间：</Text>
+              <Text type="secondary">{t('cp.currentEnd')}</Text>
               <Text strong>{extendCoupon.claimEnd}</Text>
             </div>
             <Space>
-              <Text>更改时间：</Text>
+              <Text>{t('cp.changeTime')}</Text>
               <DatePicker
                 showTime
                 value={extendTime ?? undefined}
                 onChange={(v) => setExtendTime(v)}
-                placeholder="选择日期时间"
+                placeholder={t('cp.pickTime')}
                 style={{ width: 260 }}
               />
             </Space>
@@ -545,10 +541,10 @@ export default function CouponPage() {
       {/* 券详情 */}
       <Modal
         open={!!detailCoupon}
-        title="优惠券详情"
+        title={t('cp.detailTitle')}
         footer={[
           <Button key="close" onClick={() => setDetailCoupon(null)}>
-            关闭
+            {t('common.close')}
           </Button>,
         ]}
         width={680}
@@ -557,64 +553,67 @@ export default function CouponPage() {
         {detailCoupon && (
           <div style={{ marginTop: 12 }}>
             <Divider orientation="left" plain style={{ marginTop: 0 }}>
-              券基本信息
+              {t('cp.basic')}
             </Divider>
             <Descriptions column={2} bordered size="small">
-              <Descriptions.Item label="券ID">{detailCoupon.id}</Descriptions.Item>
-              <Descriptions.Item label="券码">
+              <Descriptions.Item label={t('cp.col.id')}>{detailCoupon.id}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.col.code')}>
                 <Text code>{detailCoupon.code}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="券名称" span={2}>
+              <Descriptions.Item label={t('cp.name')} span={2}>
                 {detailCoupon.name}
               </Descriptions.Item>
-              <Descriptions.Item label="业务线">
+              <Descriptions.Item label={t('cp.col.line')}>
                 <Tag color="geekblue">{detailCoupon.businessLine}</Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="券类型">{detailCoupon.couponType}</Descriptions.Item>
-              <Descriptions.Item label="币种">{detailCoupon.currency}</Descriptions.Item>
-              <Descriptions.Item label="创建人">{detailCoupon.creator}</Descriptions.Item>
-              <Descriptions.Item label="领取状态">
-                <Tag color={detailCoupon.status === '已生效' ? 'green' : 'default'}>{detailCoupon.status}</Tag>
+              <Descriptions.Item label={t('cp.couponType')}>{t('enum.couponType.满减券')}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.currency')}>{detailCoupon.currency}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.creator')}>{detailCoupon.creator}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.col.status')}>
+                <Tag color={detailCoupon.status === '已生效' ? 'green' : 'default'}>{t(`enum.coupon.${detailCoupon.status}`)}</Tag>
               </Descriptions.Item>
-              <Descriptions.Item label="创建时间">{detailCoupon.createdAt}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.createTime')}>{detailCoupon.createdAt}</Descriptions.Item>
             </Descriptions>
 
             <Divider orientation="left" plain>
-              发放及领取规则
+              {t('cp.issueRule')}
             </Divider>
             <Descriptions column={2} bordered size="small">
-              <Descriptions.Item label="券总量">{detailCoupon.total.toLocaleString()}</Descriptions.Item>
-              <Descriptions.Item label="剩余数量">{detailCoupon.remaining.toLocaleString()}</Descriptions.Item>
-              <Descriptions.Item label="领取有效期" span={2}>
+              <Descriptions.Item label={t('cp.col.total')}>{detailCoupon.total.toLocaleString()}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.col.remaining')}>{detailCoupon.remaining.toLocaleString()}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.claimValidLabel')} span={2}>
                 {detailCoupon.claimStart} ~ {detailCoupon.claimEnd}
               </Descriptions.Item>
             </Descriptions>
 
             <Divider orientation="left" plain>
-              使用规则
+              {t('cp.useRule')}
             </Divider>
             <Descriptions column={1} bordered size="small">
-              <Descriptions.Item label="使用有效期">
+              <Descriptions.Item label={t('cp.useValidLabel')}>
                 {detailCoupon.useStart} ~ {detailCoupon.useEnd}
               </Descriptions.Item>
-              <Descriptions.Item label="满减规则">
-                满 {detailCoupon.thresholdAmount.toLocaleString()}，减 {detailCoupon.deductAmount.toLocaleString()}（
-                {detailCoupon.currency}）
+              <Descriptions.Item label={t('cp.fullMinus')}>
+                {t('cp.fullMinusValue', {
+                  threshold: detailCoupon.thresholdAmount.toLocaleString(),
+                  deduct: detailCoupon.deductAmount.toLocaleString(),
+                  currency: detailCoupon.currency,
+                })}
               </Descriptions.Item>
             </Descriptions>
             <div style={{ marginTop: 12 }}>
-              <Text strong>可用商品</Text>
+              <Text strong>{t('cp.products')}</Text>
               <Table
                 style={{ marginTop: 8 }}
                 rowKey="id"
                 size="small"
                 pagination={false}
                 dataSource={detailCoupon.products}
-                locale={{ emptyText: '暂无数据' }}
+                locale={{ emptyText: t('common.noData') }}
                 columns={[
-                  { title: 'ID', dataIndex: 'id', width: 100 },
-                  { title: '用户侧名称', dataIndex: 'name' },
-                  { title: '现价', dataIndex: 'price', width: 120, render: (v) => v.toLocaleString() },
+                  { title: t('cp.prod.id'), dataIndex: 'id', width: 100 },
+                  { title: t('cp.prod.name'), dataIndex: 'name' },
+                  { title: t('cp.prod.price'), dataIndex: 'price', width: 120, render: (v) => v.toLocaleString() },
                 ]}
               />
             </div>

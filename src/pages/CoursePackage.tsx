@@ -22,6 +22,7 @@ import { setState, useStore } from '../store'
 import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
 import type { BusinessLine, CoursePackage } from '../types'
 import { useSession } from '../auth'
+import { useI18n } from '../i18n'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
@@ -36,6 +37,7 @@ function currencyOptions(line?: BusinessLine) {
 }
 
 export default function CoursePackagePage() {
+  const { t } = useI18n()
   const packages = useStore((s) => s.packages)
   const session = useSession()
   const [keyword, setKeyword] = useState('')
@@ -87,7 +89,7 @@ export default function CoursePackagePage() {
         createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       }
       setState((prev) => ({ ...prev, packages: [pkg, ...prev.packages] }))
-      message.success('课包已新增并上架')
+      message.success(t('pkg.added'))
     } else if (modal?.record) {
       setState((prev) => ({
         ...prev,
@@ -105,7 +107,7 @@ export default function CoursePackagePage() {
             : p,
         ),
       }))
-      message.success('课包已更新')
+      message.success(t('pkg.updated'))
     }
     setModal(null)
   }
@@ -113,8 +115,10 @@ export default function CoursePackagePage() {
   const toggleShelf = (record: CoursePackage) => {
     const next = record.status === '上架' ? '下架' : '上架'
     Modal.confirm({
-      title: next === '下架' ? '下架课包' : '上架课包',
-      content: `确认${next}「${record.name}」？`,
+      title: next === '下架' ? t('pkg.shelfOffTitle') : t('pkg.shelfOnTitle'),
+      content: t('pkg.shelfConfirm', { action: t(`enum.pkg.${next}`), name: record.name }),
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
       okButtonProps: next === '下架' ? { danger: true } : undefined,
       onOk: () =>
         setState((prev) => ({
@@ -125,11 +129,11 @@ export default function CoursePackagePage() {
   }
 
   const columns: ColumnsType<CoursePackage> = [
-    { title: '课包ID', dataIndex: 'id', width: 120 },
-    { title: '业务线', dataIndex: 'businessLine', width: 100, render: (v) => <Tag color="geekblue">{v}</Tag> },
-    { title: '课包名称', dataIndex: 'name', width: 220 },
+    { title: t('pkg.col.id'), dataIndex: 'id', width: 120 },
+    { title: t('pkg.col.line'), dataIndex: 'businessLine', width: 100, render: (v) => <Tag color="geekblue">{v}</Tag> },
+    { title: t('pkg.col.name'), dataIndex: 'name', width: 220 },
     {
-      title: '价格',
+      title: t('pkg.col.price'),
       dataIndex: 'price',
       width: 150,
       render: (v, r) => (
@@ -139,7 +143,7 @@ export default function CoursePackagePage() {
       ),
     },
     {
-      title: '有效期',
+      title: t('pkg.col.valid'),
       key: 'valid',
       width: 340,
       render: (_, r) => (
@@ -148,28 +152,28 @@ export default function CoursePackagePage() {
         </Text>
       ),
     },
-    { title: '创建人', dataIndex: 'creator', width: 180 },
+    { title: t('pkg.col.creator'), dataIndex: 'creator', width: 180 },
     {
-      title: '课包状态',
+      title: t('pkg.col.status'),
       dataIndex: 'status',
       width: 100,
-      render: (v) => <Tag color={v === '上架' ? 'green' : 'default'}>{v}</Tag>,
+      render: (v) => <Tag color={v === '上架' ? 'green' : 'default'}>{t(`enum.pkg.${v}`)}</Tag>,
     },
     {
-      title: '操作',
+      title: t('common.action'),
       key: 'action',
       width: 200,
       fixed: 'right',
       render: (_, r) => (
         <Space size={0}>
           <Button type="link" onClick={() => setDetail(r)}>
-            详情
+            {t('common.detail')}
           </Button>
           <Button type="link" onClick={() => openEdit(r)}>
-            编辑
+            {t('common.edit')}
           </Button>
           <Button type="link" danger={r.status === '上架'} onClick={() => toggleShelf(r)}>
-            {r.status === '上架' ? '下架' : '上架'}
+            {r.status === '上架' ? t('pkg.offShelf') : t('pkg.onShelf')}
           </Button>
         </Space>
       ),
@@ -180,10 +184,10 @@ export default function CoursePackagePage() {
     <Card
       className="page-card"
       bordered={false}
-      title={<span className="section-title">课包管理</span>}
+      title={<span className="section-title">{t('pkg.title')}</span>}
       extra={
         <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>
-          新增课包
+          {t('pkg.addBtn')}
         </Button>
       }
     >
@@ -191,14 +195,14 @@ export default function CoursePackagePage() {
         <Input
           allowClear
           prefix={<SearchOutlined />}
-          placeholder="课包ID / 课包名称"
+          placeholder={t('pkg.searchPlaceholder')}
           style={{ width: 240 }}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
         <Select
           allowClear
-          placeholder="业务线"
+          placeholder={t('pkg.filterLine')}
           style={{ width: 150 }}
           value={lineFilter}
           onChange={setLineFilter}
@@ -211,63 +215,63 @@ export default function CoursePackagePage() {
         columns={columns}
         dataSource={data}
         scroll={{ x: 1440 }}
-        pagination={{ showTotal: (t) => `共 ${t} 条`, showSizeChanger: true }}
+        pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
       <Modal
         open={!!modal}
-        title={modal?.mode === 'add' ? '新增课包' : '编辑课包'}
+        title={modal?.mode === 'add' ? t('pkg.addTitle') : t('pkg.editTitle')}
         onCancel={() => setModal(null)}
         onOk={submit}
-        okText="确定"
-        cancelText="取消"
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false} style={{ marginTop: 12 }}>
-          <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}>
+          <Form.Item name="businessLine" label={t('pkg.label.line')} rules={[{ required: true, message: t('pkg.lineRequired') }]}>
             <Select
-              placeholder="请选择业务线"
+              placeholder={t('pkg.linePlaceholder')}
               options={BUSINESS_LINES.map((l) => ({ label: l, value: l }))}
               onChange={() => form.setFieldValue('currency', undefined)}
             />
           </Form.Item>
-          <Form.Item name="name" label="课包名称" rules={[{ required: true, message: '请输入课包名称' }]}>
-            <Input placeholder="请输入课包名称" />
+          <Form.Item name="name" label={t('pkg.label.name')} rules={[{ required: true, message: t('pkg.nameRequired') }]}>
+            <Input placeholder={t('pkg.namePlaceholder')} />
           </Form.Item>
-          <Form.Item name="currency" label="币种" rules={[{ required: true, message: '请选择币种' }]}>
-            <Select placeholder="请选择币种" options={currencyOptions(watchLine)} />
+          <Form.Item name="currency" label={t('pkg.label.currency')} rules={[{ required: true, message: t('pkg.currencyRequired') }]}>
+            <Select placeholder={t('pkg.currencyPlaceholder')} options={currencyOptions(watchLine)} />
           </Form.Item>
-          <Form.Item name="price" label="价格" rules={[{ required: true, message: '请输入价格' }]}>
-            <InputNumber style={{ width: '100%' }} min={0} placeholder="请输入价格" />
+          <Form.Item name="price" label={t('pkg.label.price')} rules={[{ required: true, message: t('pkg.priceRequired') }]}>
+            <InputNumber style={{ width: '100%' }} min={0} placeholder={t('pkg.pricePlaceholder')} />
           </Form.Item>
-          <Form.Item name="validRange" label="有效期" rules={[{ required: true, message: '请选择有效期' }]}>
+          <Form.Item name="validRange" label={t('pkg.label.valid')} rules={[{ required: true, message: t('pkg.validRequired') }]}>
             <RangePicker
               showTime
               format="YYYY-MM-DD HH:mm:ss"
               style={{ width: '100%' }}
-              placeholder={['开始时间', '结束时间']}
+              placeholder={[t('pkg.startTime'), t('pkg.endTime')]}
             />
           </Form.Item>
         </Form>
       </Modal>
 
-      <Modal open={!!detail} title="课包详情" footer={null} onCancel={() => setDetail(null)}>
+      <Modal open={!!detail} title={t('pkg.detailTitle')} footer={null} onCancel={() => setDetail(null)}>
         {detail && (
           <Descriptions column={1} bordered size="small" style={{ marginTop: 12 }}>
-            <Descriptions.Item label="课包ID">{detail.id}</Descriptions.Item>
-            <Descriptions.Item label="业务线">{detail.businessLine}</Descriptions.Item>
-            <Descriptions.Item label="课包名称">{detail.name}</Descriptions.Item>
-            <Descriptions.Item label="价格">
+            <Descriptions.Item label={t('pkg.col.id')}>{detail.id}</Descriptions.Item>
+            <Descriptions.Item label={t('pkg.label.line')}>{detail.businessLine}</Descriptions.Item>
+            <Descriptions.Item label={t('pkg.label.name')}>{detail.name}</Descriptions.Item>
+            <Descriptions.Item label={t('pkg.label.price')}>
               {detail.currency} {detail.price.toLocaleString()}
             </Descriptions.Item>
-            <Descriptions.Item label="有效期">
+            <Descriptions.Item label={t('pkg.label.valid')}>
               {detail.validStart} ~ {detail.validEnd}
             </Descriptions.Item>
-            <Descriptions.Item label="创建人">{detail.creator}</Descriptions.Item>
-            <Descriptions.Item label="课包状态">
-              <Tag color={detail.status === '上架' ? 'green' : 'default'}>{detail.status}</Tag>
+            <Descriptions.Item label={t('pkg.col.creator')}>{detail.creator}</Descriptions.Item>
+            <Descriptions.Item label={t('pkg.col.status')}>
+              <Tag color={detail.status === '上架' ? 'green' : 'default'}>{t(`enum.pkg.${detail.status}`)}</Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="创建时间">{detail.createdAt}</Descriptions.Item>
+            <Descriptions.Item label={t('pkg.createTime')}>{detail.createdAt}</Descriptions.Item>
           </Descriptions>
         )}
       </Modal>
