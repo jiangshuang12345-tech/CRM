@@ -55,7 +55,6 @@ export default function UserCenter() {
   const openEdit = (s: Student) => {
     setEditing(s)
     form.setFieldsValue({
-      enName: s.enName,
       localName: s.localName,
       gender: s.gender,
       birthday: s.birthday ? dayjs(s.birthday) : undefined,
@@ -72,7 +71,6 @@ export default function UserCenter() {
         s.studentId === editing.studentId
           ? {
               ...s,
-              enName: v.enName,
               localName: v.localName,
               gender: v.gender,
               birthday: v.birthday ? v.birthday.format('YYYY-MM-DD') : undefined,
@@ -173,9 +171,6 @@ export default function UserCenter() {
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false} style={{ marginTop: 12 }}>
-          <Form.Item name="enName" label="英文名">
-            <Input placeholder="English name" />
-          </Form.Item>
           <Form.Item name="localName" label="本地名">
             <Input placeholder="本地语言姓名" />
           </Form.Item>
