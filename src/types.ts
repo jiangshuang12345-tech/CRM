@@ -79,6 +79,7 @@ export type Order = {
   payMethod: 'App Store' | 'Google Play' | 'Stripe' | 'PayPal'
   currency: string
   paidTime?: string
+  validUntil?: string // 有效期到期时间
 }
 
 export type PackageStatus = '上架' | '下架'

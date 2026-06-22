@@ -87,6 +87,7 @@ export default function OrderCenter() {
       render: (v) => <Tag>{v}</Tag>,
     },
     { title: t('order.col.paidTime'), dataIndex: 'paidTime', width: 180, render: (v) => v || <Text type="secondary">—</Text> },
+    { title: t('order.col.validUntil'), dataIndex: 'validUntil', width: 180, render: (v) => v || <Text type="secondary">—</Text> },
   ]
 
   return (
@@ -122,7 +123,7 @@ export default function OrderCenter() {
         rowKey="orderId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1400 }}
+        scroll={{ x: 1580 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
     </Card>
