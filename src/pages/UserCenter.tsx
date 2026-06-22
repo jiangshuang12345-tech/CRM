@@ -60,8 +60,7 @@ export default function UserCenter() {
           !kw ||
           s.studentId.toLowerCase().includes(kw) ||
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
-          s.account.toLowerCase().includes(kw) ||
-          (s.phone ?? '').toLowerCase().includes(kw)
+          s.account.toLowerCase().includes(kw)
         const matchCode = !codeFilter || s.countryCode === codeFilter
         const matchStatus = !statusFilter || s.status === statusFilter
         return matchKw && matchCode && matchStatus
@@ -119,12 +118,6 @@ export default function UserCenter() {
       dataIndex: 'account',
       width: 200,
       render: (v) => <Text>{v}</Text>,
-    },
-    {
-      title: t('user.col.phone'),
-      dataIndex: 'phone',
-      width: 160,
-      render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
     },
     { title: t('user.col.channel'), dataIndex: 'registerChannel', width: 160 },
     { title: t('user.col.countryCode'), dataIndex: 'countryCode', width: 110 },
@@ -188,7 +181,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1770 }}
+        scroll={{ x: 1610 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
