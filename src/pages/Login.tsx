@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Button, Card, Dropdown, Form, Input, Tabs, Typography, message } from 'antd'
+import { Button, Card, Dropdown, Form, Input, Typography, message } from 'antd'
 import { GlobalOutlined, MailOutlined, SafetyCertificateOutlined, DownOutlined } from '@ant-design/icons'
 import { EMAIL_SUFFIXES, isValidWorkEmail, login } from '../auth'
 import { LOGO } from '../logo'
@@ -12,7 +12,6 @@ const SUFFIX_LABEL = EMAIL_SUFFIXES.join(' / ')
 export default function Login() {
   const { t, lang, setLang } = useI18n()
   const [form] = Form.useForm()
-  const [tab, setTab] = useState<'login' | 'register'>('login')
   const [countdown, setCountdown] = useState(0)
   const [sentCode, setSentCode] = useState<string>('')
   const timer = useRef<number>()
@@ -58,7 +57,7 @@ export default function Login() {
       message.error(t('login.codeError'))
       return
     }
-    message.success(tab === 'register' ? t('login.registerOk') : t('login.loginOk'))
+    message.success(t('login.loginOk'))
     login(values.email)
   }
 
@@ -89,17 +88,7 @@ export default function Login() {
           <Text type="secondary">{t('login.subtitle', { suffix: SUFFIX_LABEL })}</Text>
         </div>
 
-        <Tabs
-          centered
-          activeKey={tab}
-          onChange={(k) => setTab(k as 'login' | 'register')}
-          items={[
-            { key: 'login', label: t('login.tab.login') },
-            { key: 'register', label: t('login.tab.register') },
-          ]}
-        />
-
-        <Form form={form} layout="vertical" requiredMark={false} onFinish={onSubmit}>
+        <Form form={form} layout="vertical" requiredMark={false} onFinish={onSubmit} style={{ marginTop: 8 }}>
           <Form.Item
             name="email"
             label={t('login.email')}
@@ -128,7 +117,7 @@ export default function Login() {
           </Form.Item>
 
           <Button type="primary" size="large" block htmlType="submit" style={{ marginTop: 6 }}>
-            {tab === 'register' ? t('login.submitRegister') : t('login.submitLogin')}
+            {t('login.submitLogin')}
           </Button>
         </Form>
       </Card>
