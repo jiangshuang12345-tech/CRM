@@ -16,6 +16,7 @@ import { EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
+import { BUSINESS_LINES } from '../types'
 import type { LoginMethod, Student, UserStatus } from '../types'
 import { useSession } from '../auth'
 import { useI18n } from '../i18n'
@@ -42,13 +43,13 @@ export default function UserCenter() {
   const students = useStore((s) => s.students)
   const session = useSession()
   const [keyword, setKeyword] = useState('')
-  const [codeFilter, setCodeFilter] = useState<string | undefined>()
+  const [lineFilter, setLineFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
-  const countryCodes = useMemo(
-    () => Array.from(new Set(students.map((s) => s.countryCode))).sort(),
+  const lines = useMemo(
+    () => Array.from(new Set(students.map((s) => s.businessLine))),
     [students],
   )
 
@@ -61,11 +62,11 @@ export default function UserCenter() {
           s.studentId.toLowerCase().includes(kw) ||
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
           s.account.toLowerCase().includes(kw)
-        const matchCode = !codeFilter || s.countryCode === codeFilter
+        const matchLine = !lineFilter || s.businessLine === lineFilter
         const matchStatus = !statusFilter || s.status === statusFilter
-        return matchKw && matchCode && matchStatus
+        return matchKw && matchLine && matchStatus
       }),
-    [students, keyword, codeFilter, statusFilter],
+    [students, keyword, lineFilter, statusFilter],
   )
 
   const openEdit = (s: Student) => {
@@ -74,7 +75,7 @@ export default function UserCenter() {
       localName: s.localName,
       gender: s.gender,
       birthday: s.birthday ? dayjs(s.birthday) : undefined,
-      countryCode: s.countryCode,
+      businessLine: s.businessLine,
     })
   }
 
@@ -90,7 +91,7 @@ export default function UserCenter() {
               localName: v.localName,
               gender: v.gender,
               birthday: v.birthday ? v.birthday.format('YYYY-MM-DD') : undefined,
-              countryCode: v.countryCode,
+              businessLine: v.businessLine,
               lastModifier: session?.email ?? 'admin@dinoai.ai',
             }
           : s,
@@ -119,8 +120,13 @@ export default function UserCenter() {
       width: 200,
       render: (v) => <Text>{v}</Text>,
     },
-    { title: t('user.col.channel'), dataIndex: 'registerChannel', width: 160 },
-    { title: t('user.col.countryCode'), dataIndex: 'countryCode', width: 110 },
+    {
+      title: t('user.col.channel'),
+      dataIndex: 'registerChannel',
+      width: 220,
+      render: (v: string, r) => `${r.businessLine} · ${v}`,
+    },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
     { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
     { title: t('user.col.regTime'), dataIndex: 'registerTime', width: 180 },
     {
@@ -167,11 +173,11 @@ export default function UserCenter() {
         />
         <Select
           allowClear
-          placeholder={t('user.col.countryCode')}
+          placeholder={t('user.col.line')}
           style={{ width: 150 }}
-          value={codeFilter}
-          onChange={setCodeFilter}
-          options={countryCodes.map((c) => ({ label: c, value: c }))}
+          value={lineFilter}
+          onChange={setLineFilter}
+          options={lines.map((c) => ({ label: c, value: c }))}
         />
         <Select
           allowClear
@@ -187,7 +193,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1790 }}
+        scroll={{ x: 1850 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -214,11 +220,11 @@ export default function UserCenter() {
           <Form.Item name="birthday" label={t('user.label.birthday')}>
             <DatePicker style={{ width: '100%' }} placeholder={t('user.birthdayPlaceholder')} />
           </Form.Item>
-          <Form.Item name="countryCode" label={t('user.col.countryCode')} rules={[{ required: true, message: t('common.pleaseSelect') }]}>
+          <Form.Item name="businessLine" label={t('user.col.line')} rules={[{ required: true, message: t('common.pleaseSelect') }]}>
             <Select
               showSearch
               placeholder={t('common.pleaseSelect')}
-              options={countryCodes.map((c) => ({ label: c, value: c }))}
+              options={BUSINESS_LINES.map((c) => ({ label: c, value: c }))}
             />
           </Form.Item>
         </Form>

@@ -173,7 +173,7 @@ const zh: Dict = {
   'user.col.method': '注册方式',
   'user.col.account': '登录账号',
   'user.col.phone': '手机号',
-  'user.col.line': '所属业务线',
+  'user.col.line': '业务线',
   'user.col.channel': '注册渠道',
   'user.col.countryCode': '注册地国家码',
   'user.col.code': '渠道 code',
