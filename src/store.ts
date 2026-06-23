@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v14'
+const KEY = 'dinoai_crm_state_v15'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -197,27 +197,27 @@ function seed(): AppState {
   const now = dayjs()
   const students: Student[] = [
     {
-      studentId: '50001', name: 'Ji-woo Kim', localName: '김지우', gender: '男',
+      studentId: '2060199610824355842', name: 'Ji-woo Kim', localName: '김지우', gender: '男',
       birthday: '2016-05-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO',
       countryCode: '+82', channelCode: 'K2000Gh', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: 'admin@dinoai.ai',
     },
     {
-      studentId: '50002', name: 'Abdullah Al-Saud', localName: 'عبدالله', gender: '男',
+      studentId: '2060199610824355843', name: 'Abdullah Al-Saud', localName: 'عبدالله', gender: '男',
       birthday: '2015-09-03', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta',
       countryCode: '+966', channelCode: 'Fb73Mxa', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      studentId: '50003', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', gender: '女',
+      studentId: '2060199610824355844', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', gender: '女',
       birthday: '2017-01-20', loginMethod: '手机号', account: '+84 90-123-4567', phone: '+84 90-123-4567', businessLine: '越南', registerChannel: 'KOL / TikTok',
       countryCode: '+84', channelCode: 'Tk88Vzq', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '注册',
     },
     {
-      studentId: '50004', name: 'Tan Wei Ming', localName: '陈伟明', gender: '男',
+      studentId: '2060199610824355845', name: 'Tan Wei Ming', localName: '陈伟明', gender: '男',
       birthday: '2016-11-08', loginMethod: 'AppID', account: 'weiming.tan@icloud.com', businessLine: '马来', registerChannel: '自然流量',
       countryCode: '+60', channelCode: 'As2K1d9', registerTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '流失', expireTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      studentId: '50005', name: 'Seo-yeon Park', localName: '박서연', gender: '女',
+      studentId: '2060199610824355846', name: 'Seo-yeon Park', localName: '박서연', gender: '女',
       birthday: '2017-03-22', loginMethod: 'kakao', account: '+82 10-9876-5432', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram',
       countryCode: '+82', channelCode: 'Ig58Kpq', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(360, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
@@ -225,23 +225,23 @@ function seed(): AppState {
 
   const orders: Order[] = [
     {
-      orderId: 'DN2026061800001', productName: 'Dino English 季度会员', studentId: '50001', userStatus: '付费',
+      orderId: 'DN2026061800001', productName: 'Dino English 季度会员', studentId: '2060199610824355842', userStatus: '付费',
       orderStatus: '已支付', originalPrice: 119000, paidAmount: 99000, payMethod: 'App Store', currency: 'KRW',
       paidTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
       validUntil: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '50002', userStatus: '体验',
+      orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '2060199610824355843', userStatus: '体验',
       orderStatus: '待支付', originalPrice: 39, paidAmount: 0, payMethod: 'Google Play', currency: 'USD',
     },
     {
-      orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '50004', userStatus: '流失',
+      orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '2060199610824355845', userStatus: '流失',
       orderStatus: '已退款', originalPrice: 388, paidAmount: 388, payMethod: 'Stripe', currency: 'MYR',
       paidTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'),
       validUntil: now.add(357, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '50005', userStatus: '流失',
+      orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '2060199610824355846', userStatus: '流失',
       orderStatus: '已取消', originalPrice: 119000, paidAmount: 0, payMethod: 'App Store', currency: 'KRW',
     },
   ]

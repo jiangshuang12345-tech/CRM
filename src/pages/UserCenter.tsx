@@ -101,7 +101,7 @@ export default function UserCenter() {
   }
 
   const columns: ColumnsType<Student> = [
-    { title: t('user.col.id'), dataIndex: 'studentId', width: 90, fixed: 'left' },
+    { title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left' },
     {
       title: t('user.col.name'),
       dataIndex: 'localName',
@@ -193,7 +193,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1850 }}
+        scroll={{ x: 1950 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 

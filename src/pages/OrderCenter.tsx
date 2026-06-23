@@ -53,7 +53,7 @@ export default function OrderCenter() {
   const columns: ColumnsType<Order> = [
     { title: t('order.col.id'), dataIndex: 'orderId', width: 180, fixed: 'left' },
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
-    { title: t('order.col.studentId'), dataIndex: 'studentId', width: 100 },
+    { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },
     {
       title: t('order.col.userStatus'),
       dataIndex: 'userStatus',
@@ -123,7 +123,7 @@ export default function OrderCenter() {
         rowKey="orderId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1580 }}
+        scroll={{ x: 1670 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
     </Card>
