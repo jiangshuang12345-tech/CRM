@@ -20,6 +20,7 @@ import { BUSINESS_LINES } from '../types'
 import type { LoginMethod, Student, UserStatus } from '../types'
 import { useSession } from '../auth'
 import { useI18n } from '../i18n'
+import { setBizFilter, useBizFilter } from '../bizFilter'
 
 const { Text } = Typography
 
@@ -41,17 +42,15 @@ const METHOD_COLOR: Record<LoginMethod, string> = {
 export default function UserCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
+  const channels = useStore((s) => s.channels)
   const session = useSession()
   const [keyword, setKeyword] = useState('')
-  const [lineFilter, setLineFilter] = useState<string | undefined>()
+  const lineFilter = useBizFilter()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
-  const lines = useMemo(
-    () => Array.from(new Set(students.map((s) => s.businessLine))),
-    [students],
-  )
+  const lines = useMemo(() => channels.map((c) => c.name), [channels])
 
   const data = useMemo(
     () =>
@@ -176,7 +175,7 @@ export default function UserCenter() {
           placeholder={t('user.col.line')}
           style={{ width: 150 }}
           value={lineFilter}
-          onChange={setLineFilter}
+          onChange={setBizFilter}
           options={lines.map((c) => ({ label: c, value: c }))}
         />
         <Select

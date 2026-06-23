@@ -5,6 +5,7 @@ import type { ColumnsType } from 'antd/es/table'
 import { useStore } from '../store'
 import type { Order, OrderStatus, UserStatus } from '../types'
 import { useI18n } from '../i18n'
+import { setBizFilter, useBizFilter } from '../bizFilter'
 
 const { Text } = Typography
 
@@ -29,20 +30,18 @@ export default function OrderCenter() {
   const { t } = useI18n()
   const orders = useStore((s) => s.orders)
   const students = useStore((s) => s.students)
+  const channels = useStore((s) => s.channels)
   const [keyword, setKeyword] = useState('')
   const [orderStatus, setOrderStatus] = useState<string | undefined>()
   const [payMethod, setPayMethod] = useState<string | undefined>()
-  const [lineFilter, setLineFilter] = useState<string | undefined>()
+  const lineFilter = useBizFilter()
 
   const lineOf = useMemo(() => {
     const map = new Map(students.map((s) => [s.studentId, s.businessLine]))
     return (studentId: string) => map.get(studentId) ?? '—'
   }, [students])
 
-  const lines = useMemo(
-    () => Array.from(new Set(students.map((s) => s.businessLine))),
-    [students],
-  )
+  const lines = useMemo(() => channels.map((c) => c.name), [channels])
 
   const data = useMemo(
     () =>
@@ -126,7 +125,7 @@ export default function OrderCenter() {
           placeholder={t('user.col.line')}
           style={{ width: 140 }}
           value={lineFilter}
-          onChange={setLineFilter}
+          onChange={setBizFilter}
           options={lines.map((l) => ({ label: l, value: l }))}
         />
         <Select
