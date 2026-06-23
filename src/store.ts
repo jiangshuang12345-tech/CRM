@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v10'
+const KEY = 'dinoai_crm_state_v11'
 
 export type AppState = {
   channels: ChannelType[]
@@ -162,12 +162,12 @@ function seed(): AppState {
     {
       studentId: '50001', name: 'Ji-woo Kim', localName: '김지우', gender: '男',
       birthday: '2016-05-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO',
-      countryCode: '+82', channelCode: 'natural_kr_aso_4f9k2a', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', lastModifier: 'admin@dinoai.ai',
+      countryCode: '+82', channelCode: 'natural_kr_aso_4f9k2a', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: 'admin@dinoai.ai',
     },
     {
       studentId: '50002', name: 'Abdullah Al-Saud', localName: 'عبدالله', gender: '男',
       birthday: '2015-09-03', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta',
-      countryCode: '+966', channelCode: 'landingpage_sa_meta_a93kd1', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验',
+      countryCode: '+966', channelCode: 'landingpage_sa_meta_a93kd1', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       studentId: '50003', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', gender: '女',
@@ -177,12 +177,12 @@ function seed(): AppState {
     {
       studentId: '50004', name: 'Tan Wei Ming', localName: '陈伟明', gender: '男',
       birthday: '2016-11-08', loginMethod: 'AppID', account: 'weiming.tan@icloud.com', businessLine: '马来', registerChannel: '自然流量',
-      countryCode: '+60', channelCode: 'natural_my_aso_2k1d9x', registerTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '流失',
+      countryCode: '+60', channelCode: 'natural_my_aso_2k1d9x', registerTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '流失', expireTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       studentId: '50005', name: 'Seo-yeon Park', localName: '박서연', gender: '女',
       birthday: '2017-03-22', loginMethod: 'kakao', account: '+82 10-9876-5432', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram',
-      countryCode: '+82', channelCode: 'kol_kr_ig_72ab5c', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费',
+      countryCode: '+82', channelCode: 'kol_kr_ig_72ab5c', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(360, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
   ]
 

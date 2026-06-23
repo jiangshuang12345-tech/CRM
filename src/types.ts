@@ -63,6 +63,7 @@ export type Student = {
   channelCode: string
   registerTime: string // Beijing
   status: UserStatus
+  expireTime?: string // 到期时间
   lastModifier?: string // 最近修改人
 }
 

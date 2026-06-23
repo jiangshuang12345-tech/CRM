@@ -124,6 +124,12 @@ export default function UserCenter() {
     { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
     { title: t('user.col.regTime'), dataIndex: 'registerTime', width: 180 },
     {
+      title: t('user.col.expireTime'),
+      dataIndex: 'expireTime',
+      width: 180,
+      render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+    },
+    {
       title: t('user.col.status'),
       dataIndex: 'status',
       width: 100,
@@ -181,7 +187,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1610 }}
+        scroll={{ x: 1790 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
