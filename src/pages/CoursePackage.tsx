@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  Alert,
   Button,
   Card,
   DatePicker,
@@ -191,6 +192,12 @@ export default function CoursePackagePage() {
         </Button>
       }
     >
+      <Alert
+        type="warning"
+        showIcon
+        message={t('phase2.banner')}
+        style={{ marginBottom: 16 }}
+      />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input
           allowClear

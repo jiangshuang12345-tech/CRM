@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Layout, Menu, Avatar, Dropdown, Modal, Typography, Button } from 'antd'
+import { Layout, Menu, Avatar, Dropdown, Modal, Typography, Button, Tag } from 'antd'
 import {
   ApartmentOutlined,
   TeamOutlined,
@@ -27,12 +27,21 @@ export default function AppLayout() {
   const session = useSession()
   const { t, lang, setLang } = useI18n()
 
+  const phase2Label = (text: string) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+      {text}
+      <Tag color="orange" style={{ margin: 0, lineHeight: '16px', fontSize: 11, padding: '0 5px' }}>
+        {t('app.phase2')}
+      </Tag>
+    </span>
+  )
+
   const NAV = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
-    { key: '/packages', icon: <AppstoreOutlined />, label: t('app.nav.packages') },
-    { key: '/coupons', icon: <TagsOutlined />, label: t('app.nav.coupons') },
+    { key: '/packages', icon: <AppstoreOutlined />, label: phase2Label(t('app.nav.packages')) },
+    { key: '/coupons', icon: <TagsOutlined />, label: phase2Label(t('app.nav.coupons')) },
   ]
 
   const TITLES: Record<string, string> = {

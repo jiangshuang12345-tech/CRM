@@ -28,9 +28,21 @@ function fmtMoney(amount: number, currency: string) {
 export default function OrderCenter() {
   const { t } = useI18n()
   const orders = useStore((s) => s.orders)
+  const students = useStore((s) => s.students)
   const [keyword, setKeyword] = useState('')
   const [orderStatus, setOrderStatus] = useState<string | undefined>()
   const [payMethod, setPayMethod] = useState<string | undefined>()
+  const [lineFilter, setLineFilter] = useState<string | undefined>()
+
+  const lineOf = useMemo(() => {
+    const map = new Map(students.map((s) => [s.studentId, s.businessLine]))
+    return (studentId: string) => map.get(studentId) ?? '—'
+  }, [students])
+
+  const lines = useMemo(
+    () => Array.from(new Set(students.map((s) => s.businessLine))),
+    [students],
+  )
 
   const data = useMemo(
     () =>
@@ -44,16 +56,24 @@ export default function OrderCenter() {
         return (
           matchKw &&
           (!orderStatus || o.orderStatus === orderStatus) &&
-          (!payMethod || o.payMethod === payMethod)
+          (!payMethod || o.payMethod === payMethod) &&
+          (!lineFilter || lineOf(o.studentId) === lineFilter)
         )
       }),
-    [orders, keyword, orderStatus, payMethod],
+    [orders, keyword, orderStatus, payMethod, lineFilter, lineOf],
   )
 
   const columns: ColumnsType<Order> = [
     { title: t('order.col.id'), dataIndex: 'orderId', width: 180, fixed: 'left' },
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
     { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },
+    {
+      title: t('user.col.line'),
+      dataIndex: 'studentId',
+      key: 'businessLine',
+      width: 100,
+      render: (id: string) => <Tag>{lineOf(id)}</Tag>,
+    },
     {
       title: t('order.col.userStatus'),
       dataIndex: 'userStatus',
@@ -103,6 +123,14 @@ export default function OrderCenter() {
         />
         <Select
           allowClear
+          placeholder={t('user.col.line')}
+          style={{ width: 140 }}
+          value={lineFilter}
+          onChange={setLineFilter}
+          options={lines.map((l) => ({ label: l, value: l }))}
+        />
+        <Select
+          allowClear
           placeholder={t('order.filterStatus')}
           style={{ width: 150 }}
           value={orderStatus}
@@ -123,7 +151,7 @@ export default function OrderCenter() {
         rowKey="orderId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1670 }}
+        scroll={{ x: 1770 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
     </Card>
