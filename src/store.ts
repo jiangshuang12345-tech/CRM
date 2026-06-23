@@ -9,7 +9,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v12'
+const KEY = 'dinoai_crm_state_v13'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -81,11 +81,11 @@ export function genCouponCode() {
   return s
 }
 
-export function genChannelCode(prefix: string) {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
+export function genChannelCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
   let s = ''
-  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)]
-  return `${prefix}_${s}`.toLowerCase()
+  for (let i = 0; i < 7; i++) s += chars[Math.floor(Math.random() * chars.length)]
+  return s
 }
 
 // ---------- seed ----------
@@ -104,7 +104,7 @@ function seed(): AppState {
               name: 'ASO',
               level: 1,
               children: [
-                { id: 'c_kr_aso_appstore', name: 'App Store 搜索', level: 2, code: 'natural_kr_aso_4f9k2a', children: [] },
+                { id: 'c_kr_aso_appstore', name: 'App Store 搜索', level: 2, code: 'K2000Gh', children: [] },
               ],
             },
           ],
@@ -118,7 +118,7 @@ function seed(): AppState {
               name: 'Instagram 达人',
               level: 1,
               children: [
-                { id: 'c_kr_kol_ig_1', name: '@seoyeon_edu', level: 2, code: 'kol_kr_ig_72ab5c', children: [] },
+                { id: 'c_kr_kol_ig_1', name: '@seoyeon_edu', level: 2, code: 'Ig58Kpq', children: [] },
               ],
             },
           ],
@@ -138,7 +138,7 @@ function seed(): AppState {
               name: 'Meta 信息流',
               level: 1,
               children: [
-                { id: 'c_sa_meta_fb', name: 'Facebook 主页', level: 2, code: 'landingpage_sa_meta_a93kd1', children: [] },
+                { id: 'c_sa_meta_fb', name: 'Facebook 主页', level: 2, code: 'Fb73Mxa', children: [] },
                 { id: 'c_sa_meta_ig', name: 'Instagram', level: 2, children: [] },
               ],
             },
@@ -172,7 +172,7 @@ function seed(): AppState {
               name: 'TikTok 达人',
               level: 1,
               children: [
-                { id: 'c_vn_tiktok_1', name: '@minh_edu', level: 2, code: 'kol_vn_tiktok_88xz0q', children: [] },
+                { id: 'c_vn_tiktok_1', name: '@minh_edu', level: 2, code: 'Tk88Vzq', children: [] },
               ],
             },
           ],

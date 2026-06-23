@@ -103,9 +103,7 @@ export default function ChannelManagement() {
   }
 
   const generateCode = (lineId: string, typeId: string, node: ChannelLevelNode) => {
-    const type = channels.find((l) => l.id === lineId)?.children.find((tp) => tp.id === typeId)
-    const prefix = `${type?.name ?? 'ch'}`.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'ch'
-    const code = node.code ?? genChannelCode(prefix)
+    const code = node.code ?? genChannelCode()
     updateType(lineId, typeId, (tp) => ({ ...tp, children: walk(tp.children, node.id, (n) => ({ ...n, code })) }))
     Modal.success({
       title: node.code ? t('ch.codeTitleView') : t('ch.codeTitleGen'),
