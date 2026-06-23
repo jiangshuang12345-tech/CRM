@@ -23,15 +23,16 @@ import {
 } from '@ant-design/icons'
 import type { DataNode } from 'antd/es/tree'
 import { genChannelCode, setState, uid, useStore } from '../store'
-import type { ChannelLevelNode, ChannelType } from '../types'
+import type { ChannelLevelNode, ChannelLine, ChannelType } from '../types'
 import { useI18n } from '../i18n'
 
 const { Text } = Typography
 const LEVEL_COLOR = ['', 'blue', 'cyan', 'green']
 
 type AddCtx =
-  | { kind: 'type' }
-  | { kind: 'child'; typeId: string; parentId?: string; nextLevel: 1 | 2 | 3 }
+  | { kind: 'line' }
+  | { kind: 'type'; lineId: string }
+  | { kind: 'child'; lineId: string; typeId: string; parentId?: string; nextLevel: 1 | 2 | 3 }
 
 export default function ChannelManagement() {
   const { t } = useI18n()
@@ -42,10 +43,16 @@ export default function ChannelManagement() {
 
   const levelLabel = (level: 1 | 2 | 3) => t(`ch.level${level}`)
 
-  const updateType = (typeId: string, fn: (t: ChannelType) => ChannelType) =>
+  const updateLine = (lineId: string, fn: (l: ChannelLine) => ChannelLine) =>
     setState((prev) => ({
       ...prev,
-      channels: prev.channels.map((tp) => (tp.id === typeId ? fn(tp) : tp)),
+      channels: prev.channels.map((l) => (l.id === lineId ? fn(l) : l)),
+    }))
+
+  const updateType = (lineId: string, typeId: string, fn: (t: ChannelType) => ChannelType) =>
+    updateLine(lineId, (l) => ({
+      ...l,
+      children: l.children.map((tp) => (tp.id === typeId ? fn(tp) : tp)),
     }))
 
   const walk = (
@@ -70,11 +77,14 @@ export default function ChannelManagement() {
   const submitAdd = async () => {
     const { name } = await form.validateFields()
     if (!addCtx) return
-    if (addCtx.kind === 'type') {
+    if (addCtx.kind === 'line') {
       setState((prev) => ({
         ...prev,
-        channels: [...prev.channels, { id: uid('ct_'), name, children: [] }],
+        channels: [...prev.channels, { id: uid('bl_'), name, children: [] }],
       }))
+      message.success(t('ch.lineCreated'))
+    } else if (addCtx.kind === 'type') {
+      updateLine(addCtx.lineId, (l) => ({ ...l, children: [...l.children, { id: uid('ct_'), name, children: [] }] }))
       message.success(t('ch.typeCreated'))
     } else {
       const node: ChannelLevelNode = {
@@ -83,7 +93,7 @@ export default function ChannelManagement() {
         level: addCtx.nextLevel,
         children: [],
       }
-      updateType(addCtx.typeId, (tp) => {
+      updateType(addCtx.lineId, addCtx.typeId, (tp) => {
         if (!addCtx.parentId) return { ...tp, children: [...tp.children, node] }
         return { ...tp, children: walk(tp.children, addCtx.parentId, (p) => ({ ...p, children: [...p.children, node] })) }
       })
@@ -92,11 +102,11 @@ export default function ChannelManagement() {
     setAddCtx(null)
   }
 
-  const generateCode = (typeId: string, node: ChannelLevelNode) => {
-    const type = channels.find((tp) => tp.id === typeId)
+  const generateCode = (lineId: string, typeId: string, node: ChannelLevelNode) => {
+    const type = channels.find((l) => l.id === lineId)?.children.find((tp) => tp.id === typeId)
     const prefix = `${type?.name ?? 'ch'}`.replace(/[^a-zA-Z0-9]/g, '').slice(0, 8) || 'ch'
     const code = node.code ?? genChannelCode(prefix)
-    updateType(typeId, (tp) => ({ ...tp, children: walk(tp.children, node.id, (n) => ({ ...n, code })) }))
+    updateType(lineId, typeId, (tp) => ({ ...tp, children: walk(tp.children, node.id, (n) => ({ ...n, code })) }))
     Modal.success({
       title: node.code ? t('ch.codeTitleView') : t('ch.codeTitleGen'),
       content: (
@@ -135,15 +145,22 @@ export default function ChannelManagement() {
   const submitRename = async () => {
     const { name } = await form.validateFields()
     if (!renameNode) return
-    const isType = channels.some((tp) => tp.id === renameNode.id)
-    if (isType) {
-      setState((prev) => ({
-        ...prev,
-        channels: prev.channels.map((tp) => (tp.id === renameNode.id ? { ...tp, name } : tp)),
-      }))
+    const isLine = channels.some((l) => l.id === renameNode.id)
+    if (isLine) {
+      updateLine(renameNode.id, (l) => ({ ...l, name }))
     } else {
-      const typeId = channels.find((tp) => containsNode(tp.children, renameNode.id))?.id
-      if (typeId) updateType(typeId, (tp) => ({ ...tp, children: walk(tp.children, renameNode.id, (n) => ({ ...n, name })) }))
+      const lineOfType = channels.find((l) => l.children.some((tp) => tp.id === renameNode.id))
+      if (lineOfType) {
+        updateType(lineOfType.id, renameNode.id, (tp) => ({ ...tp, name }))
+      } else {
+        for (const l of channels) {
+          const tp = l.children.find((t) => containsNode(t.children, renameNode.id))
+          if (tp) {
+            updateType(l.id, tp.id, (t) => ({ ...t, children: walk(t.children, renameNode.id, (n) => ({ ...n, name })) }))
+            break
+          }
+        }
+      }
     }
     message.success(t('ch.renamed'))
     setRenameNode(null)
@@ -152,27 +169,37 @@ export default function ChannelManagement() {
   const containsNode = (nodes: ChannelLevelNode[], id: string): boolean =>
     nodes.some((n) => n.id === id || containsNode(n.children, id))
 
-  const deleteType = (typeId: string) =>
+  const deleteLine = (lineId: string) =>
+    Modal.confirm({
+      title: t('ch.delLineTitle'),
+      content: t('ch.delLineContent'),
+      okText: t('common.confirm'),
+      cancelText: t('common.cancel'),
+      okButtonProps: { danger: true },
+      onOk: () => setState((prev) => ({ ...prev, channels: prev.channels.filter((l) => l.id !== lineId) })),
+    })
+
+  const deleteType = (lineId: string, typeId: string) =>
     Modal.confirm({
       title: t('ch.delTypeTitle'),
       content: t('ch.delTypeContent'),
       okText: t('common.confirm'),
       cancelText: t('common.cancel'),
       okButtonProps: { danger: true },
-      onOk: () => setState((prev) => ({ ...prev, channels: prev.channels.filter((tp) => tp.id !== typeId) })),
+      onOk: () => updateLine(lineId, (l) => ({ ...l, children: l.children.filter((tp) => tp.id !== typeId) })),
     })
 
-  const deleteLevel = (typeId: string, nodeId: string) =>
+  const deleteLevel = (lineId: string, typeId: string, nodeId: string) =>
     Modal.confirm({
       title: t('ch.delLevelTitle'),
       content: t('ch.delLevelContent'),
       okText: t('common.confirm'),
       cancelText: t('common.cancel'),
       okButtonProps: { danger: true },
-      onOk: () => updateType(typeId, (tp) => ({ ...tp, children: removeNode(tp.children, nodeId) })),
+      onOk: () => updateType(lineId, typeId, (tp) => ({ ...tp, children: removeNode(tp.children, nodeId) })),
     })
 
-  const renderLevelTitle = (typeId: string, n: ChannelLevelNode) => (
+  const renderLevelTitle = (lineId: string, typeId: string, n: ChannelLevelNode) => (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
       <Tag color={LEVEL_COLOR[n.level]} style={{ margin: 0 }}>
         {levelLabel(n.level)}
@@ -191,7 +218,7 @@ export default function ChannelManagement() {
               size="small"
               icon={<PlusSquareOutlined />}
               onClick={() =>
-                openAdd({ kind: 'child', typeId, parentId: n.id, nextLevel: (n.level + 1) as 1 | 2 | 3 })
+                openAdd({ kind: 'child', lineId, typeId, parentId: n.id, nextLevel: (n.level + 1) as 1 | 2 | 3 })
               }
             />
           </Tooltip>
@@ -202,7 +229,7 @@ export default function ChannelManagement() {
             size="small"
             icon={<ThunderboltOutlined />}
             style={{ color: n.code ? '#faad14' : '#2F6BFF' }}
-            onClick={() => generateCode(typeId, n)}
+            onClick={() => generateCode(lineId, typeId, n)}
           />
         </Tooltip>
         <Tooltip title={t('ch.rename')}>
@@ -217,33 +244,66 @@ export default function ChannelManagement() {
           />
         </Tooltip>
         <Tooltip title={t('common.delete')}>
-          <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLevel(typeId, n.id)} />
+          <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLevel(lineId, typeId, n.id)} />
         </Tooltip>
       </Space>
     </span>
   )
 
-  const toDataNode = (typeId: string, n: ChannelLevelNode): DataNode => ({
+  const toDataNode = (lineId: string, typeId: string, n: ChannelLevelNode): DataNode => ({
     key: n.id,
-    title: renderLevelTitle(typeId, n),
-    children: n.children.map((c) => toDataNode(typeId, c)),
+    title: renderLevelTitle(lineId, typeId, n),
+    children: n.children.map((c) => toDataNode(lineId, typeId, c)),
   })
 
-  const treeData: DataNode[] = channels.map((tp) => ({
-    key: tp.id,
+  const renderTypeTitle = (lineId: string, tp: ChannelType) => (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+      <Tag color="purple" style={{ margin: 0 }}>
+        {t('ch.type')}
+      </Tag>
+      <Text strong>{tp.name}</Text>
+      <Space size={2} className="node-actions">
+        <Tooltip title={t('ch.addChild', { level: levelLabel(1) })}>
+          <Button
+            type="text"
+            size="small"
+            icon={<PlusSquareOutlined />}
+            onClick={() => openAdd({ kind: 'child', lineId, typeId: tp.id, nextLevel: 1 })}
+          />
+        </Tooltip>
+        <Tooltip title={t('ch.rename')}>
+          <Button
+            type="text"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setRenameNode({ id: tp.id, name: tp.name })
+              form.setFieldsValue({ name: tp.name })
+            }}
+          />
+        </Tooltip>
+        <Tooltip title={t('common.delete')}>
+          <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteType(lineId, tp.id)} />
+        </Tooltip>
+      </Space>
+    </span>
+  )
+
+  const treeData: DataNode[] = channels.map((line) => ({
+    key: line.id,
     title: (
       <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-        <Tag color="purple" style={{ margin: 0 }}>
-          {t('ch.type')}
+        <Tag color="magenta" style={{ margin: 0 }}>
+          {t('ch.line')}
         </Tag>
-        <Text strong>{tp.name}</Text>
+        <Text strong>{line.name}</Text>
         <Space size={2} className="node-actions">
-          <Tooltip title={t('ch.addChild', { level: levelLabel(1) })}>
+          <Tooltip title={t('ch.addType')}>
             <Button
               type="text"
               size="small"
               icon={<PlusSquareOutlined />}
-              onClick={() => openAdd({ kind: 'child', typeId: tp.id, nextLevel: 1 })}
+              onClick={() => openAdd({ kind: 'type', lineId: line.id })}
             />
           </Tooltip>
           <Tooltip title={t('ch.rename')}>
@@ -252,18 +312,22 @@ export default function ChannelManagement() {
               size="small"
               icon={<EditOutlined />}
               onClick={() => {
-                setRenameNode({ id: tp.id, name: tp.name })
-                form.setFieldsValue({ name: tp.name })
+                setRenameNode({ id: line.id, name: line.name })
+                form.setFieldsValue({ name: line.name })
               }}
             />
           </Tooltip>
           <Tooltip title={t('common.delete')}>
-            <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteType(tp.id)} />
+            <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLine(line.id)} />
           </Tooltip>
         </Space>
       </span>
     ),
-    children: tp.children.map((c) => toDataNode(tp.id, c)),
+    children: line.children.map((tp) => ({
+      key: tp.id,
+      title: renderTypeTitle(line.id, tp),
+      children: tp.children.map((c) => toDataNode(line.id, tp.id, c)),
+    })),
   }))
 
   return (
@@ -272,8 +336,8 @@ export default function ChannelManagement() {
       bordered={false}
       title={<span className="section-title">{t('ch.title')}</span>}
       extra={
-        <Button type="primary" icon={<PlusOutlined />} onClick={() => openAdd({ kind: 'type' })}>
-          {t('ch.addType')}
+        <Button type="primary" icon={<PlusOutlined />} onClick={() => openAdd({ kind: 'line' })}>
+          {t('ch.addLine')}
         </Button>
       }
     >
@@ -294,7 +358,13 @@ export default function ChannelManagement() {
 
       <Modal
         open={!!addCtx}
-        title={addCtx?.kind === 'type' ? t('ch.addType') : t('ch.addChild', { level: addCtx ? levelLabel(addCtx.nextLevel) : '' })}
+        title={
+          addCtx?.kind === 'line'
+            ? t('ch.addLine')
+            : addCtx?.kind === 'type'
+              ? t('ch.addType')
+              : t('ch.addChild', { level: addCtx ? levelLabel(addCtx.nextLevel) : '' })
+        }
         onCancel={() => setAddCtx(null)}
         onOk={submitAdd}
         okText={t('common.confirm')}
@@ -302,7 +372,16 @@ export default function ChannelManagement() {
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
-          {addCtx?.kind === 'type' ? (
+          {addCtx?.kind === 'line' ? (
+            <Form.Item
+              name="name"
+              label={t('ch.lineNameLabel')}
+              rules={[{ required: true, message: t('ch.lineNamePlaceholder') }]}
+              extra={t('ch.lineNameExtra')}
+            >
+              <Input placeholder={t('ch.lineNamePlaceholder')} />
+            </Form.Item>
+          ) : addCtx?.kind === 'type' ? (
             <Form.Item
               name="name"
               label={t('ch.typeNameLabel')}

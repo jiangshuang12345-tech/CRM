@@ -33,6 +33,13 @@ export type ChannelType = {
   children: ChannelLevelNode[]
 }
 
+// 业务线（最顶层）：韩国 / 沙特 / 泰国 / 越南 / 印尼 ...，下含渠道类型
+export type ChannelLine = {
+  id: string
+  name: string
+  children: ChannelType[]
+}
+
 export type UserStatus = '注册' | '体验' | '付费' | '流失'
 
 export type LoginMethod = '谷歌邮箱' | 'Facebook' | 'kakao' | '手机号' | 'AppID'

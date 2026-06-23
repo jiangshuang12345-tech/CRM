@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import dayjs from 'dayjs'
 import type {
-  ChannelType,
+  ChannelLine,
   Coupon,
   CoursePackage,
   Order,
@@ -9,10 +9,10 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v11'
+const KEY = 'dinoai_crm_state_v12'
 
 export type AppState = {
-  channels: ChannelType[]
+  channels: ChannelLine[]
   students: Student[]
   orders: Order[]
   packages: CoursePackage[]
@@ -90,22 +90,35 @@ export function genChannelCode(prefix: string) {
 
 // ---------- seed ----------
 function seed(): AppState {
-  const channels: ChannelType[] = [
+  const channels: ChannelLine[] = [
     {
-      id: 'ct_natural',
-      name: '自然流量',
+      id: 'bl_kr',
+      name: '韩国',
       children: [
         {
-          id: 'c_kr',
-          name: '韩国',
-          level: 1,
+          id: 'ct_kr_natural',
+          name: '自然流量',
           children: [
             {
               id: 'c_kr_aso',
               name: 'ASO',
-              level: 2,
+              level: 1,
               children: [
-                { id: 'c_kr_aso_appstore', name: 'App Store 搜索', level: 3, code: 'natural_kr_aso_4f9k2a', children: [] },
+                { id: 'c_kr_aso_appstore', name: 'App Store 搜索', level: 2, code: 'natural_kr_aso_4f9k2a', children: [] },
+              ],
+            },
+          ],
+        },
+        {
+          id: 'ct_kr_kol',
+          name: 'KOL',
+          children: [
+            {
+              id: 'c_kr_kol_ig',
+              name: 'Instagram 达人',
+              level: 1,
+              children: [
+                { id: 'c_kr_kol_ig_1', name: '@seoyeon_edu', level: 2, code: 'kol_kr_ig_72ab5c', children: [] },
               ],
             },
           ],
@@ -113,21 +126,20 @@ function seed(): AppState {
       ],
     },
     {
-      id: 'ct_landing',
-      name: 'landingpage',
+      id: 'bl_sa',
+      name: '沙特',
       children: [
         {
-          id: 'c_lp_sa',
-          name: '沙特',
-          level: 1,
+          id: 'ct_sa_landing',
+          name: 'landingpage',
           children: [
             {
-              id: 'c_lp_sa_meta',
+              id: 'c_sa_meta',
               name: 'Meta 信息流',
-              level: 2,
+              level: 1,
               children: [
-                { id: 'c_lp_sa_meta_fb', name: 'Facebook 主页', level: 3, code: 'landingpage_sa_meta_a93kd1', children: [] },
-                { id: 'c_lp_sa_meta_ig', name: 'Instagram', level: 3, children: [] },
+                { id: 'c_sa_meta_fb', name: 'Facebook 主页', level: 2, code: 'landingpage_sa_meta_a93kd1', children: [] },
+                { id: 'c_sa_meta_ig', name: 'Instagram', level: 2, children: [] },
               ],
             },
           ],
@@ -135,22 +147,47 @@ function seed(): AppState {
       ],
     },
     {
-      id: 'ct_kol',
-      name: 'KOL',
+      id: 'bl_th',
+      name: '泰国',
       children: [
         {
-          id: 'c_kol_vn',
-          name: '越南',
-          level: 1,
+          id: 'ct_th_natural',
+          name: '自然流量',
+          children: [
+            { id: 'c_th_aso', name: 'ASO', level: 1, children: [] },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'bl_vn',
+      name: '越南',
+      children: [
+        {
+          id: 'ct_vn_kol',
+          name: 'KOL',
           children: [
             {
-              id: 'c_kol_vn_tiktok',
+              id: 'c_vn_tiktok',
               name: 'TikTok 达人',
-              level: 2,
+              level: 1,
               children: [
-                { id: 'c_kol_vn_tiktok_1', name: '@minh_edu', level: 3, code: 'kol_vn_tiktok_88xz0q', children: [] },
+                { id: 'c_vn_tiktok_1', name: '@minh_edu', level: 2, code: 'kol_vn_tiktok_88xz0q', children: [] },
               ],
             },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'bl_id',
+      name: '印尼',
+      children: [
+        {
+          id: 'ct_id_landing',
+          name: 'landingpage',
+          children: [
+            { id: 'c_id_meta', name: 'Meta 信息流', level: 1, children: [] },
           ],
         },
       ],
