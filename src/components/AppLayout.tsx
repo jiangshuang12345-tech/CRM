@@ -10,6 +10,7 @@ import {
   DownOutlined,
   RedoOutlined,
   GlobalOutlined,
+  DeploymentUnitOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout, useSession } from '../auth'
@@ -20,12 +21,30 @@ import { LANGS, useI18n } from '../i18n'
 const { Header, Sider, Content } = Layout
 const { Text } = Typography
 
+const BIZ_LINES = [
+  { value: '中国', flag: '🇨🇳' },
+  { value: '韩国', flag: '🇰🇷' },
+  { value: '沙特', flag: '🇸🇦' },
+  { value: '越南', flag: '🇻🇳' },
+  { value: '泰国', flag: '🇹🇭' },
+  { value: '印尼', flag: '🇮🇩' },
+]
+const BIZ_LINE_KEY = 'dinoai_crm_bizline'
+
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
   const session = useSession()
   const { t, lang, setLang } = useI18n()
+  const [bizLine, setBizLine] = useState<string>(
+    () => localStorage.getItem(BIZ_LINE_KEY) || BIZ_LINES[0].value,
+  )
+
+  const changeBizLine = (v: string) => {
+    setBizLine(v)
+    localStorage.setItem(BIZ_LINE_KEY, v)
+  }
 
   const NAV = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
@@ -64,6 +83,7 @@ export default function AppLayout() {
   }
 
   const currentLang = LANGS.find((l) => l.value === lang)
+  const currentBiz = BIZ_LINES.find((b) => b.value === bizLine) ?? BIZ_LINES[0]
 
   return (
     <Layout style={{ height: '100vh' }}>
@@ -108,6 +128,20 @@ export default function AppLayout() {
             {TITLES[location.pathname] ?? t('app.brand')}
           </Text>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+            <Dropdown
+              menu={{
+                selectedKeys: [bizLine],
+                items: BIZ_LINES.map((b) => ({
+                  key: b.value,
+                  label: `${b.flag}  ${t(`bizline.${b.value}`)}`,
+                  onClick: () => changeBizLine(b.value),
+                })),
+              }}
+            >
+              <Button type="text" icon={<DeploymentUnitOutlined />}>
+                {currentBiz.flag} {t(`bizline.${currentBiz.value}`)} <DownOutlined style={{ fontSize: 10 }} />
+              </Button>
+            </Dropdown>
             <Dropdown
               menu={{
                 selectedKeys: [lang],
