@@ -43,7 +43,7 @@ export function useSession() {
   )
 }
 
-export const EMAIL_SUFFIXES = ['dinoai.ai', 'vipkid.com.cn']
+export const EMAIL_SUFFIXES = ['dinoai.ai']
 
 export function isValidWorkEmail(email?: string) {
   if (!email) return false
