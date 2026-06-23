@@ -45,25 +45,10 @@ export type Lang =
   | 'nl' | 'pl' | 'pt' | 'ru' | 'zh' | 'zhTW' | 'th' | 'vi' | 'tr'
 
 export const LANGS: { value: Lang; label: string; flag: string }[] = [
-  { value: 'ar', label: 'العربية', flag: '🇸🇦' },
-  { value: 'id', label: 'Bahasa Indonesia', flag: '🇮🇩' },
-  { value: 'de', label: 'Deutsch', flag: '🇩🇪' },
-  { value: 'en', label: 'English', flag: '🇬🇧' },
-  { value: 'es', label: 'Español', flag: '🇪🇸' },
-  { value: 'fr', label: 'Français', flag: '🇫🇷' },
-  { value: 'hi', label: 'हिन्दी', flag: '🇮🇳' },
-  { value: 'it', label: 'Italiano', flag: '🇮🇹' },
-  { value: 'ja', label: '日本語', flag: '🇯🇵' },
-  { value: 'ko', label: '한국어', flag: '🇰🇷' },
-  { value: 'nl', label: 'Nederlands', flag: '🇳🇱' },
-  { value: 'pl', label: 'Polski', flag: '🇵🇱' },
-  { value: 'pt', label: 'Português', flag: '🇵🇹' },
-  { value: 'ru', label: 'Русский', flag: '🇷🇺' },
   { value: 'zh', label: '简体中文', flag: '🇨🇳' },
-  { value: 'zhTW', label: '繁體中文', flag: '🇭🇰' },
-  { value: 'th', label: 'ไทย', flag: '🇹🇭' },
-  { value: 'vi', label: 'Tiếng Việt', flag: '🇻🇳' },
-  { value: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  { value: 'en', label: 'English', flag: '🇬🇧' },
+  { value: 'ko', label: '한국어', flag: '🇰🇷' },
+  { value: 'ar', label: 'العربية', flag: '🇸🇦' },
 ]
 
 export const ANTD_LOCALE: Record<Lang, Locale> = {
@@ -1864,7 +1849,7 @@ const LANG_KEY = 'dinoai_crm_lang'
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(() => {
     const saved = localStorage.getItem(LANG_KEY) as Lang | null
-    return saved && DICTS[saved] ? saved : 'zh'
+    return saved && LANGS.some((l) => l.value === saved) ? saved : 'zh'
   })
 
   const setLang = useCallback((l: Lang) => {
