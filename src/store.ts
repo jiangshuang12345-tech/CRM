@@ -22,6 +22,8 @@ export type AppState = {
 }
 
 const listeners = new Set<() => void>()
+// 注意：counter 必须在 load()/seed() 之前初始化，否则 seed 内调用 uid() 会触发 TDZ 报错
+let counter = Date.now()
 let state: AppState = load()
 
 function emit() {
@@ -70,7 +72,6 @@ export function useStore<T>(selector: (s: AppState) => T): T {
 }
 
 // ---------- id helpers ----------
-let counter = Date.now()
 export function uid(prefix = '') {
   counter += 1
   return `${prefix}${counter.toString(36)}`
