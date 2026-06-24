@@ -15,6 +15,7 @@ import {
   Space,
   Table,
   Tag,
+  Tooltip,
   Typography,
   message,
 } from 'antd'
@@ -23,6 +24,7 @@ import {
   SearchOutlined,
   ArrowLeftOutlined,
   DeleteOutlined,
+  CopyOutlined,
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
@@ -34,6 +36,11 @@ import { useI18n } from '../i18n'
 
 const { Text, Title } = Typography
 const { RangePicker } = DatePicker
+
+function copyText(text: string, ok: string) {
+  navigator.clipboard?.writeText(text)
+  message.success(ok)
+}
 
 function currencyOptions(line: BusinessLine) {
   const opts = [{ label: '美元 (USD)', value: 'USD' }]
@@ -140,9 +147,30 @@ function CodePicker({
 
   const remove = (id: string) => onChange?.(value.filter((c) => c.id !== id))
 
+  const copyAll = () => {
+    if (value.length === 0) return
+    copyText(value.map((c) => c.code).join('\n'), t('common.copied'))
+  }
+  const copyAllWithKol = () => {
+    if (value.length === 0) return
+    copyText(value.map((c) => `${c.kol}\t${c.code}`).join('\n'), t('common.copied'))
+  }
+
   const columns: ColumnsType<CouponCode> = [
     { title: t('cp.code.kol'), dataIndex: 'kol' },
-    { title: t('cp.code.code'), dataIndex: 'code', width: 150, render: (v) => <Text code>{v}</Text> },
+    {
+      title: t('cp.code.code'),
+      dataIndex: 'code',
+      width: 200,
+      render: (v: string) => (
+        <Space size={4}>
+          <Text code>{v}</Text>
+          <Tooltip title={t('common.copy')}>
+            <Button type="text" size="small" icon={<CopyOutlined />} onClick={() => copyText(v, t('common.copied'))} />
+          </Tooltip>
+        </Space>
+      ),
+    },
     ...(showUsed
       ? [{ title: t('cp.code.used'), dataIndex: 'used', width: 110, align: 'right' as const, render: (v: number) => v.toLocaleString() }]
       : []),
@@ -172,6 +200,14 @@ function CodePicker({
           </Button>
         }
       />
+      <Space style={{ marginTop: 12 }}>
+        <Button size="small" icon={<CopyOutlined />} disabled={value.length === 0} onClick={copyAll}>
+          {t('cp.copyAllCodes')}
+        </Button>
+        <Button size="small" icon={<CopyOutlined />} disabled={value.length === 0} onClick={copyAllWithKol}>
+          {t('cp.copyAllWithKol')}
+        </Button>
+      </Space>
       <Table
         style={{ marginTop: 12 }}
         rowKey="id"
@@ -749,6 +785,24 @@ export default function CouponPage() {
             <Divider orientation="left" plain>
               {t('cp.codes')}
             </Divider>
+            <Space style={{ marginBottom: 8 }}>
+              <Button
+                size="small"
+                icon={<CopyOutlined />}
+                disabled={detailCoupon.codes.length === 0}
+                onClick={() => copyText(detailCoupon.codes.map((c) => c.code).join('\n'), t('common.copied'))}
+              >
+                {t('cp.copyAllCodes')}
+              </Button>
+              <Button
+                size="small"
+                icon={<CopyOutlined />}
+                disabled={detailCoupon.codes.length === 0}
+                onClick={() => copyText(detailCoupon.codes.map((c) => `${c.kol}\t${c.code}`).join('\n'), t('common.copied'))}
+              >
+                {t('cp.copyAllWithKol')}
+              </Button>
+            </Space>
             <Table
               rowKey="id"
               size="small"
@@ -769,7 +823,19 @@ export default function CouponPage() {
               }}
               columns={[
                 { title: t('cp.code.kol'), dataIndex: 'kol' },
-                { title: t('cp.code.code'), dataIndex: 'code', width: 160, render: (v) => <Text code>{v}</Text> },
+                {
+                  title: t('cp.code.code'),
+                  dataIndex: 'code',
+                  width: 200,
+                  render: (v: string) => (
+                    <Space size={4}>
+                      <Text code>{v}</Text>
+                      <Tooltip title={t('common.copy')}>
+                        <Button type="text" size="small" icon={<CopyOutlined />} onClick={() => copyText(v, t('common.copied'))} />
+                      </Tooltip>
+                    </Space>
+                  ),
+                },
                 { title: t('cp.code.used'), dataIndex: 'used', width: 120, align: 'right', render: (v) => v.toLocaleString() },
               ]}
             />
