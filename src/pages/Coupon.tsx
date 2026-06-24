@@ -26,9 +26,9 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
-import { genCouponCode, getState, setState, useStore } from '../store'
+import { genCouponCode, getState, setState, uid, useStore } from '../store'
 import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
-import type { BusinessLine, Coupon, CouponProduct, CouponStatus } from '../types'
+import type { BusinessLine, Coupon, CouponCode, CouponProduct, CouponStatus } from '../types'
 import { useSession } from '../auth'
 import { useI18n } from '../i18n'
 
@@ -41,7 +41,7 @@ function currencyOptions(line: BusinessLine) {
   return opts
 }
 
-// 可用商品搜索框（输入课包ID，回车搜索，可多次添加）
+// 可用商品搜索框（输入商品包ID，回车搜索，可多次添加）
 function ProductPicker({
   value = [],
   onChange,
@@ -114,6 +114,77 @@ function ProductPicker({
   )
 }
 
+// 优惠码列表（按 KOL 生成多个优惠码，分别统计使用量用于结算）
+function CodePicker({
+  value = [],
+  onChange,
+  showUsed = false,
+}: {
+  value?: CouponCode[]
+  onChange?: (v: CouponCode[]) => void
+  showUsed?: boolean
+}) {
+  const { t } = useI18n()
+  const [kol, setKol] = useState('')
+
+  const add = () => {
+    const name = kol.trim()
+    if (!name) return
+    if (value.some((c) => c.kol.toLowerCase() === name.toLowerCase())) {
+      message.warning(t('cp.kolExists'))
+      return
+    }
+    onChange?.([...value, { id: uid('cc_'), code: genCouponCode(), kol: name, used: 0 }])
+    setKol('')
+  }
+
+  const remove = (id: string) => onChange?.(value.filter((c) => c.id !== id))
+
+  const columns: ColumnsType<CouponCode> = [
+    { title: t('cp.code.kol'), dataIndex: 'kol' },
+    { title: t('cp.code.code'), dataIndex: 'code', width: 150, render: (v) => <Text code>{v}</Text> },
+    ...(showUsed
+      ? [{ title: t('cp.code.used'), dataIndex: 'used', width: 110, align: 'right' as const, render: (v: number) => v.toLocaleString() }]
+      : []),
+    {
+      title: t('common.action'),
+      key: 'op',
+      width: 90,
+      render: (_: unknown, r: CouponCode) => (
+        <Button type="link" danger size="small" icon={<DeleteOutlined />} onClick={() => remove(r.id)}>
+          {t('common.delete')}
+        </Button>
+      ),
+    },
+  ]
+
+  return (
+    <div>
+      <Input
+        placeholder={t('cp.kolPlaceholder')}
+        prefix={<PlusOutlined />}
+        value={kol}
+        onChange={(e) => setKol(e.target.value)}
+        onPressEnter={add}
+        suffix={
+          <Button type="link" size="small" onClick={add} style={{ padding: 0 }}>
+            {t('cp.addCode')}
+          </Button>
+        }
+      />
+      <Table
+        style={{ marginTop: 12 }}
+        rowKey="id"
+        size="small"
+        columns={columns}
+        dataSource={value}
+        pagination={false}
+        locale={{ emptyText: t('cp.noCodes') }}
+      />
+    </div>
+  )
+}
+
 // 生成券表单
 function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void }) {
   const { t } = useI18n()
@@ -124,10 +195,14 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
     const v = await form.validateFields()
     const [claimStart, claimEnd] = v.claimRange as [Dayjs, Dayjs]
     const [useStart, useEnd] = v.useRange as [Dayjs, Dayjs]
+    const codes: CouponCode[] = (v.codes as CouponCode[]).map((c) => ({
+      ...c,
+      used: 0,
+    }))
     const coupon: Coupon = {
       id: `CP${Math.floor(1000 + Math.random() * 9000)}`,
       name: v.name,
-      code: genCouponCode(),
+      codes,
       businessLine: line,
       couponType: '满减券',
       currency: v.currency,
@@ -196,6 +271,19 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         <Title level={5}>{t('cp.issueRule')}</Title>
         <Form.Item name="total" label={t('cp.totalQty')} rules={[{ required: true, message: t('cp.totalRequired') }]}>
           <InputNumber style={{ width: 280 }} min={1} placeholder={t('cp.totalPlaceholder')} />
+        </Form.Item>
+        <Form.Item
+          name="codes"
+          label={t('cp.codes')}
+          tooltip={t('cp.codesTip')}
+          rules={[
+            {
+              validator: (_, val: CouponCode[] | undefined) =>
+                val && val.length > 0 ? Promise.resolve() : Promise.reject(new Error(t('cp.codesRequired'))),
+            },
+          ]}
+        >
+          <CodePicker />
         </Form.Item>
         <Form.Item name="claimRange" label={t('cp.claimValid')} rules={[{ required: true, message: t('cp.claimRequired') }]}>
           <RangePicker showTime style={{ width: 400 }} placeholder={[t('pkg.startTime'), t('pkg.endTime')]} />
@@ -266,6 +354,9 @@ export default function CouponPage() {
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null)
   const [editProducts, setEditProducts] = useState<CouponProduct[]>([])
 
+  const [codesCoupon, setCodesCoupon] = useState<Coupon | null>(null)
+  const [codesList, setCodesList] = useState<CouponCode[]>([])
+
   const [extendCoupon, setExtendCoupon] = useState<Coupon | null>(null)
   const [extendTime, setExtendTime] = useState<Dayjs | null>(null)
 
@@ -279,7 +370,7 @@ export default function CouponPage() {
           !kw ||
           c.id.toLowerCase().includes(kw) ||
           c.name.toLowerCase().includes(kw) ||
-          c.code.toLowerCase().includes(kw)
+          c.codes.some((cc) => cc.code.toLowerCase().includes(kw) || cc.kol.toLowerCase().includes(kw))
         return (
           matchKw &&
           (!lineFilter || c.businessLine === lineFilter) &&
@@ -315,6 +406,24 @@ export default function CouponPage() {
     }))
     message.success(t('cp.saveProductsOk'))
     setEditCoupon(null)
+  }
+
+  const openCodes = (c: Coupon) => {
+    setCodesCoupon(c)
+    setCodesList(c.codes)
+  }
+  const saveCodes = () => {
+    if (!codesCoupon) return
+    if (codesList.length === 0) {
+      message.error(t('cp.codesRequired'))
+      return
+    }
+    setState((prev) => ({
+      ...prev,
+      coupons: prev.coupons.map((c) => (c.id === codesCoupon.id ? { ...c, codes: codesList } : c)),
+    }))
+    message.success(t('cp.saveCodesOk'))
+    setCodesCoupon(null)
   }
 
   const openExtend = (c: Coupon) => {
@@ -359,7 +468,16 @@ export default function CouponPage() {
   const columns: ColumnsType<Coupon> = [
     { title: t('cp.col.id'), dataIndex: 'id', width: 90, fixed: 'left' },
     { title: t('cp.col.name'), dataIndex: 'name', width: 200 },
-    { title: t('cp.col.code'), dataIndex: 'code', width: 150, render: (v) => <Text code>{v}</Text> },
+    {
+      title: t('cp.col.codes'),
+      dataIndex: 'codes',
+      width: 130,
+      render: (codes: CouponCode[], r) => (
+        <Button type="link" size="small" style={{ padding: 0 }} onClick={() => openCodes(r)}>
+          <Tag color="blue">{t('cp.codesCount', { n: codes.length })}</Tag>
+        </Button>
+      ),
+    },
     { title: t('cp.col.line'), dataIndex: 'businessLine', width: 90, render: (v) => <Tag color="geekblue">{v}</Tag> },
     { title: t('cp.col.currency'), dataIndex: 'currency', width: 80 },
     { title: t('cp.col.total'), dataIndex: 'total', width: 100, align: 'right', render: (v) => v.toLocaleString() },
@@ -380,7 +498,7 @@ export default function CouponPage() {
     {
       title: t('common.action'),
       key: 'action',
-      width: 290,
+      width: 360,
       fixed: 'right',
       render: (_, r) => (
         <Space size={0} wrap>
@@ -389,6 +507,9 @@ export default function CouponPage() {
           </Button>
           <Button type="link" size="small" onClick={() => openEdit(r)}>
             {t('common.edit')}
+          </Button>
+          <Button type="link" size="small" onClick={() => openCodes(r)}>
+            {t('cp.manageCodes')}
           </Button>
           <Button type="link" size="small" onClick={() => openExtend(r)}>
             {t('cp.extend')}
@@ -460,7 +581,7 @@ export default function CouponPage() {
         rowKey="id"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1500 }}
+        scroll={{ x: 1580 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -564,8 +685,8 @@ export default function CouponPage() {
             </Divider>
             <Descriptions column={2} bordered size="small">
               <Descriptions.Item label={t('cp.col.id')}>{detailCoupon.id}</Descriptions.Item>
-              <Descriptions.Item label={t('cp.col.code')}>
-                <Text code>{detailCoupon.code}</Text>
+              <Descriptions.Item label={t('cp.col.codes')}>
+                {t('cp.codesCount', { n: detailCoupon.codes.length })}
               </Descriptions.Item>
               <Descriptions.Item label={t('cp.name')} span={2}>
                 {detailCoupon.name}
@@ -624,6 +745,62 @@ export default function CouponPage() {
                 ]}
               />
             </div>
+
+            <Divider orientation="left" plain>
+              {t('cp.codes')}
+            </Divider>
+            <Table
+              rowKey="id"
+              size="small"
+              pagination={false}
+              dataSource={detailCoupon.codes}
+              locale={{ emptyText: t('cp.noCodes') }}
+              summary={(rows) => {
+                const total = rows.reduce((s, r) => s + r.used, 0)
+                return (
+                  <Table.Summary.Row>
+                    <Table.Summary.Cell index={0}>{t('cp.codesTotalUsed')}</Table.Summary.Cell>
+                    <Table.Summary.Cell index={1} />
+                    <Table.Summary.Cell index={2} align="right">
+                      <Text strong>{total.toLocaleString()}</Text>
+                    </Table.Summary.Cell>
+                  </Table.Summary.Row>
+                )
+              }}
+              columns={[
+                { title: t('cp.code.kol'), dataIndex: 'kol' },
+                { title: t('cp.code.code'), dataIndex: 'code', width: 160, render: (v) => <Text code>{v}</Text> },
+                { title: t('cp.code.used'), dataIndex: 'used', width: 120, align: 'right', render: (v) => v.toLocaleString() },
+              ]}
+            />
+          </div>
+        )}
+      </Modal>
+
+      {/* 管理优惠码 */}
+      <Modal
+        open={!!codesCoupon}
+        title={t('cp.manageCodesTitle')}
+        onCancel={() => setCodesCoupon(null)}
+        width={680}
+        footer={[
+          <Button key="back" onClick={() => setCodesCoupon(null)}>
+            {t('common.back')}
+          </Button>,
+          <Button key="ok" type="primary" onClick={saveCodes}>
+            {t('common.confirm')}
+          </Button>,
+        ]}
+      >
+        {codesCoupon && (
+          <div style={{ marginTop: 12 }}>
+            <Alert
+              type="info"
+              showIcon
+              style={{ marginBottom: 12 }}
+              message={t('cp.manageCodesTip')}
+            />
+            <CodePicker value={codesList} onChange={setCodesList} showUsed />
           </div>
         )}
       </Modal>

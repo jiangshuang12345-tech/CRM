@@ -6,6 +6,7 @@ import {
   ProfileOutlined,
   AppstoreOutlined,
   TagsOutlined,
+  LinkOutlined,
   LogoutOutlined,
   DownOutlined,
   RedoOutlined,
@@ -38,6 +39,7 @@ export default function AppLayout() {
 
   const NAV = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
+    { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
     { key: '/packages', icon: <AppstoreOutlined />, label: phase2Label(t('app.nav.packages')) },
@@ -46,6 +48,7 @@ export default function AppLayout() {
 
   const TITLES: Record<string, string> = {
     '/channels': t('app.nav.channels'),
+    '/landing': t('app.nav.landing'),
     '/users': t('app.nav.users'),
     '/orders': t('app.nav.orders'),
     '/packages': t('app.nav.packages'),

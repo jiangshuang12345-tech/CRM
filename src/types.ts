@@ -105,6 +105,21 @@ export type CoursePackage = {
   createdAt: string
 }
 
+// 落地页：一键生成投放链接，关联渠道、商品包、优惠券
+export type LandingPage = {
+  id: string
+  businessLine: string
+  channelCode: string
+  channelName?: string
+  packageId?: string
+  packageName?: string
+  couponId?: string
+  couponCode?: string
+  url: string
+  creator: string
+  createdAt: string
+}
+
 export type CouponStatus = '已生效' | '已结束'
 
 export type CouponProduct = {
@@ -113,10 +128,18 @@ export type CouponProduct = {
   price: number
 }
 
+// 一张优惠券可包含多个优惠码（如分发给不同 KOL），分别统计领取/使用量用于结算
+export type CouponCode = {
+  id: string
+  code: string
+  kol: string // 使用方 / KOL 名称
+  used: number // 该码已使用张数
+}
+
 export type Coupon = {
   id: string
   name: string
-  code: string
+  codes: CouponCode[]
   businessLine: BusinessLine
   couponType: '满减券'
   currency: string

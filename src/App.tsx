@@ -7,6 +7,7 @@ import UserCenter from './pages/UserCenter'
 import OrderCenter from './pages/OrderCenter'
 import CoursePackagePage from './pages/CoursePackage'
 import CouponPage from './pages/Coupon'
+import LandingPageManagement from './pages/LandingPage'
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const session = useSession()
@@ -33,6 +34,7 @@ export default function App() {
         >
           <Route index element={<Navigate to="/channels" replace />} />
           <Route path="channels" element={<ChannelManagement />} />
+          <Route path="landing" element={<LandingPageManagement />} />
           <Route path="users" element={<UserCenter />} />
           <Route path="orders" element={<OrderCenter />} />
           <Route path="packages" element={<CoursePackagePage />} />
