@@ -115,6 +115,8 @@ export type LandingPage = {
   packageName?: string
   couponId?: string
   couponCode?: string
+  validFrom?: string
+  validUntil?: string
   url: string
   creator: string
   createdAt: string

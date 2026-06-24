@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Card,
+  DatePicker,
   Divider,
   Form,
   Modal,
@@ -14,6 +15,8 @@ import {
   Typography,
   message,
 } from 'antd'
+
+const { RangePicker } = DatePicker
 import { CopyOutlined, DeleteOutlined, LinkOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
@@ -135,6 +138,7 @@ export default function LandingPageManagement() {
     }
     const ch = codeOptions.find((c) => c.code === v.channelCode)
     const pkg = packages.find((p) => p.id === v.packageId)
+    const range = v.validRange as [dayjs.Dayjs, dayjs.Dayjs] | undefined
     const lp: LandingPage = {
       id: uid('lp_'),
       businessLine: v.businessLine,
@@ -144,6 +148,8 @@ export default function LandingPageManagement() {
       packageName: pkg?.name,
       couponId: v.couponId,
       couponCode: v.couponCode,
+      validFrom: range?.[0]?.format('YYYY-MM-DD HH:mm:ss'),
+      validUntil: range?.[1]?.format('YYYY-MM-DD HH:mm:ss'),
       url,
       creator: session?.email ?? 'admin@dinoai.ai',
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -184,6 +190,20 @@ export default function LandingPageManagement() {
       dataIndex: 'couponId',
       width: 130,
       render: (v, r) => (v ? <span>{v}{r.couponCode ? <Text code style={{ marginLeft: 4 }}>{r.couponCode}</Text> : null}</span> : <Text type="secondary">—</Text>),
+    },
+    {
+      title: t('lp.col.valid'),
+      dataIndex: 'validFrom',
+      width: 200,
+      render: (_, r) =>
+        r.validFrom && r.validUntil ? (
+          <Text style={{ fontSize: 12 }}>
+            {r.validFrom}
+            <br />~ {r.validUntil}
+          </Text>
+        ) : (
+          <Text type="secondary">—</Text>
+        ),
     },
     {
       title: t('lp.col.url'),
@@ -235,7 +255,7 @@ export default function LandingPageManagement() {
         rowKey="id"
         columns={columns}
         dataSource={landingPages}
-        scroll={{ x: 1400 }}
+        scroll={{ x: 1620 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -287,11 +307,15 @@ export default function LandingPageManagement() {
             />
           </Form.Item>
 
-          <Form.Item name="packageId" label={t('lp.f.package')} tooltip={t('lp.f.packageTip')}>
+          <Form.Item
+            name="packageId"
+            label={t('lp.f.package')}
+            tooltip={t('lp.f.packageTip')}
+            rules={[{ required: true, message: t('common.pleaseSelect') }]}
+          >
             <Select
-              allowClear
               showSearch
-              placeholder={t('lp.f.optional')}
+              placeholder={line ? t('common.pleaseSelect') : t('lp.f.pickLineFirst')}
               disabled={!line}
               optionFilterProp="label"
               onChange={() => setPreview(null)}
@@ -324,6 +348,20 @@ export default function LandingPageManagement() {
               />
             </Form.Item>
           )}
+
+          <Form.Item
+            name="validRange"
+            label={t('lp.f.validRange')}
+            tooltip={t('lp.f.validRangeTip')}
+            rules={[{ required: true, message: t('common.pleaseSelect') }]}
+          >
+            <RangePicker
+              showTime={{ format: 'HH:mm:ss' }}
+              format="YYYY-MM-DD HH:mm:ss"
+              style={{ width: '100%' }}
+              placeholder={[t('lp.f.validStart'), t('lp.f.validEnd')]}
+            />
+          </Form.Item>
 
           <Divider style={{ margin: '8px 0 16px' }} />
           <Space style={{ marginBottom: 8 }}>

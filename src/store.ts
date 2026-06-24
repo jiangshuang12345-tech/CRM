@@ -10,7 +10,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v16'
+const KEY = 'dinoai_crm_state_v17'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -309,6 +309,8 @@ function seed(): AppState {
       packageName: 'Dino English 启蒙季度商品包',
       couponId: 'CP4017',
       couponCode: '',
+      validFrom: now.subtract(2, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+      validUntil: now.add(28, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss'),
       url: 'https://kr.dinoai.ai/website/signin/?backurl=%2Fwebsite%2Fpayment%2Fsku%2F%3Fid%3DPKG1001%26channel%3DK2000Gh',
       creator: 'admin@dinoai.ai',
       createdAt: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
@@ -318,6 +320,10 @@ function seed(): AppState {
       businessLine: '越南',
       channelCode: 'Tk88Vzq',
       channelName: 'KOL / TikTok 达人 / @minh_edu',
+      packageId: 'PKG1003',
+      packageName: 'Dino English 年度畅学商品包',
+      validFrom: now.subtract(1, 'day').startOf('day').format('YYYY-MM-DD HH:mm:ss'),
+      validUntil: now.add(14, 'day').endOf('day').format('YYYY-MM-DD HH:mm:ss'),
       url: 'https://vn.dinoai.ai/website/landingpage/signin/?channel=Tk88Vzq',
       creator: 'admin@dinoai.ai',
       createdAt: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
