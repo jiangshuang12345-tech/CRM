@@ -94,7 +94,7 @@ const zh: Dict = {
   'app.nav.orders': '订单中心',
   'app.nav.packages': '商品包管理',
   'app.nav.coupons': '优惠券管理',
-  'app.brand': 'Dino English 运营平台',
+  'app.brand': 'Dino English 管理端',
   'app.phase2': '二期',
   'lp.title': '落地页管理',
   'lp.intro': '一键生成投放落地页链接，关联渠道、商品包与优惠券；不同业务线使用各自的落地页模版生成对应链接。',
