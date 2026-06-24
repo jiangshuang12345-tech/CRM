@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import type { Key } from 'react'
 import {
   Button,
   Card,
@@ -28,6 +29,7 @@ import { useI18n } from '../i18n'
 
 const { Text } = Typography
 const LEVEL_COLOR = ['', 'blue', 'cyan', 'green']
+const EXPAND_KEY = 'dinoai_crm_channel_expanded'
 
 type AddCtx =
   | { kind: 'line' }
@@ -40,6 +42,25 @@ export default function ChannelManagement() {
   const [addCtx, setAddCtx] = useState<AddCtx | null>(null)
   const [renameNode, setRenameNode] = useState<{ id: string; name: string } | null>(null)
   const [form] = Form.useForm()
+  // 默认各业务线收起；展开/收起状态记忆到 localStorage
+  const [expandedKeys, setExpandedKeys] = useState<Key[]>(() => {
+    try {
+      const raw = localStorage.getItem(EXPAND_KEY)
+      if (raw) return JSON.parse(raw) as Key[]
+    } catch {
+      /* ignore */
+    }
+    return []
+  })
+
+  const onExpand = (keys: Key[]) => {
+    setExpandedKeys(keys)
+    try {
+      localStorage.setItem(EXPAND_KEY, JSON.stringify(keys))
+    } catch {
+      /* ignore */
+    }
+  }
 
   const levelLabel = (level: 1 | 2 | 3) => t(`ch.level${level}`)
 
@@ -351,7 +372,13 @@ export default function ChannelManagement() {
       {channels.length === 0 ? (
         <Empty description={t('ch.empty')} />
       ) : (
-        <Tree treeData={treeData} defaultExpandAll blockNode selectable={false} />
+        <Tree
+          treeData={treeData}
+          expandedKeys={expandedKeys}
+          onExpand={onExpand}
+          blockNode
+          selectable={false}
+        />
       )}
 
       <Modal
