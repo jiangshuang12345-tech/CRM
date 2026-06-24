@@ -39,11 +39,11 @@ export default function AppLayout() {
 
   const NAV = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
-    { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
     { key: '/packages', icon: <AppstoreOutlined />, label: phase2Label(t('app.nav.packages')) },
     { key: '/coupons', icon: <TagsOutlined />, label: phase2Label(t('app.nav.coupons')) },
+    { key: '/landing', icon: <LinkOutlined />, label: phase2Label(t('app.nav.landing')) },
   ]
 
   const TITLES: Record<string, string> = {
