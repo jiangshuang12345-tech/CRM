@@ -6,7 +6,6 @@ import { useStore } from '../store'
 import type { Order, OrderStatus, UserStatus } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
-import { setBizFilter, useBizFilter } from '../bizFilter'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -33,11 +32,10 @@ export default function OrderCenter() {
   const { t } = useI18n()
   const orders = useStore((s) => s.orders)
   const students = useStore((s) => s.students)
-  const channels = useStore((s) => s.channels)
   const [keyword, setKeyword] = useState('')
   const [orderStatus, setOrderStatus] = useState<string | undefined>()
   const [payMethod, setPayMethod] = useState<string | undefined>()
-  const lineFilter = useBizFilter()
+  const [countryFilter, setCountryFilter] = useState<string | undefined>()
   const { allowedLines } = usePerm()
   const scope = allowedLines()
 
@@ -51,10 +49,10 @@ export default function OrderCenter() {
     return (studentId: string) => map.get(studentId)
   }, [students])
 
-  const lines = useMemo(() => {
-    const all = channels.map((c) => c.name)
-    return scope ? all.filter((l) => scope.includes(l)) : all
-  }, [channels, scope])
+  const countries = useMemo(() => {
+    const inScope = scope ? students.filter((s) => scope.includes(s.businessLine)) : students
+    return Array.from(new Set(inScope.map((s) => s.country || s.businessLine).filter(Boolean))) as string[]
+  }, [students, scope])
 
   const data = useMemo(
     () =>
@@ -70,10 +68,10 @@ export default function OrderCenter() {
           matchKw &&
           (!orderStatus || o.orderStatus === orderStatus) &&
           (!payMethod || o.payMethod === payMethod) &&
-          (!lineFilter || lineOf(o.studentId) === lineFilter)
+          (!countryFilter || countryOf(o.studentId) === countryFilter)
         )
       }),
-    [orders, keyword, orderStatus, payMethod, lineFilter, lineOf, scope],
+    [orders, keyword, orderStatus, payMethod, countryFilter, lineOf, countryOf, scope],
   )
 
   const columns: ColumnsType<Order> = [
@@ -81,11 +79,11 @@ export default function OrderCenter() {
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
     { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },
     {
-      title: t('user.col.line'),
+      title: t('user.col.country'),
       dataIndex: 'studentId',
-      key: 'businessLine',
+      key: 'country',
       width: 100,
-      render: (id: string) => <Tag>{lineOf(id)}</Tag>,
+      render: (id: string) => <Tag>{countryOf(id) ?? '—'}</Tag>,
     },
     {
       title: t('order.col.userStatus'),
@@ -146,11 +144,11 @@ export default function OrderCenter() {
         />
         <Select
           allowClear
-          placeholder={t('user.col.line')}
+          placeholder={t('user.col.country')}
           style={{ width: 140 }}
-          value={lineFilter}
-          onChange={setBizFilter}
-          options={lines.map((l) => ({ label: l, value: l }))}
+          value={countryFilter}
+          onChange={setCountryFilter}
+          options={countries.map((l) => ({ label: l, value: l }))}
         />
         <Select
           allowClear
