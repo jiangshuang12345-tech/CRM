@@ -17,6 +17,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
 import type { LoginMethod, Student, UserStatus } from '../types'
+import { USER_STATUSES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { setBizFilter, useBizFilter } from '../bizFilter'
@@ -25,9 +26,10 @@ const { Text } = Typography
 
 const STATUS_COLOR: Record<UserStatus, string> = {
   注册: 'default',
-  体验: 'blue',
+  体验中: 'blue',
+  体验逾期: 'orange',
   付费: 'green',
-  流失: 'red',
+  付费逾期: 'red',
 }
 
 const METHOD_COLOR: Record<LoginMethod, string> = {
@@ -193,7 +195,7 @@ export default function UserCenter() {
           style={{ width: 150 }}
           value={statusFilter}
           onChange={setStatusFilter}
-          options={(['注册', '体验', '付费', '流失'] as UserStatus[]).map((l) => ({ label: t(`enum.status.${l}`), value: l }))}
+          options={USER_STATUSES.map((l) => ({ label: t(`enum.status.${l}`), value: l }))}
         />
       </Space>
 

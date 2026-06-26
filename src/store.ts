@@ -14,7 +14,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v22'
+const KEY = 'dinoai_crm_state_v23'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -214,7 +214,7 @@ function seed(): AppState {
     {
       studentId: '2060199610824355843', name: 'Abdullah Al-Saud', localName: 'عبدالله', gender: '男',
       birthday: '2015-09-03', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta',
-      countryCode: '+966', channelCode: 'Fb73Mxa', country: '沙特', appChannel: 'Google Play', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      countryCode: '+966', channelCode: 'Fb73Mxa', country: '沙特', appChannel: 'Google Play', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验中', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       studentId: '2060199610824355844', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', gender: '女',
@@ -224,12 +224,12 @@ function seed(): AppState {
     {
       studentId: '2060199610824355845', name: 'Tan Wei Ming', localName: '陈伟明', gender: '男',
       birthday: '2016-11-08', loginMethod: 'AppID', account: 'weiming.tan@icloud.com', businessLine: '马来', registerChannel: '自然流量',
-      countryCode: '+60', channelCode: 'As2K1d9', country: '马来西亚', appChannel: 'App Store', registerTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '流失', expireTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      countryCode: '+60', channelCode: 'As2K1d9', country: '马来西亚', appChannel: 'App Store', registerTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费逾期', expireTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       studentId: '2060199610824355846', name: 'Seo-yeon Park', localName: '박서연', gender: '女',
       birthday: '2017-03-22', loginMethod: 'kakao', account: '+82 10-9876-5432', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram',
-      countryCode: '+82', channelCode: 'Ig58Kpq', country: '韩国', appChannel: 'Google Play', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(360, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      countryCode: '+82', channelCode: 'Ig58Kpq', country: '韩国', appChannel: 'Google Play', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验逾期', expireTime: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
   ]
 
@@ -241,17 +241,17 @@ function seed(): AppState {
       validUntil: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '2060199610824355843', userStatus: '体验',
+      orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '2060199610824355843', userStatus: '体验中',
       orderStatus: '待支付', originalPrice: 39, paidAmount: 0, payMethod: 'Google Play', currency: 'USD',
     },
     {
-      orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '2060199610824355845', userStatus: '流失',
+      orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '2060199610824355845', userStatus: '付费逾期',
       orderStatus: '已退款', originalPrice: 388, paidAmount: 388, payMethod: 'Stripe', currency: 'MYR',
       paidTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'),
       validUntil: now.add(357, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '2060199610824355846', userStatus: '流失',
+      orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '2060199610824355846', userStatus: '体验逾期',
       orderStatus: '已取消', originalPrice: 119000, paidAmount: 0, payMethod: 'App Store', currency: 'KRW',
     },
   ]

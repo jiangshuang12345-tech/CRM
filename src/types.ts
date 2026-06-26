@@ -40,7 +40,9 @@ export type ChannelLine = {
   children: ChannelType[]
 }
 
-export type UserStatus = '注册' | '体验' | '付费' | '流失'
+export type UserStatus = '注册' | '体验中' | '体验逾期' | '付费' | '付费逾期'
+
+export const USER_STATUSES: UserStatus[] = ['注册', '体验中', '体验逾期', '付费', '付费逾期']
 
 export type LoginMethod = '谷歌邮箱' | 'Facebook' | 'kakao' | '手机号' | 'AppID'
 
