@@ -1,5 +1,8 @@
 import { useSyncExternalStore } from 'react'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+
+dayjs.extend(utc)
 import type {
   Account,
   AuditLog,
@@ -14,7 +17,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v23'
+const KEY = 'dinoai_crm_state_v24'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -204,7 +207,7 @@ function seed(): AppState {
     },
   ]
 
-  const now = dayjs()
+  const now = dayjs.utc() // 种子时间统一以 UTC 存储，展示时再按用户注册国家换算
   const students: Student[] = [
     {
       studentId: '2060199610824355842', name: 'Ji-woo Kim', localName: '김지우', gender: '男',

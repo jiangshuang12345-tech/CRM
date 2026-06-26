@@ -7,6 +7,7 @@ import type { Order, OrderStatus, UserStatus } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { setBizFilter, useBizFilter } from '../bizFilter'
+import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
 
@@ -43,6 +44,11 @@ export default function OrderCenter() {
   const lineOf = useMemo(() => {
     const map = new Map(students.map((s) => [s.studentId, s.businessLine]))
     return (studentId: string) => map.get(studentId) ?? '—'
+  }, [students])
+
+  const countryOf = useMemo(() => {
+    const map = new Map(students.map((s) => [s.studentId, s.country || s.businessLine]))
+    return (studentId: string) => map.get(studentId)
   }, [students])
 
   const lines = useMemo(() => {
@@ -113,8 +119,18 @@ export default function OrderCenter() {
       width: 130,
       render: (v) => <Tag>{v}</Tag>,
     },
-    { title: t('order.col.paidTime'), dataIndex: 'paidTime', width: 180, render: (v) => v || <Text type="secondary">—</Text> },
-    { title: t('order.col.validUntil'), dataIndex: 'validUntil', width: 180, render: (v) => v || <Text type="secondary">—</Text> },
+    {
+      title: t('order.col.paidTime'),
+      dataIndex: 'paidTime',
+      width: 200,
+      render: (v: string | undefined, r: Order) => <LocalTime time={v} country={countryOf(r.studentId)} />,
+    },
+    {
+      title: t('order.col.validUntil'),
+      dataIndex: 'validUntil',
+      width: 200,
+      render: (v: string | undefined, r: Order) => <LocalTime time={v} country={countryOf(r.studentId)} />,
+    },
   ]
 
   return (

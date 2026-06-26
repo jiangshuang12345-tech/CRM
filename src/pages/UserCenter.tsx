@@ -21,6 +21,7 @@ import { USER_STATUSES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { setBizFilter, useBizFilter } from '../bizFilter'
+import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
 
@@ -134,12 +135,17 @@ export default function UserCenter() {
     },
     { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
     { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
-    { title: t('user.col.regTime'), dataIndex: 'registerTime', width: 180 },
+    {
+      title: t('user.col.regTime'),
+      dataIndex: 'registerTime',
+      width: 200,
+      render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
+    },
     {
       title: t('user.col.expireTime'),
       dataIndex: 'expireTime',
-      width: 180,
-      render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+      width: 200,
+      render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
     },
     {
       title: t('user.col.status'),
