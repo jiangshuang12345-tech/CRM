@@ -56,7 +56,7 @@ export default function AppLayout() {
   )
 
   const ALL_NAV = [
-    { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
+    { key: '/channels', icon: <ApartmentOutlined />, label: phase2Label(t('app.nav.channels')) },
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
     { key: '/packages', icon: <AppstoreOutlined />, label: phase2Label(t('app.nav.packages')) },
