@@ -57,10 +57,12 @@ export default function AppLayout() {
   )
 
   const ALL_NAV = [
-    { key: '/channels', icon: <ApartmentOutlined />, label: phase2Label(t('app.nav.channels')) },
+    // 一期功能
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
-    { key: '/users-v2', icon: <TeamOutlined />, label: phase2Label(t('app.nav.usersV2')) },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
+    // 二期功能
+    { key: '/channels', icon: <ApartmentOutlined />, label: phase2Label(t('app.nav.channels')) },
+    { key: '/users-v2', icon: <TeamOutlined />, label: phase2Label(t('app.nav.usersV2')) },
     { key: '/packages', icon: <AppstoreOutlined />, label: phase2Label(t('app.nav.packages')) },
     { key: '/coupons', icon: <TagsOutlined />, label: phase2Label(t('app.nav.coupons')) },
     { key: '/landing', icon: <LinkOutlined />, label: phase2Label(t('app.nav.landing')) },

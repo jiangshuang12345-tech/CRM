@@ -20,9 +20,9 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 }
 
 const MODULE_PATH: { module: ModuleKey; path: string }[] = [
-  { module: 'channels', path: '/channels' },
   { module: 'users', path: '/users' },
   { module: 'orders', path: '/orders' },
+  { module: 'channels', path: '/channels' },
   { module: 'packages', path: '/packages' },
   { module: 'coupons', path: '/coupons' },
   { module: 'landing', path: '/landing' },
