@@ -61,12 +61,16 @@ export const METHOD_HAS_PHONE: Record<LoginMethod, boolean> = {
 export type AppChannel = 'App Store' | 'Google Play'
 export const APP_CHANNELS: AppChannel[] = ['App Store', 'Google Play']
 
+export type AgeGroup = '3-5' | '6-8' | '9-12' | '13-17' | '18+'
+export const AGE_GROUPS: AgeGroup[] = ['3-5', '6-8', '9-12', '13-17', '18+']
+
 export type Student = {
   studentId: string
   name: string
   localName?: string
   gender?: '男' | '女' | '其他'
   birthday?: string // YYYY-MM-DD
+  ageGroup?: AgeGroup
   loginMethod: LoginMethod
   account: string // 登录账号：邮箱 / FB / kakao ID / AppID / 手机号
   phone?: string // 仅 kakao / 手机号 方式有

@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react'
 import {
   Button,
   Card,
-  DatePicker,
   Form,
   Input,
   Modal,
@@ -14,10 +13,9 @@ import {
 } from 'antd'
 import { EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
 import type { AppChannel, LoginMethod, Student, UserStatus } from '../types'
-import { APP_CHANNELS, USER_STATUSES } from '../types'
+import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import LocalTime from '../components/LocalTime'
@@ -90,8 +88,7 @@ export default function UserCenterP1() {
     setEditing(s)
     form.setFieldsValue({
       localName: s.localName,
-      gender: s.gender,
-      birthday: s.birthday ? dayjs(s.birthday) : undefined,
+      ageGroup: s.ageGroup,
     })
   }
 
@@ -105,8 +102,7 @@ export default function UserCenterP1() {
           ? {
               ...s,
               localName: v.localName,
-              gender: v.gender,
-              birthday: v.birthday ? v.birthday.format('YYYY-MM-DD') : undefined,
+              ageGroup: v.ageGroup,
             }
           : s,
       ),
@@ -121,6 +117,12 @@ export default function UserCenterP1() {
       dataIndex: 'localName',
       width: 140,
       render: (_, r) => <span>{r.localName || r.name}</span>,
+    },
+    {
+      title: t('user.col.ageGroup'),
+      dataIndex: 'ageGroup',
+      width: 100,
+      render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
     {
       title: t('user.col.method'),
@@ -246,15 +248,12 @@ export default function UserCenterP1() {
           <Form.Item name="localName" label={t('user.label.localName')}>
             <Input placeholder={t('user.localNamePlaceholder')} />
           </Form.Item>
-          <Form.Item name="gender" label={t('user.label.gender')}>
+          <Form.Item name="ageGroup" label={t('user.label.ageGroup')}>
             <Select
               allowClear
               placeholder={t('common.pleaseSelect')}
-              options={(['男', '女', '其他'] as const).map((g) => ({ label: t(`enum.gender.${g}`), value: g }))}
+              options={AGE_GROUPS.map((g) => ({ label: g, value: g }))}
             />
-          </Form.Item>
-          <Form.Item name="birthday" label={t('user.label.birthday')}>
-            <DatePicker style={{ width: '100%' }} placeholder={t('user.birthdayPlaceholder')} />
           </Form.Item>
           <Form.Item label={t('user.col.country')}>
             <Input value={editing?.country} disabled />
