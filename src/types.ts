@@ -76,7 +76,7 @@ export type Student = {
   channelCode: string
   country?: string // 注册时 IP 对应的国家（一期用户中心）
   appChannel?: AppChannel // 注册渠道（一期：App Store / Google Play）
-  registerTime: string // Beijing
+  registerTime: string // UTC
   status: UserStatus
   expireTime?: string // 到期时间
   lastModifier?: string // 最近修改人
