@@ -13,6 +13,7 @@ import {
   RedoOutlined,
   GlobalOutlined,
   UserSwitchOutlined,
+  ShopOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout, useSession } from '../auth'
@@ -56,20 +57,42 @@ export default function AppLayout() {
     </span>
   )
 
-  const ALL_NAV = [
-    // 一期功能
+  const visible = (key: string) => can(NAV_MODULE[key]) !== 'none'
+
+  // 一期功能
+  const topNav = [
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
-    // 二期功能
-    { key: '/channels', icon: <ApartmentOutlined />, label: phase2Label(t('app.nav.channels')) },
+  ].filter((n) => visible(n.key))
+
+  // 营销中心（二期）子菜单
+  const marketingChildren = [
+    { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
+    { key: '/packages', icon: <AppstoreOutlined />, label: t('app.nav.packages') },
+    { key: '/coupons', icon: <TagsOutlined />, label: t('app.nav.coupons') },
+    { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
+  ].filter((n) => visible(n.key))
+
+  // 其他二期功能
+  const tailNav = [
     { key: '/users-v2', icon: <TeamOutlined />, label: phase2Label(t('app.nav.usersV2')) },
-    { key: '/packages', icon: <AppstoreOutlined />, label: phase2Label(t('app.nav.packages')) },
-    { key: '/coupons', icon: <TagsOutlined />, label: phase2Label(t('app.nav.coupons')) },
-    { key: '/landing', icon: <LinkOutlined />, label: phase2Label(t('app.nav.landing')) },
     { key: '/system', icon: <SafetyOutlined />, label: phase2Label(t('app.nav.system')) },
+  ].filter((n) => visible(n.key))
+
+  const NAV = [
+    ...topNav,
+    ...(marketingChildren.length
+      ? [
+          {
+            key: 'marketing',
+            icon: <ShopOutlined />,
+            label: phase2Label(t('app.nav.marketing')),
+            children: marketingChildren,
+          },
+        ]
+      : []),
+    ...tailNav,
   ]
-  // 按当前角色权限过滤可见菜单
-  const NAV = ALL_NAV.filter((n) => can(NAV_MODULE[n.key]) !== 'none')
 
   const TITLES: Record<string, string> = {
     '/channels': t('app.nav.channels'),
@@ -128,8 +151,11 @@ export default function AppLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
+          defaultOpenKeys={['marketing']}
           items={NAV}
-          onClick={({ key }) => navigate(key)}
+          onClick={({ key }) => {
+            if (key !== 'marketing') navigate(key)
+          }}
         />
       </Sider>
       <Layout>

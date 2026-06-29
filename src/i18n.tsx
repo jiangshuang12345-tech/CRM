@@ -88,6 +88,7 @@ const zh: Dict = {
 
   'lang.label': '语言',
 
+  'app.nav.marketing': '营销中心',
   'app.nav.channels': '渠道管理',
   'app.nav.landing': '落地页管理',
   'app.nav.users': '用户中心',
@@ -507,6 +508,7 @@ const en: Dict = {
 
   'lang.label': 'Language',
 
+  'app.nav.marketing': 'Marketing',
   'app.nav.channels': 'Channels',
   'app.nav.users': 'Users',
   'app.nav.orders': 'Orders',
@@ -1055,7 +1057,7 @@ const ko: Dict = {
   'common.back': '뒤로', 'common.save': '저장', 'common.close': '닫기', 'common.copy': '복사',
   'common.copied': '복사됨', 'common.pleaseSelect': '선택하세요', 'common.noData': '데이터 없음',
   'common.action': '작업', 'common.total': '총 {n}건', 'lang.label': '언어',
-  'app.nav.channels': '채널 관리', 'app.nav.landing': '랜딩 페이지', 'app.nav.users': '사용자 센터', 'app.nav.orders': '주문 센터',
+  'app.nav.marketing': '마케팅 센터', 'app.nav.channels': '채널 관리', 'app.nav.landing': '랜딩 페이지', 'app.nav.users': '사용자 센터', 'app.nav.orders': '주문 센터',
   'lp.title': '랜딩 페이지 관리', 'lp.intro': '캠페인 랜딩 페이지 링크를 원클릭으로 생성하고 채널·상품 패키지·쿠폰을 연결합니다. 사업 라인별로 자체 템플릿을 사용합니다.', 'lp.genBtn': '랜딩 페이지 생성', 'lp.genTitle': '랜딩 페이지 링크 생성', 'lp.genConfirm': '생성 후 저장', 'lp.genOk': '랜딩 페이지 링크가 생성되었습니다', 'lp.noTemplate': '이 사업 라인에는 랜딩 페이지 템플릿이 없습니다.', 'lp.noTemplateTag': '템플릿 없음', 'lp.previewBtn': '링크 미리보기', 'lp.previewHint': '생성될 링크를 먼저 미리볼 수 있습니다', 'lp.openLink': '링크 열기', 'lp.delTitle': '랜딩 페이지 삭제', 'lp.delContent': '이 랜딩 페이지 링크를 삭제할까요?', 'lp.f.line': '사업 라인', 'lp.f.channel': '채널', 'lp.f.channelTip': '코드가 생성된 채널 중에서 선택', 'lp.f.channelPlaceholder': '채널 선택(코드 포함)', 'lp.f.pickLineFirst': '먼저 사업 라인을 선택하세요', 'lp.f.noChannel': '이 사업 라인에 코드가 생성된 채널이 없습니다', 'lp.f.package': '상품 패키지', 'lp.f.packageTip': '필수, 일부 템플릿은 패키지 ID를 포함합니다', 'lp.f.coupon': '쿠폰', 'lp.f.couponCode': '쿠폰 코드', 'lp.f.couponCodeTip': '선택 사항, 특정 KOL 코드를 지정할 수 있습니다', 'lp.f.optional': '선택', 'lp.f.validRange': '캠페인 기간', 'lp.f.validRangeTip': '랜딩 페이지의 시작 및 종료 시간(현지 시간)', 'lp.f.validStart': '시작 시간', 'lp.f.validEnd': '종료 시간', 'lp.col.valid': '캠페인 기간', 'lp.col.line': '사업 라인', 'lp.col.channel': '채널', 'lp.col.package': '패키지', 'lp.col.coupon': '쿠폰', 'lp.col.url': '랜딩 페이지 URL', 'lp.col.creator': '생성자', 'lp.col.createTime': '생성 시간',
   'app.nav.packages': '상품 패키지', 'app.nav.coupons': '쿠폰 관리', 'app.nav.usersV2': '사용자 센터-2단계', 'app.nav.system': '시스템 설정', 'app.brand': 'Dino English 콘솔',
   'user.titleV2': '사용자 센터-2단계', 'user.col.appChannel': '가입 채널', 'user.col.country': '국가', 'user.col.ageGroup': '연령대', 'user.label.ageGroup': '연령대',
@@ -1133,7 +1135,7 @@ const ar: Dict = {
   'common.back': 'رجوع', 'common.save': 'حفظ', 'common.close': 'إغلاق', 'common.copy': 'نسخ',
   'common.copied': 'تم النسخ', 'common.pleaseSelect': 'يرجى الاختيار', 'common.noData': 'لا توجد بيانات',
   'common.action': 'إجراء', 'common.total': 'الإجمالي {n}', 'lang.label': 'اللغة',
-  'app.nav.channels': 'إدارة القنوات', 'app.nav.landing': 'صفحات الهبوط', 'app.nav.users': 'مركز المستخدمين', 'app.nav.orders': 'مركز الطلبات',
+  'app.nav.marketing': 'مركز التسويق', 'app.nav.channels': 'إدارة القنوات', 'app.nav.landing': 'صفحات الهبوط', 'app.nav.users': 'مركز المستخدمين', 'app.nav.orders': 'مركز الطلبات',
   'lp.title': 'إدارة صفحات الهبوط', 'lp.intro': 'أنشئ روابط صفحات الهبوط بنقرة واحدة، مع ربط القناة وحزمة المنتج والقسيمة. يستخدم كل خط عمل قالبه الخاص.', 'lp.genBtn': 'إنشاء صفحة هبوط', 'lp.genTitle': 'إنشاء رابط صفحة الهبوط', 'lp.genConfirm': 'إنشاء وحفظ', 'lp.genOk': 'تم إنشاء رابط صفحة الهبوط', 'lp.noTemplate': 'لا يوجد قالب صفحة هبوط لخط العمل هذا.', 'lp.noTemplateTag': 'بدون قالب', 'lp.previewBtn': 'معاينة الرابط', 'lp.previewHint': 'يمكنك معاينة الرابط أولاً', 'lp.openLink': 'فتح الرابط', 'lp.delTitle': 'حذف صفحة الهبوط', 'lp.delContent': 'حذف رابط صفحة الهبوط هذا؟', 'lp.f.line': 'خط العمل', 'lp.f.channel': 'القناة', 'lp.f.channelTip': 'اختر قناة لديها رمز مُولَّد', 'lp.f.channelPlaceholder': 'اختر القناة (مع الرمز)', 'lp.f.pickLineFirst': 'اختر خط العمل أولاً', 'lp.f.noChannel': 'لا توجد قناة برمز مُولَّد ضمن خط العمل هذا', 'lp.f.package': 'حزمة المنتج', 'lp.f.packageTip': 'مطلوب، بعض القوالب تتضمّن معرّف الحزمة', 'lp.f.validRange': 'فترة الحملة', 'lp.f.validRangeTip': 'وقت بدء وانتهاء صفحة الهبوط (التوقيت المحلي)', 'lp.f.validStart': 'وقت البدء', 'lp.f.validEnd': 'وقت الانتهاء', 'lp.col.valid': 'فترة الحملة', 'lp.f.coupon': 'القسيمة', 'lp.f.couponCode': 'رمز القسيمة', 'lp.f.couponCodeTip': 'اختياري، يمكن تحديد رمز KOL معيّن', 'lp.f.optional': 'اختياري', 'lp.col.line': 'خط العمل', 'lp.col.channel': 'القناة', 'lp.col.package': 'الحزمة', 'lp.col.coupon': 'القسيمة', 'lp.col.url': 'رابط صفحة الهبوط', 'lp.col.creator': 'المنشئ', 'lp.col.createTime': 'وقت الإنشاء',
   'app.nav.packages': 'حزم المنتجات', 'app.nav.coupons': 'إدارة القسائم', 'app.nav.usersV2': 'مركز المستخدمين - المرحلة 2', 'app.nav.system': 'إعدادات النظام', 'app.brand': 'وحدة Dino English',
   'user.titleV2': 'مركز المستخدمين - المرحلة 2', 'user.col.appChannel': 'قناة التسجيل', 'user.col.country': 'الدولة', 'user.col.ageGroup': 'الفئة العمرية', 'user.label.ageGroup': 'الفئة العمرية',
