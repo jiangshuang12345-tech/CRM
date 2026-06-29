@@ -151,7 +151,6 @@ export default function AppLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
-          defaultOpenKeys={['marketing']}
           items={NAV}
           onClick={({ key }) => {
             if (key !== 'marketing') navigate(key)
