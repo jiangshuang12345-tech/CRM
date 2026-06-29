@@ -39,6 +39,7 @@ const NAV_MODULE: Record<string, ModuleKey> = {
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const [openKeys, setOpenKeys] = useState<string[]>([])
   const navigate = useNavigate()
   const location = useLocation()
   const session = useSession()
@@ -151,6 +152,8 @@ export default function AppLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
+          openKeys={openKeys}
+          onOpenChange={(keys) => setOpenKeys(keys as string[])}
           items={NAV}
           onClick={({ key }) => {
             if (key !== 'marketing') navigate(key)
