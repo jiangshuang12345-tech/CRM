@@ -14,10 +14,11 @@ import {
 import { EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { setState, useStore } from '../store'
-import type { AppChannel, LoginMethod, Student, UserStatus } from '../types'
-import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES } from '../types'
+import type { AppChannel, LoginMethod, Student, UserStatus, UserType } from '../types'
+import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
+import { hasPhoneLogin, resolveUserType } from '../userType'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -43,6 +44,11 @@ const APP_CHANNEL_COLOR: Record<AppChannel, string> = {
   'Google Play': 'green',
 }
 
+const USER_TYPE_COLOR: Record<UserType, string> = {
+  正式用户: 'green',
+  测试用户: 'gold',
+}
+
 export default function UserCenterP1() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
@@ -53,6 +59,7 @@ export default function UserCenterP1() {
   const [countryFilter, setCountryFilter] = useState<string | undefined>()
   const [channelFilter, setChannelFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
@@ -79,22 +86,27 @@ export default function UserCenterP1() {
         const matchCountry = !countryFilter || s.country === countryFilter
         const matchChannel = !channelFilter || s.appChannel === channelFilter
         const matchStatus = !statusFilter || s.status === statusFilter
-        return matchKw && matchCountry && matchChannel && matchStatus
+        const matchType = !typeFilter || resolveUserType(s) === typeFilter
+        return matchKw && matchCountry && matchChannel && matchStatus && matchType
       }),
-    [scoped, keyword, countryFilter, channelFilter, statusFilter],
+    [scoped, keyword, countryFilter, channelFilter, statusFilter, typeFilter],
   )
+
+  const phoneLocked = editing ? hasPhoneLogin(editing) : false
 
   const openEdit = (s: Student) => {
     setEditing(s)
     form.setFieldsValue({
       localName: s.localName,
       ageGroup: s.ageGroup,
+      userType: resolveUserType(s),
     })
   }
 
   const submitEdit = async () => {
     const v = await form.validateFields()
     if (!editing) return
+    const locked = hasPhoneLogin(editing)
     setState((prev) => ({
       ...prev,
       students: prev.students.map((s) =>
@@ -103,6 +115,8 @@ export default function UserCenterP1() {
               ...s,
               localName: v.localName,
               ageGroup: v.ageGroup,
+              // 手机号/kakao 由规则自动判定，不接受手动修改
+              userType: locked ? s.userType : v.userType,
             }
           : s,
       ),
@@ -117,6 +131,15 @@ export default function UserCenterP1() {
       dataIndex: 'localName',
       width: 140,
       render: (_, r) => <span>{r.localName || r.name}</span>,
+    },
+    {
+      title: t('user.col.userType'),
+      dataIndex: 'userType',
+      width: 110,
+      render: (_: UserType, r: Student) => {
+        const tp = resolveUserType(r)
+        return <Tag color={USER_TYPE_COLOR[tp]}>{t(`enum.userType.${tp}`)}</Tag>
+      },
     },
     {
       title: t('user.col.ageGroup'),
@@ -203,6 +226,14 @@ export default function UserCenterP1() {
         />
         <Select
           allowClear
+          placeholder={t('user.col.userType')}
+          style={{ width: 140 }}
+          value={typeFilter}
+          onChange={setTypeFilter}
+          options={USER_TYPES.map((tp) => ({ label: t(`enum.userType.${tp}`), value: tp }))}
+        />
+        <Select
+          allowClear
           placeholder={t('user.col.appChannel')}
           style={{ width: 150 }}
           value={channelFilter}
@@ -231,7 +262,7 @@ export default function UserCenterP1() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1700 }}
+        scroll={{ x: 1810 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -253,6 +284,16 @@ export default function UserCenterP1() {
               allowClear
               placeholder={t('common.pleaseSelect')}
               options={AGE_GROUPS.map((g) => ({ label: g, value: g }))}
+            />
+          </Form.Item>
+          <Form.Item
+            name="userType"
+            label={t('user.col.userType')}
+            tooltip={phoneLocked ? t('user.userTypeAutoTip') : undefined}
+          >
+            <Select
+              disabled={phoneLocked}
+              options={USER_TYPES.map((tp) => ({ label: t(`enum.userType.${tp}`), value: tp }))}
             />
           </Form.Item>
           <Form.Item label={t('user.col.country')}>

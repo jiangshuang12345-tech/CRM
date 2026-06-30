@@ -64,10 +64,15 @@ export const APP_CHANNELS: AppChannel[] = ['App Store', 'Google Play']
 export type AgeGroup = '3-5' | '6-8' | '9-12' | '13-17' | '18+'
 export const AGE_GROUPS: AgeGroup[] = ['3-5', '6-8', '9-12', '13-17', '18+']
 
+// 用户类型：正式用户 / 测试用户
+export type UserType = '正式用户' | '测试用户'
+export const USER_TYPES: UserType[] = ['正式用户', '测试用户']
+
 export type Student = {
   studentId: string
   name: string
   localName?: string
+  userType: UserType
   gender?: '男' | '女' | '其他'
   birthday?: string // YYYY-MM-DD
   ageGroup?: AgeGroup

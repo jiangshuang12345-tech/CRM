@@ -16,10 +16,11 @@ import { EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { LoginMethod, Student, UserStatus } from '../types'
-import { USER_STATUSES } from '../types'
+import type { LoginMethod, Student, UserStatus, UserType } from '../types'
+import { USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
+import { hasPhoneLogin, resolveUserType } from '../userType'
 import { setBizFilter, useBizFilter } from '../bizFilter'
 import LocalTime from '../components/LocalTime'
 
@@ -41,6 +42,11 @@ const METHOD_COLOR: Record<LoginMethod, string> = {
   AppID: 'purple',
 }
 
+const USER_TYPE_COLOR: Record<UserType, string> = {
+  正式用户: 'green',
+  测试用户: 'gold',
+}
+
 export default function UserCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
@@ -51,6 +57,7 @@ export default function UserCenter() {
   const [keyword, setKeyword] = useState('')
   const lineFilter = useBizFilter()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
+  const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
@@ -72,10 +79,13 @@ export default function UserCenter() {
           s.account.toLowerCase().includes(kw)
         const matchLine = !lineFilter || s.businessLine === lineFilter
         const matchStatus = !statusFilter || s.status === statusFilter
-        return matchKw && matchLine && matchStatus
+        const matchType = !typeFilter || resolveUserType(s) === typeFilter
+        return matchKw && matchLine && matchStatus && matchType
       }),
-    [students, keyword, lineFilter, statusFilter, scope],
+    [students, keyword, lineFilter, statusFilter, typeFilter, scope],
   )
+
+  const phoneLocked = editing ? hasPhoneLogin(editing) : false
 
   const openEdit = (s: Student) => {
     setEditing(s)
@@ -84,12 +94,14 @@ export default function UserCenter() {
       gender: s.gender,
       birthday: s.birthday ? dayjs(s.birthday) : undefined,
       businessLine: s.businessLine,
+      userType: resolveUserType(s),
     })
   }
 
   const submitEdit = async () => {
     const v = await form.validateFields()
     if (!editing) return
+    const locked = hasPhoneLogin(editing)
     setState((prev) => ({
       ...prev,
       students: prev.students.map((s) =>
@@ -99,6 +111,8 @@ export default function UserCenter() {
               localName: v.localName,
               gender: v.gender,
               birthday: v.birthday ? v.birthday.format('YYYY-MM-DD') : undefined,
+              // 手机号/kakao 由规则自动判定，不接受手动修改
+              userType: locked ? s.userType : v.userType,
               lastModifier: actor,
             }
           : s,
@@ -114,6 +128,15 @@ export default function UserCenter() {
       dataIndex: 'localName',
       width: 140,
       render: (_, r) => <span>{r.localName || r.name}</span>,
+    },
+    {
+      title: t('user.col.userType'),
+      dataIndex: 'userType',
+      width: 110,
+      render: (_: UserType, r: Student) => {
+        const tp = resolveUserType(r)
+        return <Tag color={USER_TYPE_COLOR[tp]}>{t(`enum.userType.${tp}`)}</Tag>
+      },
     },
     {
       title: t('user.col.method'),
@@ -197,6 +220,14 @@ export default function UserCenter() {
         />
         <Select
           allowClear
+          placeholder={t('user.col.userType')}
+          style={{ width: 140 }}
+          value={typeFilter}
+          onChange={setTypeFilter}
+          options={USER_TYPES.map((tp) => ({ label: t(`enum.userType.${tp}`), value: tp }))}
+        />
+        <Select
+          allowClear
           placeholder={t('user.filterStatus')}
           style={{ width: 150 }}
           value={statusFilter}
@@ -209,7 +240,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1950 }}
+        scroll={{ x: 2060 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -235,6 +266,16 @@ export default function UserCenter() {
           </Form.Item>
           <Form.Item name="birthday" label={t('user.label.birthday')}>
             <DatePicker style={{ width: '100%' }} placeholder={t('user.birthdayPlaceholder')} />
+          </Form.Item>
+          <Form.Item
+            name="userType"
+            label={t('user.col.userType')}
+            tooltip={phoneLocked ? t('user.userTypeAutoTip') : undefined}
+          >
+            <Select
+              disabled={phoneLocked}
+              options={USER_TYPES.map((tp) => ({ label: t(`enum.userType.${tp}`), value: tp }))}
+            />
           </Form.Item>
           <Form.Item label={t('user.col.line')} tooltip={t('user.lineReadonly')}>
             <Input value={editing?.businessLine} disabled />
