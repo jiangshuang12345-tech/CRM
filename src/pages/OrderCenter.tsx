@@ -3,9 +3,11 @@ import { Card, Input, Select, Space, Table, Tag, Typography } from 'antd'
 import { SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useStore } from '../store'
-import type { Order, OrderStatus, UserStatus } from '../types'
+import type { Order, OrderStatus, UserStatus, UserType } from '../types'
+import { USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
+import { resolveUserType } from '../userType'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -16,6 +18,10 @@ const USER_STATUS_COLOR: Record<UserStatus, string> = {
   体验逾期: 'orange',
   付费: 'green',
   付费逾期: 'red',
+}
+const USER_TYPE_COLOR: Record<UserType, string> = {
+  正式用户: 'green',
+  测试用户: 'gold',
 }
 const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {
   待支付: 'orange',
@@ -36,12 +42,18 @@ export default function OrderCenter() {
   const [orderStatus, setOrderStatus] = useState<string | undefined>()
   const [payMethod, setPayMethod] = useState<string | undefined>()
   const [countryFilter, setCountryFilter] = useState<string | undefined>()
+  const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const { allowedLines } = usePerm()
   const scope = allowedLines()
 
   const lineOf = useMemo(() => {
     const map = new Map(students.map((s) => [s.studentId, s.businessLine]))
     return (studentId: string) => map.get(studentId) ?? '—'
+  }, [students])
+
+  const typeOf = useMemo(() => {
+    const map = new Map(students.map((s) => [s.studentId, resolveUserType(s)]))
+    return (studentId: string) => map.get(studentId)
   }, [students])
 
   const countryOf = useMemo(() => {
@@ -68,16 +80,27 @@ export default function OrderCenter() {
           matchKw &&
           (!orderStatus || o.orderStatus === orderStatus) &&
           (!payMethod || o.payMethod === payMethod) &&
-          (!countryFilter || countryOf(o.studentId) === countryFilter)
+          (!countryFilter || countryOf(o.studentId) === countryFilter) &&
+          (!typeFilter || typeOf(o.studentId) === typeFilter)
         )
       }),
-    [orders, keyword, orderStatus, payMethod, countryFilter, lineOf, countryOf, scope],
+    [orders, keyword, orderStatus, payMethod, countryFilter, typeFilter, lineOf, countryOf, typeOf, scope],
   )
 
   const columns: ColumnsType<Order> = [
     { title: t('order.col.id'), dataIndex: 'orderId', width: 180, fixed: 'left' },
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
     { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },
+    {
+      title: t('user.col.userType'),
+      dataIndex: 'studentId',
+      key: 'userType',
+      width: 110,
+      render: (id: string) => {
+        const tp = typeOf(id)
+        return tp ? <Tag color={USER_TYPE_COLOR[tp]}>{t(`enum.userType.${tp}`)}</Tag> : <Text type="secondary">—</Text>
+      },
+    },
     {
       title: t('user.col.country'),
       dataIndex: 'studentId',
@@ -152,6 +175,14 @@ export default function OrderCenter() {
         />
         <Select
           allowClear
+          placeholder={t('user.col.userType')}
+          style={{ width: 140 }}
+          value={typeFilter}
+          onChange={setTypeFilter}
+          options={USER_TYPES.map((tp) => ({ label: t(`enum.userType.${tp}`), value: tp }))}
+        />
+        <Select
+          allowClear
           placeholder={t('order.filterStatus')}
           style={{ width: 150 }}
           value={orderStatus}
@@ -172,7 +203,7 @@ export default function OrderCenter() {
         rowKey="orderId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1770 }}
+        scroll={{ x: 1880 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
     </Card>
