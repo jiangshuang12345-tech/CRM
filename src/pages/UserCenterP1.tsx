@@ -15,7 +15,7 @@ import { EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { AppChannel, LoginMethod, Student, StudentEditLog, UserStatus, UserType } from '../types'
+import type { AppChannel, LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
 import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
@@ -109,14 +109,21 @@ export default function UserCenterP1() {
     const v = await form.validateFields()
     if (!editing) return
     const locked = hasPhoneLogin(editing)
-    const changed: string[] = []
-    if ((v.localName || '') !== (editing.localName || '')) changed.push(t('user.label.localName'))
-    if ((v.ageGroup || '') !== (editing.ageGroup || '')) changed.push(t('user.label.ageGroup'))
-    if (!locked && v.userType !== resolveUserType(editing)) changed.push(t('user.col.userType'))
+    const changes: StudentFieldChange[] = []
+    if ((v.localName || '') !== (editing.localName || ''))
+      changes.push({ field: t('user.label.localName'), before: editing.localName || '', after: v.localName || '' })
+    if ((v.ageGroup || '') !== (editing.ageGroup || ''))
+      changes.push({ field: t('user.label.ageGroup'), before: editing.ageGroup || '', after: v.ageGroup || '' })
+    if (!locked && v.userType !== resolveUserType(editing))
+      changes.push({
+        field: t('user.col.userType'),
+        before: t(`enum.userType.${resolveUserType(editing)}`),
+        after: t(`enum.userType.${v.userType}`),
+      })
     const entry: StudentEditLog = {
       time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
       action: 'user.hist.edit',
-      detail: changed.join('、') || undefined,
+      changes,
       modifier: actor,
     }
     setState((prev) => ({
@@ -129,8 +136,8 @@ export default function UserCenterP1() {
               ageGroup: v.ageGroup,
               // 手机号/kakao 由规则自动判定，不接受手动修改
               userType: locked ? s.userType : v.userType,
-              lastModifier: changed.length ? actor : s.lastModifier,
-              editHistory: changed.length ? [entry, ...(s.editHistory || [])] : s.editHistory,
+              lastModifier: changes.length ? actor : s.lastModifier,
+              editHistory: changes.length ? [entry, ...(s.editHistory || [])] : s.editHistory,
             }
           : s,
       ),
@@ -326,7 +333,7 @@ export default function UserCenterP1() {
 
       <Modal
         open={!!historyOf}
-        title={t('user.hist.title', { name: historyOf?.localName || historyOf?.name || '' })}
+        title={t('user.hist.title')}
         onCancel={() => setHistoryOf(null)}
         footer={null}
         width={640}
@@ -339,14 +346,28 @@ export default function UserCenterP1() {
           dataSource={historyOf?.editHistory ?? []}
           locale={{ emptyText: t('user.hist.empty') }}
           columns={[
-            { title: t('user.hist.col.time'), dataIndex: 'time', width: 180 },
-            { title: t('user.hist.col.action'), dataIndex: 'action', width: 120, render: (v: string) => t(v) },
+            { title: t('user.hist.col.time'), dataIndex: 'time', width: 170 },
             {
               title: t('user.hist.col.detail'),
-              dataIndex: 'detail',
-              render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+              dataIndex: 'changes',
+              render: (changes: StudentFieldChange[] | undefined, r: StudentEditLog) => {
+                if (changes && changes.length)
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {changes.map((c, i) => (
+                        <div key={i}>
+                          <Text type="secondary">{c.field}：</Text>
+                          <Text delete type="secondary">{c.before || t('user.hist.blank')}</Text>
+                          <Text type="secondary"> → </Text>
+                          <Text strong>{c.after || t('user.hist.blank')}</Text>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                return r.detail ? <span>{r.detail}</span> : <Text type="secondary">—</Text>
+              },
             },
-            { title: t('user.hist.col.modifier'), dataIndex: 'modifier', width: 200 },
+            { title: t('user.hist.col.modifier'), dataIndex: 'modifier', width: 190 },
           ]}
         />
       </Modal>

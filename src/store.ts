@@ -17,7 +17,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v28'
+const KEY = 'dinoai_crm_state_v30'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -214,8 +214,21 @@ function seed(): AppState {
       birthday: '2016-05-12', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO',
       countryCode: '+82', channelCode: 'K2000Gh', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: 'admin@dinoai.ai',
       editHistory: [
-        { time: now.subtract(2, 'day').add(1, 'hour').format('YYYY-MM-DD HH:mm:ss'), action: 'user.hist.edit', detail: '当地姓名、年龄段', modifier: 'ops.kr@dinoai.ai' },
-        { time: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), action: 'user.hist.edit', detail: '年龄段', modifier: 'admin@dinoai.ai' },
+        {
+          time: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+          action: 'user.hist.edit',
+          changes: [{ field: '年龄段', before: '6-8', after: '9-12' }],
+          modifier: 'admin@dinoai.ai',
+        },
+        {
+          time: now.subtract(2, 'day').add(1, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+          action: 'user.hist.edit',
+          changes: [
+            { field: '学生姓名', before: '지우', after: '김지우' },
+            { field: '年龄段', before: '3-5', after: '6-8' },
+          ],
+          modifier: 'ops.kr@dinoai.ai',
+        },
       ],
     },
     {
