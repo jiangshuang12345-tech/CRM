@@ -68,6 +68,14 @@ export const AGE_GROUPS: AgeGroup[] = ['3-5', '6-8', '9-12', '13-17', '18+']
 export type UserType = '正式用户' | '测试用户'
 export const USER_TYPES: UserType[] = ['正式用户', '测试用户']
 
+// 学生信息修改历史：每次操作的时间、行为（i18n key）、修改人
+export type StudentEditLog = {
+  time: string
+  action: string // i18n key，如 'user.hist.edit'
+  detail?: string // 变更明细（可选，纯文本）
+  modifier: string
+}
+
 export type Student = {
   studentId: string
   name: string
@@ -89,6 +97,7 @@ export type Student = {
   status: UserStatus
   expireTime?: string // 到期时间
   lastModifier?: string // 最近修改人
+  editHistory?: StudentEditLog[] // 修改历史（时间 / 行为 / 修改人）
 }
 
 export type OrderStatus = '待支付' | '已支付' | '已退款' | '已取消'

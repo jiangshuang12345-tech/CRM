@@ -11,10 +11,11 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
+import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { AppChannel, LoginMethod, Student, UserStatus, UserType } from '../types'
+import type { AppChannel, LoginMethod, Student, StudentEditLog, UserStatus, UserType } from '../types'
 import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
@@ -52,7 +53,7 @@ const USER_TYPE_COLOR: Record<UserType, string> = {
 export default function UserCenterP1() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
-  const { can, allowedLines } = usePerm()
+  const { can, allowedLines, actor } = usePerm()
   const canEdit = can('users') === 'operate'
   const scope = allowedLines()
   const [keyword, setKeyword] = useState('')
@@ -61,6 +62,7 @@ export default function UserCenterP1() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
+  const [historyOf, setHistoryOf] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
   // 数据权限：底层仍按业务线隔离（一期不展示业务线，仅展示国家）
@@ -107,6 +109,16 @@ export default function UserCenterP1() {
     const v = await form.validateFields()
     if (!editing) return
     const locked = hasPhoneLogin(editing)
+    const changed: string[] = []
+    if ((v.localName || '') !== (editing.localName || '')) changed.push(t('user.label.localName'))
+    if ((v.ageGroup || '') !== (editing.ageGroup || '')) changed.push(t('user.label.ageGroup'))
+    if (!locked && v.userType !== resolveUserType(editing)) changed.push(t('user.col.userType'))
+    const entry: StudentEditLog = {
+      time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      action: 'user.hist.edit',
+      detail: changed.join('、') || undefined,
+      modifier: actor,
+    }
     setState((prev) => ({
       ...prev,
       students: prev.students.map((s) =>
@@ -117,6 +129,8 @@ export default function UserCenterP1() {
               ageGroup: v.ageGroup,
               // 手机号/kakao 由规则自动判定，不接受手动修改
               userType: locked ? s.userType : v.userType,
+              lastModifier: changed.length ? actor : s.lastModifier,
+              editHistory: changed.length ? [entry, ...(s.editHistory || [])] : s.editHistory,
             }
           : s,
       ),
@@ -131,6 +145,12 @@ export default function UserCenterP1() {
       dataIndex: 'localName',
       width: 140,
       render: (_, r) => <span>{r.localName || r.name}</span>,
+    },
+    {
+      title: t('user.col.status'),
+      dataIndex: 'status',
+      width: 100,
+      render: (v: UserStatus) => <Tag color={STATUS_COLOR[v]}>{t(`enum.status.${v}`)}</Tag>,
     },
     {
       title: t('user.col.userType'),
@@ -185,16 +205,18 @@ export default function UserCenterP1() {
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country} />,
     },
     {
-      title: t('user.col.status'),
-      dataIndex: 'status',
-      width: 100,
-      render: (v: UserStatus) => <Tag color={STATUS_COLOR[v]}>{t(`enum.status.${v}`)}</Tag>,
-    },
-    {
       title: t('user.col.modifier'),
       dataIndex: 'lastModifier',
-      width: 180,
-      render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+      width: 200,
+      render: (v: string | undefined, r: Student) =>
+        v ? (
+          <Button type="link" style={{ padding: 0, height: 'auto' }} onClick={() => setHistoryOf(r)}>
+            {v}
+            <HistoryOutlined style={{ marginInlineStart: 6 }} />
+          </Button>
+        ) : (
+          <Text type="secondary">—</Text>
+        ),
     },
     ...(canEdit
       ? [
@@ -300,6 +322,33 @@ export default function UserCenterP1() {
             <Input value={editing?.country} disabled />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        open={!!historyOf}
+        title={t('user.hist.title', { name: historyOf?.localName || historyOf?.name || '' })}
+        onCancel={() => setHistoryOf(null)}
+        footer={null}
+        width={640}
+        destroyOnClose
+      >
+        <Table<StudentEditLog>
+          rowKey={(r) => `${r.time}-${r.modifier}`}
+          size="small"
+          pagination={false}
+          dataSource={historyOf?.editHistory ?? []}
+          locale={{ emptyText: t('user.hist.empty') }}
+          columns={[
+            { title: t('user.hist.col.time'), dataIndex: 'time', width: 180 },
+            { title: t('user.hist.col.action'), dataIndex: 'action', width: 120, render: (v: string) => t(v) },
+            {
+              title: t('user.hist.col.detail'),
+              dataIndex: 'detail',
+              render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+            },
+            { title: t('user.hist.col.modifier'), dataIndex: 'modifier', width: 200 },
+          ]}
+        />
       </Modal>
     </Card>
   )

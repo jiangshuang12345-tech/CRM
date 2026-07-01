@@ -17,7 +17,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v27'
+const KEY = 'dinoai_crm_state_v28'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -213,6 +213,10 @@ function seed(): AppState {
       studentId: '2060199610824355842', name: 'Ji-woo Kim', localName: '김지우', userType: '正式用户', gender: '男',
       birthday: '2016-05-12', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO',
       countryCode: '+82', channelCode: 'K2000Gh', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: 'admin@dinoai.ai',
+      editHistory: [
+        { time: now.subtract(2, 'day').add(1, 'hour').format('YYYY-MM-DD HH:mm:ss'), action: 'user.hist.edit', detail: '当地姓名、年龄段', modifier: 'ops.kr@dinoai.ai' },
+        { time: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), action: 'user.hist.edit', detail: '年龄段', modifier: 'admin@dinoai.ai' },
+      ],
     },
     {
       studentId: '2060199610824355843', name: 'Abdullah Al-Saud', localName: 'عبدالله', userType: '正式用户', gender: '男',
