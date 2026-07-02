@@ -21,7 +21,7 @@ import { CheckOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { LoginMethod, SalesFollowLog, Student, UserType } from '../types'
+import type { SalesFollowLog, Student, UserType } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
@@ -33,14 +33,6 @@ const { Text } = Typography
 const USER_TYPE_COLOR: Record<UserType, string> = {
   正式用户: 'green',
   测试用户: 'gold',
-}
-
-const METHOD_COLOR: Record<LoginMethod, string> = {
-  谷歌邮箱: 'red',
-  Facebook: 'blue',
-  kakao: 'gold',
-  手机号: 'green',
-  AppID: 'purple',
 }
 
 // 跟进进度标签配色
@@ -179,26 +171,25 @@ export default function SalesCenter() {
       return <Tag color={USER_TYPE_COLOR[tp]}>{t(`enum.userType.${tp}`)}</Tag>
     },
   }
-  // 与「用户中心-二期」保持一致（不含 用户状态 / 到期时间 / 最近修改人）
+  // 基于「用户中心-二期」字段（不含 用户状态 / 到期时间 / 最近修改人 / 注册方式 / 渠道 code）
   const userColumns: ColumnsType<Student> = [
     { title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left' },
     { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
     typeCol,
     {
-      title: t('user.col.method'),
-      dataIndex: 'loginMethod',
-      width: 120,
-      render: (v: LoginMethod) => <Tag color={METHOD_COLOR[v]}>{t(`enum.method.${v}`)}</Tag>,
+      title: t('user.col.ageGroup'),
+      dataIndex: 'ageGroup',
+      width: 100,
+      render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
+    { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (v) => (v ? <Tag>{v}</Tag> : <Text type="secondary">—</Text>) },
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',
       width: 220,
       render: (v: string, r) => `${r.businessLine} · ${v}`,
     },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
-    { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
     {
       title: t('user.col.regTime'),
       dataIndex: 'registerTime',
@@ -299,7 +290,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={poolColumns}
                   dataSource={poolData}
-                  scroll={{ x: 1610 }}
+                  scroll={{ x: 1280 }}
                   locale={{ emptyText: t('sales.emptyPool') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
@@ -333,7 +324,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: 2450 }}
+                  scroll={{ x: 2130 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
