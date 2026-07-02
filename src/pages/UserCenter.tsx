@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import {
+  Alert,
   Button,
   Card,
   DatePicker,
@@ -21,6 +22,7 @@ import { USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
+import { inUserCenter } from '../funnel'
 import { setBizFilter, useBizFilter } from '../bizFilter'
 import LocalTime from '../components/LocalTime'
 
@@ -71,6 +73,8 @@ export default function UserCenter() {
     () =>
       students.filter((s) => {
         if (scope && !scope.includes(s.businessLine)) return false
+        // 分流规则：已注册未体验且有手机号的用户进入「销售中心」，其余展示在此
+        if (!inUserCenter(s)) return false
         const kw = keyword.trim().toLowerCase()
         const matchKw =
           !kw ||
@@ -201,6 +205,7 @@ export default function UserCenter() {
 
   return (
     <Card className="page-card" bordered={false} title={<span className="section-title">{t('user.titleV2')}</span>}>
+      <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('user.funnelTip')} />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input
           allowClear

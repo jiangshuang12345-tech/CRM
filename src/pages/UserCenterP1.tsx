@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react'
 import {
-  Alert,
   Button,
   Card,
   Form,
@@ -21,7 +20,6 @@ import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
-import { inUserCenter } from '../funnel'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
