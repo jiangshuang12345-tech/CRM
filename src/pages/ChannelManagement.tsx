@@ -268,12 +268,13 @@ export default function ChannelManagement() {
       )}
       {canEdit && (
       <Space size={2} className="node-actions">
-        <Tooltip title={t('ch.fillParams')}>
+        <Tooltip title={n.code ? t('ch.fillParams') : t('ch.fillParamsNeedCode')}>
           <Button
             type="text"
             size="small"
             icon={<SlidersOutlined />}
-            style={{ color: '#2F6BFF' }}
+            style={{ color: n.code ? '#2F6BFF' : undefined }}
+            disabled={!n.code}
             onClick={() => openParams(lineId, typeId, n)}
           />
         </Tooltip>
