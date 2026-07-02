@@ -47,7 +47,6 @@ export type Lang =
 export const LANGS: { value: Lang; label: string; flag: string }[] = [
   { value: 'en', label: 'English', flag: '🇬🇧' },
   { value: 'ko', label: '한국어', flag: '🇰🇷' },
-  { value: 'ar', label: 'العربية', flag: '🇸🇦' },
   { value: 'zh', label: '简体中文', flag: '🇨🇳' },
 ]
 
