@@ -14,6 +14,7 @@ import {
   GlobalOutlined,
   UserSwitchOutlined,
   ShopOutlined,
+  SolutionOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout, useSession } from '../auth'
@@ -30,6 +31,7 @@ const NAV_MODULE: Record<string, ModuleKey> = {
   '/channels': 'channels',
   '/landing': 'landing',
   '/users': 'users',
+  '/sales-followup': 'users',
   '/users-v2': 'users',
   '/orders': 'orders',
   '/packages': 'packages',
@@ -63,6 +65,7 @@ export default function AppLayout() {
   // 一期功能
   const topNav = [
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
+    { key: '/sales-followup', icon: <SolutionOutlined />, label: t('app.nav.sales') },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
   ].filter((n) => visible(n.key))
 
@@ -99,6 +102,7 @@ export default function AppLayout() {
     '/channels': t('app.nav.channels'),
     '/landing': t('app.nav.landing'),
     '/users': t('app.nav.users'),
+    '/sales-followup': t('app.nav.sales'),
     '/users-v2': t('app.nav.usersV2'),
     '/orders': t('app.nav.orders'),
     '/packages': t('app.nav.packages'),

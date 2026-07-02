@@ -7,6 +7,7 @@ import AppLayout from './components/AppLayout'
 import ChannelManagement from './pages/ChannelManagement'
 import UserCenter from './pages/UserCenter'
 import UserCenterP1 from './pages/UserCenterP1'
+import SalesFollowup from './pages/SalesFollowup'
 import OrderCenter from './pages/OrderCenter'
 import CoursePackagePage from './pages/CoursePackage'
 import CouponPage from './pages/Coupon'
@@ -67,6 +68,7 @@ export default function App() {
           <Route path="channels" element={<Guard module="channels"><ChannelManagement /></Guard>} />
           <Route path="landing" element={<Guard module="landing"><LandingPageManagement /></Guard>} />
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
+          <Route path="sales-followup" element={<Guard module="users"><SalesFollowup /></Guard>} />
           <Route path="users-v2" element={<Guard module="users"><UserCenter /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />

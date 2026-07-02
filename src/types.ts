@@ -106,6 +106,7 @@ export type Student = {
   expireTime?: string // 到期时间
   lastModifier?: string // 最近修改人
   editHistory?: StudentEditLog[] // 修改历史（时间 / 行为 / 修改人）
+  salesFollowedUp?: boolean // 销售是否已跟进（仅「已注册未体验且有手机号」的线索）
 }
 
 export type OrderStatus = '待支付' | '已支付' | '已退款' | '已取消'
