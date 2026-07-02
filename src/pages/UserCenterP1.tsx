@@ -68,10 +68,8 @@ export default function UserCenterP1() {
   const [form] = Form.useForm()
 
   // 数据权限：底层仍按业务线隔离（一期不展示业务线，仅展示国家）
-  // 分流规则：已注册未体验且有手机号的用户流入「销售跟进」，其余进入用户中心
   const scoped = useMemo(
-    () =>
-      (scope ? students.filter((s) => scope.includes(s.businessLine)) : students).filter(inUserCenter),
+    () => (scope ? students.filter((s) => scope.includes(s.businessLine)) : students),
     [students, scope],
   )
 
@@ -248,12 +246,6 @@ export default function UserCenterP1() {
 
   return (
     <Card className="page-card" bordered={false} title={<span className="section-title">{t('user.title')}</span>}>
-      <Alert
-        type="info"
-        showIcon
-        style={{ marginBottom: 16 }}
-        message={t('user.funnelTip')}
-      />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input
           allowClear
