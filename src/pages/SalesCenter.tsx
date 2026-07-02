@@ -272,6 +272,7 @@ export default function SalesCenter() {
 
   return (
     <Card className="page-card" bordered={false} title={<span className="section-title">{t('sales.title')}</span>}>
+      <Alert type="warning" showIcon message={t('phase2.banner')} style={{ marginBottom: 16 }} />
       <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.flow')} description={t('sales.intro')} />
 
       <Tabs

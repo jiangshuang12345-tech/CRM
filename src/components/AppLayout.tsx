@@ -65,7 +65,7 @@ export default function AppLayout() {
   // 一期功能
   const topNav = [
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
-    { key: '/sales', icon: <SolutionOutlined />, label: t('app.nav.sales') },
+    { key: '/sales', icon: <SolutionOutlined />, label: phase2Label(t('app.nav.sales')) },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
   ].filter((n) => visible(n.key))
 
