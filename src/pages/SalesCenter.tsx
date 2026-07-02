@@ -183,7 +183,7 @@ export default function SalesCenter() {
       render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
-    { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (v) => (v ? <Tag>{v}</Tag> : <Text type="secondary">—</Text>) },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',
