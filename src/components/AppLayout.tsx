@@ -65,7 +65,6 @@ export default function AppLayout() {
   // 一期功能
   const topNav = [
     { key: '/users', icon: <TeamOutlined />, label: t('app.nav.users') },
-    { key: '/sales', icon: <SolutionOutlined />, label: phase2Label(t('app.nav.sales')) },
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
   ].filter((n) => visible(n.key))
 
@@ -77,14 +76,21 @@ export default function AppLayout() {
     { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
   ].filter((n) => visible(n.key))
 
-  // 其他二期功能
-  const tailNav = [
+  // 二期功能（销售中心 → 用户中心二期 → 营销中心 → 系统配置）
+  const salesNav = [{ key: '/sales', icon: <SolutionOutlined />, label: phase2Label(t('app.nav.sales')) }].filter((n) =>
+    visible(n.key),
+  )
+  const usersV2Nav = [
     { key: '/users-v2', icon: <TeamOutlined />, label: phase2Label(t('app.nav.usersV2')) },
+  ].filter((n) => visible(n.key))
+  const systemNav = [
     { key: '/system', icon: <SafetyOutlined />, label: phase2Label(t('app.nav.system')) },
   ].filter((n) => visible(n.key))
 
   const NAV = [
     ...topNav,
+    ...salesNav,
+    ...usersV2Nav,
     ...(marketingChildren.length
       ? [
           {
@@ -95,7 +101,7 @@ export default function AppLayout() {
           },
         ]
       : []),
-    ...tailNav,
+    ...systemNav,
   ]
 
   const TITLES: Record<string, string> = {
