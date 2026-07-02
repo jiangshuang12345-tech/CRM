@@ -21,45 +21,59 @@ import { CopyOutlined, DeleteOutlined, LinkOutlined, ThunderboltOutlined } from 
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, uid, useStore } from '../store'
-import type { ChannelLevelNode, ChannelLine, LandingPage } from '../types'
+import type { ChannelLevelNode, ChannelLine, ChannelParams, LandingPage } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 
 const { Text, Paragraph } = Typography
 
-// 各业务线的落地页模版（关联渠道 / 商品包 / 优惠码）
-const LANDING_TEMPLATES: Record<
-  string,
-  (p: { channel: string; packageId?: string; coupon?: string }) => string
-> = {
-  韩国: ({ channel, packageId, coupon }) => {
-    const inner =
-      `/website/payment/sku/?id=${packageId ?? ''}&channel=${channel}` +
-      (coupon ? `&coupon=${coupon}` : '')
-    return `https://kr.dinoai.ai/website/signin/?backurl=${encodeURIComponent(inner)}`
-  },
-  越南: ({ channel, coupon }) =>
-    `https://vn.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
-    (coupon ? `&coupon=${coupon}` : ''),
-  印尼: ({ channel, coupon }) =>
-    `https://in.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
-    (coupon ? `&coupon=${coupon}` : ''),
-  马来西亚: ({ channel, coupon }) =>
-    `https://ma.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
-    (coupon ? `&coupon=${coupon}` : ''),
-  马来: ({ channel, coupon }) =>
-    `https://ma.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
-    (coupon ? `&coupon=${coupon}` : ''),
+// 渠道配置的参数拼成查询串（带入落地页链接）
+function paramSuffix(params?: ChannelParams): string {
+  if (!params) return ''
+  let s = ''
+  if (params.param1) s += `&p1=${encodeURIComponent(params.param1)}`
+  if (params.param2) s += `&p2=${encodeURIComponent(params.param2)}`
+  return s
 }
 
-// 收集某业务线下所有「已生成 code」的渠道（带层级路径）
-function collectCodes(line: ChannelLine): { code: string; path: string }[] {
-  const res: { code: string; path: string }[] = []
+// 各业务线的落地页模版（关联渠道 / 商品包 / 优惠码 / 渠道参数）
+const LANDING_TEMPLATES: Record<
+  string,
+  (p: { channel: string; packageId?: string; coupon?: string; params?: string }) => string
+> = {
+  韩国: ({ channel, packageId, coupon, params }) => {
+    const inner =
+      `/website/payment/sku/?id=${packageId ?? ''}&channel=${channel}` +
+      (coupon ? `&coupon=${coupon}` : '') +
+      (params ?? '')
+    return `https://kr.dinoai.ai/website/signin/?backurl=${encodeURIComponent(inner)}`
+  },
+  越南: ({ channel, coupon, params }) =>
+    `https://vn.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
+    (coupon ? `&coupon=${coupon}` : '') +
+    (params ?? ''),
+  印尼: ({ channel, coupon, params }) =>
+    `https://in.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
+    (coupon ? `&coupon=${coupon}` : '') +
+    (params ?? ''),
+  马来西亚: ({ channel, coupon, params }) =>
+    `https://ma.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
+    (coupon ? `&coupon=${coupon}` : '') +
+    (params ?? ''),
+  马来: ({ channel, coupon, params }) =>
+    `https://ma.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
+    (coupon ? `&coupon=${coupon}` : '') +
+    (params ?? ''),
+}
+
+// 收集某业务线下所有「已生成 code」的渠道（带层级路径 + 渠道参数）
+function collectCodes(line: ChannelLine): { code: string; path: string; params?: ChannelParams }[] {
+  const res: { code: string; path: string; params?: ChannelParams }[] = []
   for (const tp of line.children) {
     const walk = (nodes: ChannelLevelNode[], names: string[]) => {
       for (const n of nodes) {
         const path = [tp.name, ...names, n.name].join(' / ')
-        if (n.code) res.push({ code: n.code, path })
+        if (n.code) res.push({ code: n.code, path, params: n.params })
         walk(n.children, [...names, n.name])
       }
     }
@@ -92,6 +106,7 @@ export default function LandingPageManagement() {
   const [preview, setPreview] = useState<string | null>(null)
   const line = Form.useWatch('businessLine', form) as string | undefined
   const couponId = Form.useWatch('couponId', form) as string | undefined
+  const channelCode = Form.useWatch('channelCode', form) as string | undefined
 
   const lines = useMemo(() => {
     const all = channels.map((c) => c.name)
@@ -107,6 +122,12 @@ export default function LandingPageManagement() {
     () => coupons.find((c) => c.id === couponId)?.codes ?? [],
     [coupons, couponId],
   )
+  const selectedChannel = useMemo(
+    () => codeOptions.find((c) => c.code === channelCode),
+    [codeOptions, channelCode],
+  )
+  const channelParams = selectedChannel?.params
+  const hasChannelParams = !!(channelParams?.param1 || channelParams?.param2)
 
   const hasTemplate = !!line && !!LANDING_TEMPLATES[line]
 
@@ -119,10 +140,12 @@ export default function LandingPageManagement() {
     const v = form.getFieldsValue()
     if (!v.businessLine || !LANDING_TEMPLATES[v.businessLine]) return null
     if (!v.channelCode) return null
+    const ch = codeOptions.find((c) => c.code === v.channelCode)
     return LANDING_TEMPLATES[v.businessLine]({
       channel: v.channelCode,
       packageId: v.packageId,
       coupon: v.couponCode,
+      params: paramSuffix(ch?.params),
     })
   }
 
@@ -153,6 +176,8 @@ export default function LandingPageManagement() {
       businessLine: v.businessLine,
       channelCode: v.channelCode,
       channelName: ch?.path,
+      param1: ch?.params?.param1 || undefined,
+      param2: ch?.params?.param2 || undefined,
       packageId: v.packageId,
       packageName: pkg?.name,
       couponId: v.couponId,
@@ -190,6 +215,12 @@ export default function LandingPageManagement() {
           {v || '—'}
           <br />
           <Text code style={{ fontSize: 12 }}>{r.channelCode}</Text>
+          {(r.param1 || r.param2) && (
+            <div style={{ marginTop: 4 }}>
+              {r.param1 && <Tag color="blue" style={{ marginInlineEnd: 4 }}>{t('ch.param1')}: {r.param1}</Tag>}
+              {r.param2 && <Tag color="cyan">{t('ch.param2')}: {r.param2}</Tag>}
+            </div>
+          )}
         </span>
       ),
     },
@@ -321,6 +352,24 @@ export default function LandingPageManagement() {
               options={codeOptions.map((c) => ({ label: `${c.path}  ·  ${c.code}`, value: c.code }))}
             />
           </Form.Item>
+
+          {channelCode && (
+            <div style={{ marginTop: -12, marginBottom: 16 }}>
+              {hasChannelParams ? (
+                <Space size={6} wrap>
+                  <Text type="secondary" style={{ fontSize: 12 }}>{t('lp.f.channelParams')}</Text>
+                  {channelParams?.param1 && (
+                    <Tag color="blue">{t('ch.param1')}: {channelParams.param1}</Tag>
+                  )}
+                  {channelParams?.param2 && (
+                    <Tag color="cyan">{t('ch.param2')}: {channelParams.param2}</Tag>
+                  )}
+                </Space>
+              ) : (
+                <Text type="secondary" style={{ fontSize: 12 }}>{t('lp.f.noChannelParams')}</Text>
+              )}
+            </div>
+          )}
 
           <Form.Item
             name="packageId"

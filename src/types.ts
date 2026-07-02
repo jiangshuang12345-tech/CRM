@@ -170,6 +170,8 @@ export type LandingPage = {
   businessLine: string
   channelCode: string
   channelName?: string
+  param1?: string // 渠道参数1（生成时带入链接）
+  param2?: string // 渠道参数2
   packageId?: string
   packageName?: string
   couponId?: string
