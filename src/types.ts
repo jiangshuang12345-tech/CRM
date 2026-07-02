@@ -106,7 +106,24 @@ export type Student = {
   expireTime?: string // 到期时间
   lastModifier?: string // 最近修改人
   editHistory?: StudentEditLog[] // 修改历史（时间 / 行为 / 修改人）
-  salesFollowedUp?: boolean // 销售是否已跟进（仅「已注册未体验且有手机号」的线索）
+  // ---- 销售中心（线索跟进）----
+  channelSource?: string // 渠道来源（投放/KOL 归因标识）
+  salesOwner?: string // 领取人（销售）
+  salesProgress?: SalesProgress // 跟进进度（仅销售中心线索）
+  salesLatestNote?: string // 最新备注
+  salesNextFollow?: string // 下次跟进时间
+  salesUpdatedAt?: string // 最后更新时间
+  salesHistory?: SalesFollowLog[] // 跟进记录
+}
+
+// 销售跟进进度（线索在销售中心的状态；转「已体验/已付费」时改写 status 并离开销售中心）
+export type SalesProgress = '待领取' | '跟进中' | '暂不跟进'
+
+export type SalesFollowLog = {
+  progress: string
+  note: string
+  time: string
+  owner: string
 }
 
 export type OrderStatus = '待支付' | '已支付' | '已退款' | '已取消'
@@ -171,6 +188,7 @@ export type ModuleKey =
   | 'packages'
   | 'coupons'
   | 'users'
+  | 'sales'
   | 'orders'
   | 'system'
 
@@ -180,6 +198,7 @@ export const PERMISSION_MODULES: ModuleKey[] = [
   'packages',
   'coupons',
   'users',
+  'sales',
   'orders',
   'system',
 ]

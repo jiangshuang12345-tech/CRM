@@ -17,7 +17,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v31'
+const KEY = 'dinoai_crm_state_v32'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -238,8 +238,8 @@ function seed(): AppState {
     },
     {
       studentId: '2060199610824355844', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', userType: '测试用户', gender: '女',
-      birthday: '2017-01-20', ageGroup: '6-8', loginMethod: '手机号', account: '+84 00000-1234', phone: '+84 00000-1234', businessLine: '越南', registerChannel: 'KOL / TikTok',
-      countryCode: '+84', channelCode: 'Tk88Vzq', country: '越南', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '注册',
+      birthday: '2017-01-20', ageGroup: '6-8', loginMethod: '手机号', account: '+84 00000-1234', phone: '+84 00000-1234', businessLine: '越南', registerChannel: 'KOL / TikTok', channelSource: 'VN_META_JULY',
+      countryCode: '+84', channelCode: 'Tk88Vzq', country: '越南', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '注册', salesProgress: '待领取',
     },
     {
       studentId: '2060199610824355845', name: 'Tan Wei Ming', localName: '陈伟明', userType: '测试用户', gender: '男',
@@ -252,16 +252,36 @@ function seed(): AppState {
       countryCode: '+82', channelCode: 'Ig58Kpq', country: '韩国', appChannel: 'Google Play', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验逾期', expireTime: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      // 已注册未体验 + 有手机号（正式）→ 进入「销售跟进」列表
+      // 已注册未体验 + 有手机号（正式）→ 进入「销售中心-待领取」
       studentId: '2060199610824355847', name: 'Putri Ayu', localName: 'Putri', userType: '正式用户', gender: '女',
-      birthday: '2015-07-15', ageGroup: '9-12', loginMethod: '手机号', account: '+62 812-3456-7890', phone: '+62 812-3456-7890', businessLine: '其他', registerChannel: 'KOL / TikTok',
-      countryCode: '+62', channelCode: 'Id77Xyz', country: '印尼', appChannel: 'Google Play', registerTime: now.subtract(6, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '注册',
+      birthday: '2015-07-15', ageGroup: '9-12', loginMethod: '手机号', account: '+62 812-3456-7890', phone: '+62 812-3456-7890', businessLine: '其他', registerChannel: 'KOL / TikTok', channelSource: 'ID_TIKTOK_JULY',
+      countryCode: '+62', channelCode: 'Id77Xyz', country: '印尼', appChannel: 'Google Play', registerTime: now.subtract(6, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '注册', salesProgress: '待领取',
     },
     {
       // 已注册未体验 + 无手机号（第三方登录）→ 直接进入用户中心
       studentId: '2060199610824355848', name: 'Somchai Prom', localName: 'สมชาย', userType: '正式用户', gender: '男',
-      birthday: '2016-02-10', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'somchai.prom@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO',
+      birthday: '2016-02-10', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'somchai.prom@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO', channelSource: 'TH_ASO',
       countryCode: '+66', channelCode: 'Th55Abc', country: '泰国', appChannel: 'App Store', registerTime: now.subtract(3, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '注册',
+    },
+    {
+      // 已领取跟进中的线索（供「我的跟进」演示）
+      studentId: '2060199610824356003', name: 'Hana', localName: 'Hana', userType: '正式用户', gender: '女',
+      birthday: '2016-04-18', ageGroup: '9-12', loginMethod: '手机号', account: '+60 17-451 9920', phone: '+60 17-451 9920', businessLine: '马来', registerChannel: 'Google Search', channelSource: 'MY_GOOGLE_SEARCH',
+      countryCode: '+60', channelCode: 'My33Grh', country: '马来西亚', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '注册',
+      salesOwner: 'admin@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '已联系家长，确认体验时间', salesNextFollow: now.add(4, 'hour').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+      salesHistory: [
+        { progress: '跟进中', note: '已联系家长，确认体验时间', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'admin@dinoai.ai' },
+        { progress: '跟进中', note: '销售已领取，开始跟进已注册用户', time: now.subtract(20, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'admin@dinoai.ai' },
+      ],
+    },
+    {
+      studentId: '2060199610824356004', name: 'Ji-won', localName: '지원', userType: '正式用户', gender: '男',
+      birthday: '2015-12-01', ageGroup: '9-12', loginMethod: '手机号', account: '+82 10-8821-2390', phone: '+82 10-8821-2390', businessLine: '韩国', registerChannel: 'Meta', channelSource: 'KR_META_SUMMER',
+      countryCode: '+82', channelCode: 'Kr21Msm', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '注册',
+      salesOwner: 'admin@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '家长还在了解课程价格', salesNextFollow: now.add(1, 'day').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+      salesHistory: [
+        { progress: '暂不跟进', note: '家长还在了解课程价格', time: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'admin@dinoai.ai' },
+      ],
     },
   ]
 
@@ -382,6 +402,7 @@ function seed(): AppState {
         packages: 'view',
         coupons: 'view',
         users: 'none',
+        sales: 'none',
         orders: 'none',
         system: 'none',
       },
@@ -398,6 +419,7 @@ function seed(): AppState {
         packages: 'operate',
         coupons: 'operate',
         users: 'view',
+        sales: 'view',
         orders: 'view',
         system: 'none',
       },
@@ -414,6 +436,7 @@ function seed(): AppState {
         packages: 'none',
         coupons: 'none',
         users: 'operate',
+        sales: 'operate',
         orders: 'view',
         system: 'none',
       },
@@ -430,6 +453,7 @@ function seed(): AppState {
         packages: 'operate',
         coupons: 'operate',
         users: 'operate',
+        sales: 'operate',
         orders: 'operate',
         system: 'operate',
       },
@@ -447,6 +471,7 @@ function seed(): AppState {
         packages: 'none',
         coupons: 'none',
         users: 'view',
+        sales: 'operate',
         orders: 'view',
         system: 'none',
       },

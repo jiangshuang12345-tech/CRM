@@ -7,7 +7,7 @@ import AppLayout from './components/AppLayout'
 import ChannelManagement from './pages/ChannelManagement'
 import UserCenter from './pages/UserCenter'
 import UserCenterP1 from './pages/UserCenterP1'
-import SalesFollowup from './pages/SalesFollowup'
+import SalesCenter from './pages/SalesCenter'
 import OrderCenter from './pages/OrderCenter'
 import CoursePackagePage from './pages/CoursePackage'
 import CouponPage from './pages/Coupon'
@@ -22,6 +22,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 
 const MODULE_PATH: { module: ModuleKey; path: string }[] = [
   { module: 'users', path: '/users' },
+  { module: 'sales', path: '/sales' },
   { module: 'orders', path: '/orders' },
   { module: 'channels', path: '/channels' },
   { module: 'packages', path: '/packages' },
@@ -68,7 +69,7 @@ export default function App() {
           <Route path="channels" element={<Guard module="channels"><ChannelManagement /></Guard>} />
           <Route path="landing" element={<Guard module="landing"><LandingPageManagement /></Guard>} />
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
-          <Route path="sales-followup" element={<Guard module="users"><SalesFollowup /></Guard>} />
+          <Route path="sales" element={<Guard module="sales"><SalesCenter /></Guard>} />
           <Route path="users-v2" element={<Guard module="users"><UserCenter /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />

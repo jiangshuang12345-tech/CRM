@@ -10,9 +10,20 @@ export function isRegisteredNotTried(s: Student): boolean {
   return s.status === '注册'
 }
 
-// 销售跟进线索：已注册未体验，且能拿到手机号 → 交给销售跟进
+// 销售中心线索：已注册未体验，且能拿到手机号 → 自动进入销售中心
+// 一旦跟进为「已体验/已付费」，会改写 status（体验中/付费），从而离开销售中心、进入用户中心
 export function isSalesLead(s: Student): boolean {
   return isRegisteredNotTried(s) && hasContactPhone(s)
+}
+
+// 待领取：线索且尚无领取人
+export function isPoolLead(s: Student): boolean {
+  return isSalesLead(s) && !s.salesOwner
+}
+
+// 已领取（跟进中/暂不跟进）
+export function isClaimedLead(s: Student): boolean {
+  return isSalesLead(s) && !!s.salesOwner
 }
 
 // 进入用户中心的用户：
