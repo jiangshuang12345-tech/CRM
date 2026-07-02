@@ -268,17 +268,15 @@ export default function ChannelManagement() {
       )}
       {canEdit && (
       <Space size={2} className="node-actions">
-        {n.children.length === 0 && (
-          <Tooltip title={t('ch.fillParams')}>
-            <Button
-              type="text"
-              size="small"
-              icon={<SlidersOutlined />}
-              style={{ color: '#2F6BFF' }}
-              onClick={() => openParams(lineId, typeId, n)}
-            />
-          </Tooltip>
-        )}
+        <Tooltip title={t('ch.fillParams')}>
+          <Button
+            type="text"
+            size="small"
+            icon={<SlidersOutlined />}
+            style={{ color: '#2F6BFF' }}
+            onClick={() => openParams(lineId, typeId, n)}
+          />
+        </Tooltip>
         {n.level < 3 && (
           <Tooltip title={t('ch.addChild', { level: levelLabel((n.level + 1) as 1 | 2 | 3) })}>
             <Button
