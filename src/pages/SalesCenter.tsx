@@ -21,7 +21,7 @@ import { CheckOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { SalesFollowLog, Student, UserType } from '../types'
+import type { LoginMethod, SalesFollowLog, Student, UserType } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
@@ -33,6 +33,14 @@ const { Text } = Typography
 const USER_TYPE_COLOR: Record<UserType, string> = {
   正式用户: 'green',
   测试用户: 'gold',
+}
+
+const METHOD_COLOR: Record<LoginMethod, string> = {
+  谷歌邮箱: 'red',
+  Facebook: 'blue',
+  kakao: 'gold',
+  手机号: 'green',
+  AppID: 'purple',
 }
 
 // 跟进进度标签配色
@@ -171,27 +179,36 @@ export default function SalesCenter() {
       return <Tag color={USER_TYPE_COLOR[tp]}>{t(`enum.userType.${tp}`)}</Tag>
     },
   }
-  const idCol = { title: t('user.col.id'), dataIndex: 'studentId', width: 190 }
-  const phoneCol = {
-    title: t('user.col.phone'),
-    dataIndex: 'phone',
-    width: 160,
-    render: (v: string | undefined) => (v ? <Text strong>{v}</Text> : <Text type="secondary">—</Text>),
-  }
-
-  const poolColumns: ColumnsType<Student> = [
-    idCol,
-    phoneCol,
+  // 与「用户中心-二期」保持一致（不含 用户状态 / 到期时间 / 最近修改人）
+  const userColumns: ColumnsType<Student> = [
+    { title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left' },
+    { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
     typeCol,
-    { title: t('user.col.name'), dataIndex: 'localName', width: 120, render: (_, r) => r.localName || r.name },
-    { title: t('user.col.country'), dataIndex: 'country', width: 100, render: (v) => (v ? <Tag>{v}</Tag> : '—') },
-    { title: t('sales.col.source'), dataIndex: 'channelSource', width: 170, render: (v) => v || <Text type="secondary">—</Text> },
+    {
+      title: t('user.col.method'),
+      dataIndex: 'loginMethod',
+      width: 120,
+      render: (v: LoginMethod) => <Tag color={METHOD_COLOR[v]}>{t(`enum.method.${v}`)}</Tag>,
+    },
+    { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
+    {
+      title: t('user.col.channel'),
+      dataIndex: 'registerChannel',
+      width: 220,
+      render: (v: string, r) => `${r.businessLine} · ${v}`,
+    },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
+    { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
     {
       title: t('user.col.regTime'),
       dataIndex: 'registerTime',
-      width: 180,
-      render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country} />,
+      width: 200,
+      render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
     },
+  ]
+
+  const poolColumns: ColumnsType<Student> = [
+    ...userColumns,
     ...(canEdit
       ? [
           {
@@ -210,12 +227,7 @@ export default function SalesCenter() {
   ]
 
   const followColumns: ColumnsType<Student> = [
-    idCol,
-    phoneCol,
-    typeCol,
-    { title: t('user.col.name'), dataIndex: 'localName', width: 110, render: (_, r) => r.localName || r.name },
-    { title: t('user.col.country'), dataIndex: 'country', width: 100, render: (v) => (v ? <Tag>{v}</Tag> : '—') },
-    { title: t('sales.col.source'), dataIndex: 'channelSource', width: 160, render: (v) => v || <Text type="secondary">—</Text> },
+    ...userColumns,
     {
       title: t('sales.col.progress'),
       dataIndex: 'salesProgress',
@@ -287,7 +299,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={poolColumns}
                   dataSource={poolData}
-                  scroll={{ x: 1080 }}
+                  scroll={{ x: 1610 }}
                   locale={{ emptyText: t('sales.emptyPool') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
@@ -321,7 +333,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: 1620 }}
+                  scroll={{ x: 2450 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />

@@ -132,6 +132,12 @@ export default function UserCenter() {
       render: (_, r) => <span>{r.localName || r.name}</span>,
     },
     {
+      title: t('user.col.status'),
+      dataIndex: 'status',
+      width: 100,
+      render: (v: UserStatus) => <Tag color={STATUS_COLOR[v]}>{t(`enum.status.${v}`)}</Tag>,
+    },
+    {
       title: t('user.col.userType'),
       dataIndex: 'userType',
       width: 110,
@@ -171,12 +177,6 @@ export default function UserCenter() {
       dataIndex: 'expireTime',
       width: 200,
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
-    },
-    {
-      title: t('user.col.status'),
-      dataIndex: 'status',
-      width: 100,
-      render: (v: UserStatus) => <Tag color={STATUS_COLOR[v]}>{t(`enum.status.${v}`)}</Tag>,
     },
     {
       title: t('user.col.modifier'),
