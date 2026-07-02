@@ -17,7 +17,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v32'
+const KEY = 'dinoai_crm_state_v33'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -234,7 +234,7 @@ function seed(): AppState {
     {
       studentId: '2060199610824355843', name: 'Abdullah Al-Saud', localName: 'عبدالله', userType: '正式用户', gender: '男',
       birthday: '2015-09-03', ageGroup: '9-12', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta',
-      countryCode: '+966', channelCode: 'Fb73Mxa', country: '沙特', appChannel: 'Google Play', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验中', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      countryCode: '+966', channelCode: 'Fb73Mxa', country: '沙特', appChannel: 'Google Play', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       studentId: '2060199610824355844', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', userType: '测试用户', gender: '女',
@@ -249,7 +249,7 @@ function seed(): AppState {
     {
       studentId: '2060199610824355846', name: 'Seo-yeon Park', localName: '박서연', userType: '正式用户', gender: '女',
       birthday: '2017-03-22', ageGroup: '6-8', loginMethod: 'kakao', account: '+82 10-9876-5432', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram',
-      countryCode: '+82', channelCode: 'Ig58Kpq', country: '韩国', appChannel: 'Google Play', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '体验逾期', expireTime: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      countryCode: '+82', channelCode: 'Ig58Kpq', country: '韩国', appChannel: 'Google Play', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费逾期', expireTime: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       // 已注册未体验 + 有手机号（正式）→ 进入「销售中心-待领取」
@@ -293,7 +293,7 @@ function seed(): AppState {
       validUntil: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '2060199610824355843', userStatus: '体验中',
+      orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '2060199610824355843', userStatus: '付费',
       orderStatus: '待支付', originalPrice: 39, paidAmount: 0, payMethod: 'Google Play', currency: 'USD',
     },
     {
@@ -303,7 +303,7 @@ function seed(): AppState {
       validUntil: now.add(357, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '2060199610824355846', userStatus: '体验逾期',
+      orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '2060199610824355846', userStatus: '付费逾期',
       orderStatus: '已取消', originalPrice: 119000, paidAmount: 0, payMethod: 'App Store', currency: 'KRW',
     },
   ]

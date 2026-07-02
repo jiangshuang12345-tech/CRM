@@ -11,7 +11,7 @@ export function isRegisteredNotTried(s: Student): boolean {
 }
 
 // 销售中心线索：已注册未体验，且能拿到手机号 → 自动进入销售中心
-// 一旦跟进为「已体验/已付费」，会改写 status（体验中/付费），从而离开销售中心、进入用户中心
+// 一旦跟进为「已付费」，会改写 status 为「付费」，从而离开销售中心、进入用户中心
 export function isSalesLead(s: Student): boolean {
   return isRegisteredNotTried(s) && hasContactPhone(s)
 }
@@ -28,7 +28,7 @@ export function isClaimedLead(s: Student): boolean {
 
 // 进入用户中心的用户：
 // - 已注册未体验但拿不到手机号 → 直接进用户中心
-// - 已体验 / 已付费及后续状态 → 全部进用户中心
+// - 已付费及后续状态 → 全部进用户中心
 export function inUserCenter(s: Student): boolean {
   return !isSalesLead(s)
 }

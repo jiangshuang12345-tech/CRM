@@ -22,6 +22,7 @@ import {
   DeleteOutlined,
   CopyOutlined,
   ThunderboltOutlined,
+  SlidersOutlined,
 } from '@ant-design/icons'
 import type { DataNode } from 'antd/es/tree'
 import { genChannelCode, setState, uid, useStore } from '../store'
@@ -45,7 +46,9 @@ export default function ChannelManagement() {
   const canEdit = can('channels') === 'operate'
   const [addCtx, setAddCtx] = useState<AddCtx | null>(null)
   const [renameNode, setRenameNode] = useState<{ id: string; name: string } | null>(null)
+  const [paramCtx, setParamCtx] = useState<{ lineId: string; typeId: string; node: ChannelLevelNode } | null>(null)
   const [form] = Form.useForm()
+  const [paramForm] = Form.useForm()
   // 默认各业务线收起；展开/收起状态记忆到 localStorage
   const [expandedKeys, setExpandedKeys] = useState<Key[]>(() => {
     try {
@@ -165,6 +168,26 @@ export default function ChannelManagement() {
     })
   }
 
+  const openParams = (lineId: string, typeId: string, node: ChannelLevelNode) => {
+    setParamCtx({ lineId, typeId, node })
+    paramForm.setFieldsValue({
+      param1: node.params?.param1 ?? '',
+      param2: node.params?.param2 ?? '',
+    })
+  }
+
+  const submitParams = async () => {
+    if (!paramCtx) return
+    const { param1, param2 } = await paramForm.validateFields()
+    const params = { param1: (param1 ?? '').trim(), param2: (param2 ?? '').trim() }
+    updateType(paramCtx.lineId, paramCtx.typeId, (tp) => ({
+      ...tp,
+      children: walk(tp.children, paramCtx.node.id, (n) => ({ ...n, params })),
+    }))
+    message.success(t('ch.paramsSaved'))
+    setParamCtx(null)
+  }
+
   const submitRename = async () => {
     const { name } = await form.validateFields()
     if (!renameNode) return
@@ -233,8 +256,29 @@ export default function ChannelManagement() {
           code: {n.code}
         </Tag>
       )}
+      {n.params?.param1 && (
+        <Tag color="blue" style={{ margin: 0 }}>
+          {t('ch.param1')}: {n.params.param1}
+        </Tag>
+      )}
+      {n.params?.param2 && (
+        <Tag color="cyan" style={{ margin: 0 }}>
+          {t('ch.param2')}: {n.params.param2}
+        </Tag>
+      )}
       {canEdit && (
       <Space size={2} className="node-actions">
+        {n.children.length === 0 && (
+          <Tooltip title={t('ch.fillParams')}>
+            <Button
+              type="text"
+              size="small"
+              icon={<SlidersOutlined />}
+              style={{ color: '#2F6BFF' }}
+              onClick={() => openParams(lineId, typeId, n)}
+            />
+          </Tooltip>
+        )}
         {n.level < 3 && (
           <Tooltip title={t('ch.addChild', { level: levelLabel((n.level + 1) as 1 | 2 | 3) })}>
             <Button
@@ -452,6 +496,28 @@ export default function ChannelManagement() {
         <Form form={form} layout="vertical" preserve={false}>
           <Form.Item name="name" label={t('ch.nameLabel')} rules={[{ required: true, message: t('ch.nameRequired') }]}>
             <Input />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={!!paramCtx}
+        title={paramCtx ? t('ch.paramsTitle', { name: paramCtx.node.name }) : t('ch.fillParams')}
+        onCancel={() => setParamCtx(null)}
+        onOk={submitParams}
+        okText={t('common.save')}
+        cancelText={t('common.cancel')}
+        destroyOnClose
+      >
+        <div style={{ marginBottom: 12 }}>
+          <Text type="secondary">{t('ch.paramsDesc')}</Text>
+        </div>
+        <Form form={paramForm} layout="vertical" preserve={false}>
+          <Form.Item name="param1" label={t('ch.param1')}>
+            <Input placeholder={t('ch.paramPlaceholder')} allowClear />
+          </Form.Item>
+          <Form.Item name="param2" label={t('ch.param2')}>
+            <Input placeholder={t('ch.paramPlaceholder')} allowClear />
           </Form.Item>
         </Form>
       </Modal>

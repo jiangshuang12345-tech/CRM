@@ -14,11 +14,10 @@ import {
   Tabs,
   Tag,
   Timeline,
-  Tooltip,
   Typography,
   message,
 } from 'antd'
-import { CheckOutlined, CopyOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { CheckOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
@@ -41,19 +40,11 @@ const PROGRESS_COLOR: Record<string, string> = {
   待领取: 'orange',
   跟进中: 'blue',
   暂不跟进: 'default',
-  已体验: 'purple',
   已付费: 'green',
 }
 
 // 更新跟进弹窗里可选的进度
-const FOLLOW_PROGRESS = ['跟进中', '已体验', '已付费', '暂不跟进'] as const
-
-function copyText(txt: string, ok: string) {
-  navigator.clipboard?.writeText(txt).then(
-    () => message.success(ok),
-    () => message.error(txt),
-  )
-}
+const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 
 export default function SalesCenter() {
   const { t } = useI18n()
@@ -148,7 +139,7 @@ export default function SalesCenter() {
     const progress = v.progress as string
     const note = (v.note as string).trim()
     const nextFollow = v.nextFollow ? v.nextFollow.format('YYYY-MM-DD HH:mm:ss') : ''
-    const converted = progress === '已体验' || progress === '已付费'
+    const converted = progress === '已付费'
     const owner = editing.salesOwner ?? actor
     setState((prev) => ({
       ...prev,
@@ -156,8 +147,8 @@ export default function SalesCenter() {
         x.studentId === editing.studentId
           ? {
               ...x,
-              // 转「已体验/已付费」→ 改写用户状态，离开销售中心进入用户中心
-              status: progress === '已体验' ? '体验中' : progress === '已付费' ? '付费' : x.status,
+              // 转「已付费」→ 改写用户状态为付费，离开销售中心进入用户中心
+              status: progress === '已付费' ? '付费' : x.status,
               salesProgress: converted ? x.salesProgress : (progress as Student['salesProgress']),
               salesLatestNote: note,
               salesNextFollow: nextFollow,
@@ -180,26 +171,17 @@ export default function SalesCenter() {
       return <Tag color={USER_TYPE_COLOR[tp]}>{t(`enum.userType.${tp}`)}</Tag>
     },
   }
+  const idCol = { title: t('user.col.id'), dataIndex: 'studentId', width: 190 }
   const phoneCol = {
     title: t('user.col.phone'),
     dataIndex: 'phone',
-    width: 175,
-    render: (v: string | undefined) =>
-      v ? (
-        <Space size={4}>
-          <Text strong>{v}</Text>
-          <Tooltip title={t('common.copy')}>
-            <Button type="text" size="small" icon={<CopyOutlined />} onClick={() => copyText(v, t('common.copied'))} />
-          </Tooltip>
-        </Space>
-      ) : (
-        <Text type="secondary">—</Text>
-      ),
+    width: 160,
+    render: (v: string | undefined) => (v ? <Text strong>{v}</Text> : <Text type="secondary">—</Text>),
   }
 
   const poolColumns: ColumnsType<Student> = [
+    idCol,
     phoneCol,
-    { title: t('user.col.id'), dataIndex: 'studentId', width: 190 },
     typeCol,
     { title: t('user.col.name'), dataIndex: 'localName', width: 120, render: (_, r) => r.localName || r.name },
     { title: t('user.col.country'), dataIndex: 'country', width: 100, render: (v) => (v ? <Tag>{v}</Tag> : '—') },
@@ -210,7 +192,6 @@ export default function SalesCenter() {
       width: 180,
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country} />,
     },
-    { title: t('sales.col.status'), key: 'st', width: 100, render: () => <Tag color={PROGRESS_COLOR['待领取']}>{t('sales.progress.待领取')}</Tag> },
     ...(canEdit
       ? [
           {
@@ -229,8 +210,8 @@ export default function SalesCenter() {
   ]
 
   const followColumns: ColumnsType<Student> = [
+    idCol,
     phoneCol,
-    { title: t('user.col.id'), dataIndex: 'studentId', width: 190 },
     typeCol,
     { title: t('user.col.name'), dataIndex: 'localName', width: 110, render: (_, r) => r.localName || r.name },
     { title: t('user.col.country'), dataIndex: 'country', width: 100, render: (v) => (v ? <Tag>{v}</Tag> : '—') },
@@ -306,7 +287,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={poolColumns}
                   dataSource={poolData}
-                  scroll={{ x: 1180 }}
+                  scroll={{ x: 1080 }}
                   locale={{ emptyText: t('sales.emptyPool') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />

@@ -19,11 +19,18 @@ export const COUNTRY_CODE: Record<BusinessLine, string> = {
   其他: '+1',
 }
 
+// 渠道自定义参数（暂支持两个）
+export type ChannelParams = {
+  param1?: string
+  param2?: string
+}
+
 export type ChannelLevelNode = {
   id: string
   name: string
   level: 1 | 2 | 3
   code?: string // 渠道 code（在该级渠道下生成）
+  params?: ChannelParams // 渠道参数（在末级渠道上填写）
   children: ChannelLevelNode[]
 }
 
@@ -40,9 +47,9 @@ export type ChannelLine = {
   children: ChannelType[]
 }
 
-export type UserStatus = '注册' | '体验中' | '体验逾期' | '付费' | '付费逾期'
+export type UserStatus = '注册' | '付费' | '付费逾期'
 
-export const USER_STATUSES: UserStatus[] = ['注册', '体验中', '体验逾期', '付费', '付费逾期']
+export const USER_STATUSES: UserStatus[] = ['注册', '付费', '付费逾期']
 
 export type LoginMethod = '谷歌邮箱' | 'Facebook' | 'kakao' | '手机号' | 'AppID'
 
