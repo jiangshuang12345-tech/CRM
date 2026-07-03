@@ -141,7 +141,7 @@ function CodePicker({
       message.warning(t('cp.kolExists'))
       return
     }
-    onChange?.([...value, { id: uid('cc_'), code: genCouponCode(), kol: name, used: 0 }])
+    onChange?.([...value, { id: uid('cc_'), code: genCouponCode(value.map((c) => c.code)), kol: name, used: 0 }])
     setKol('')
   }
 

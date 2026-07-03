@@ -6,6 +6,7 @@ dayjs.extend(utc)
 import type {
   Account,
   AuditLog,
+  ChannelLevelNode,
   ChannelLine,
   Coupon,
   CoursePackage,
@@ -87,18 +88,73 @@ export function uid(prefix = '') {
   return `${prefix}${counter.toString(36)}`
 }
 
-export function genCouponCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+function randomStr(chars: string, len: number) {
   let s = ''
-  for (let i = 0; i < 12; i++) s += chars[Math.floor(Math.random() * chars.length)]
+  for (let i = 0; i < len; i++) s += chars[Math.floor(Math.random() * chars.length)]
   return s
 }
 
+// 生成一个不在 used 集合中的随机码；极端情况下追加计数器兜底，保证绝对唯一
+function uniqueCode(make: () => string, used: Set<string>) {
+  let code = make()
+  let guard = 0
+  while (used.has(code) && guard < 1000) {
+    code = make()
+    guard += 1
+  }
+  if (used.has(code)) {
+    counter += 1
+    code = `${code}${counter.toString(36)}`
+  }
+  return code
+}
+
+// 收集当前渠道树中所有已存在的渠道 code（含各级）
+function collectChannelCodes(lines: ChannelLine[]): Set<string> {
+  const used = new Set<string>()
+  const walk = (nodes: ChannelLevelNode[]) => {
+    for (const n of nodes) {
+      if (n.code) used.add(n.code)
+      if (n.children) walk(n.children)
+    }
+  }
+  for (const line of lines) {
+    for (const type of line.children) walk(type.children)
+  }
+  return used
+}
+
+// 收集当前所有优惠券里已存在的兑换码
+function collectCouponCodes(coupons: Coupon[]): Set<string> {
+  const used = new Set<string>()
+  for (const c of coupons) {
+    for (const cc of c.codes) if (cc.code) used.add(cc.code)
+  }
+  return used
+}
+
+// 安全读取 state：seed() 在 state 赋值前执行，直接访问会触发 TDZ，这里兜底为 undefined
+function safeState(): AppState | undefined {
+  try {
+    return state
+  } catch {
+    return undefined
+  }
+}
+
+// 生成优惠券兑换码，自动对已存在的码（含正在编辑但未保存的 extraUsed）去重
+export function genCouponCode(extraUsed: string[] = []) {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  const used = collectCouponCodes(safeState()?.coupons ?? [])
+  for (const c of extraUsed) if (c) used.add(c)
+  return uniqueCode(() => randomStr(chars, 12), used)
+}
+
+// 生成渠道 code，自动对渠道树中已存在的 code 去重
 export function genChannelCode() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789'
-  let s = ''
-  for (let i = 0; i < 7; i++) s += chars[Math.floor(Math.random() * chars.length)]
-  return s
+  const used = collectChannelCodes(safeState()?.channels ?? [])
+  return uniqueCode(() => randomStr(chars, 7), used)
 }
 
 // ---------- seed ----------
