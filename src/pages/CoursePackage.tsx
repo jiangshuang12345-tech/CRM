@@ -47,6 +47,12 @@ export default function CoursePackagePage() {
   const [form] = Form.useForm()
   const watchLine = Form.useWatch('businessLine', form) as BusinessLine | undefined
 
+  // 业务线筛选项来源于列表实际包含的业务线数据
+  const lineOptions = useMemo(
+    () => Array.from(new Set(packages.map((p) => p.businessLine).filter(Boolean))),
+    [packages],
+  )
+
   const data = useMemo(
     () =>
       packages.filter((p) => {
@@ -221,7 +227,7 @@ export default function CoursePackagePage() {
           style={{ width: 150 }}
           value={lineFilter}
           onChange={setLineFilter}
-          options={BUSINESS_LINES.map((l) => ({ label: l, value: l }))}
+          options={lineOptions.map((l) => ({ label: l, value: l }))}
         />
       </Space>
 

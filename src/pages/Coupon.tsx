@@ -401,6 +401,20 @@ export default function CouponPage() {
 
   const [detailCoupon, setDetailCoupon] = useState<Coupon | null>(null)
 
+  // 业务线筛选项来源于列表实际包含的业务线数据（受数据范围限制）
+  const lineOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          coupons
+            .filter((c) => !scope || scope.includes(c.businessLine))
+            .map((c) => c.businessLine)
+            .filter(Boolean),
+        ),
+      ),
+    [coupons, scope],
+  )
+
   const data = useMemo(
     () =>
       coupons.filter((c) => {
@@ -615,7 +629,7 @@ export default function CouponPage() {
           style={{ width: 140 }}
           value={lineFilter}
           onChange={setLineFilter}
-          options={BUSINESS_LINES.map((l) => ({ label: l, value: l }))}
+          options={lineOptions.map((l) => ({ label: l, value: l }))}
         />
         <Select
           allowClear
