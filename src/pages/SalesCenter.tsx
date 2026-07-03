@@ -279,7 +279,7 @@ export default function SalesCenter() {
                   />
                   <Select
                     allowClear
-                    placeholder={t('user.col.country')}
+                    placeholder={t('user.col.line')}
                     style={{ width: 140 }}
                     value={poolCountry}
                     onChange={setPoolCountry}
