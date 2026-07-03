@@ -13,11 +13,11 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { LoginMethod, Student, UserStatus, UserType } from '../types'
+import type { LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
 import { USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
@@ -59,6 +59,7 @@ export default function UserCenter() {
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
+  const [historyOf, setHistoryOf] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
   // 数据范围内的业务线（null 表示全部）
@@ -182,7 +183,15 @@ export default function UserCenter() {
       title: t('user.col.modifier'),
       dataIndex: 'lastModifier',
       width: 180,
-      render: (v: string | undefined) => (v ? v : <Text type="secondary">—</Text>),
+      render: (v: string | undefined, r: Student) =>
+        v ? (
+          <Button type="link" style={{ padding: 0, height: 'auto' }} onClick={() => setHistoryOf(r)}>
+            {v}
+            <HistoryOutlined style={{ marginInlineStart: 6 }} />
+          </Button>
+        ) : (
+          <Text type="secondary">—</Text>
+        ),
     },
     ...(canEdit
       ? [
@@ -284,6 +293,47 @@ export default function UserCenter() {
             <Input value={editing?.businessLine} disabled />
           </Form.Item>
         </Form>
+      </Modal>
+
+      <Modal
+        open={!!historyOf}
+        title={t('user.hist.title')}
+        onCancel={() => setHistoryOf(null)}
+        footer={null}
+        width={640}
+        destroyOnClose
+      >
+        <Table<StudentEditLog>
+          rowKey={(r) => `${r.time}-${r.modifier}`}
+          size="small"
+          pagination={false}
+          dataSource={historyOf?.editHistory ?? []}
+          locale={{ emptyText: t('user.hist.empty') }}
+          columns={[
+            { title: t('user.hist.col.time'), dataIndex: 'time', width: 170 },
+            {
+              title: t('user.hist.col.detail'),
+              dataIndex: 'changes',
+              render: (changes: StudentFieldChange[] | undefined, r: StudentEditLog) => {
+                if (changes && changes.length)
+                  return (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                      {changes.map((c, i) => (
+                        <div key={i}>
+                          <Text type="secondary">{c.field}：</Text>
+                          <Text delete type="secondary">{c.before || t('user.hist.blank')}</Text>
+                          <Text type="secondary"> → </Text>
+                          <Text strong>{c.after || t('user.hist.blank')}</Text>
+                        </div>
+                      ))}
+                    </div>
+                  )
+                return r.detail ? <span>{r.detail}</span> : <Text type="secondary">—</Text>
+              },
+            },
+            { title: t('user.hist.col.modifier'), dataIndex: 'modifier', width: 190 },
+          ]}
+        />
       </Modal>
     </Card>
   )
