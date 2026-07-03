@@ -158,13 +158,13 @@ export default function UserCenter() {
       width: 200,
       render: (v) => <Text>{v}</Text>,
     },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',
       width: 220,
       render: (v: string, r) => `${r.businessLine} · ${v}`,
     },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
     { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
     {
       title: t('user.col.regTime'),
