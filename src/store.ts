@@ -157,6 +157,18 @@ export function genChannelCode() {
   return uniqueCode(() => randomStr(chars, 7), used)
 }
 
+// 生成商品包 ID（PKG####），自动对已存在的商品包 ID 去重
+export function genPackageId() {
+  const used = new Set((safeState()?.packages ?? []).map((p) => p.id))
+  return uniqueCode(() => `PKG${Math.floor(1000 + Math.random() * 9000)}`, used)
+}
+
+// 生成优惠券 ID（CP####），自动对已存在的优惠券 ID 去重
+export function genCouponId() {
+  const used = new Set((safeState()?.coupons ?? []).map((c) => c.id))
+  return uniqueCode(() => `CP${Math.floor(1000 + Math.random() * 9000)}`, used)
+}
+
 // ---------- seed ----------
 function seed(): AppState {
   const channels: ChannelLine[] = [

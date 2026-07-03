@@ -28,7 +28,7 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
-import { genCouponCode, getState, setState, uid, useStore } from '../store'
+import { genCouponCode, genCouponId, getState, setState, uid, useStore } from '../store'
 import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
 import type { BusinessLine, Coupon, CouponCode, CouponProduct, CouponStatus } from '../types'
 import { useI18n } from '../i18n'
@@ -236,7 +236,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       used: 0,
     }))
     const coupon: Coupon = {
-      id: `CP${Math.floor(1000 + Math.random() * 9000)}`,
+      id: genCouponId(),
       name: v.name,
       codes,
       businessLine: line,

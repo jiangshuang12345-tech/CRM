@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   DatePicker,
-  Descriptions,
   Form,
   Input,
   InputNumber,
@@ -19,7 +18,7 @@ import {
 import { PlusOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs, { Dayjs } from 'dayjs'
-import { setState, useStore } from '../store'
+import { genPackageId, setState, useStore } from '../store'
 import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
 import type { BusinessLine, CoursePackage } from '../types'
 import { useI18n } from '../i18n'
@@ -45,7 +44,6 @@ export default function CoursePackagePage() {
   const [keyword, setKeyword] = useState('')
   const [lineFilter, setLineFilter] = useState<string | undefined>()
   const [modal, setModal] = useState<{ mode: 'add' | 'edit'; record?: CoursePackage } | null>(null)
-  const [detail, setDetail] = useState<CoursePackage | null>(null)
   const [form] = Form.useForm()
   const watchLine = Form.useWatch('businessLine', form) as BusinessLine | undefined
 
@@ -79,7 +77,7 @@ export default function CoursePackagePage() {
     const [validStart, validEnd] = v.validRange as [Dayjs, Dayjs]
     if (modal?.mode === 'add') {
       const pkg: CoursePackage = {
-        id: `PKG${Math.floor(1000 + Math.random() * 9000)}`,
+        id: genPackageId(),
         businessLine: v.businessLine,
         name: v.name,
         currency: v.currency,
@@ -162,15 +160,18 @@ export default function CoursePackagePage() {
       render: (v) => <Tag color={v === '上架' ? 'green' : 'default'}>{t(`enum.pkg.${v}`)}</Tag>,
     },
     {
+      title: t('pkg.createTime'),
+      dataIndex: 'createdAt',
+      width: 200,
+      render: (v: string | undefined) => <Text type="secondary">{v || '—'}</Text>,
+    },
+    {
       title: t('common.action'),
       key: 'action',
-      width: 200,
+      width: 160,
       fixed: 'right',
       render: (_, r) => (
         <Space size={0}>
-          <Button type="link" onClick={() => setDetail(r)}>
-            {t('common.detail')}
-          </Button>
           {canEdit && (
             <Button type="link" onClick={() => openEdit(r)}>
               {t('common.edit')}
@@ -269,26 +270,6 @@ export default function CoursePackagePage() {
         </Form>
       </Modal>
 
-      <Modal open={!!detail} title={t('pkg.detailTitle')} footer={null} onCancel={() => setDetail(null)}>
-        {detail && (
-          <Descriptions column={1} bordered size="small" style={{ marginTop: 12 }}>
-            <Descriptions.Item label={t('pkg.col.id')}>{detail.id}</Descriptions.Item>
-            <Descriptions.Item label={t('pkg.label.line')}>{detail.businessLine}</Descriptions.Item>
-            <Descriptions.Item label={t('pkg.label.name')}>{detail.name}</Descriptions.Item>
-            <Descriptions.Item label={t('pkg.label.price')}>
-              {detail.currency} {detail.price.toLocaleString()}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('pkg.label.valid')}>
-              {detail.validStart} ~ {detail.validEnd}
-            </Descriptions.Item>
-            <Descriptions.Item label={t('pkg.col.creator')}>{detail.creator}</Descriptions.Item>
-            <Descriptions.Item label={t('pkg.col.status')}>
-              <Tag color={detail.status === '上架' ? 'green' : 'default'}>{t(`enum.pkg.${detail.status}`)}</Tag>
-            </Descriptions.Item>
-            <Descriptions.Item label={t('pkg.createTime')}>{detail.createdAt}</Descriptions.Item>
-          </Descriptions>
-        )}
-      </Modal>
     </Card>
   )
 }
