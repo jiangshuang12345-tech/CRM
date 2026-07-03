@@ -49,7 +49,6 @@ const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 export default function SalesCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
-  const channels = useStore((s) => s.channels)
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('sales') === 'operate'
   const scope = allowedLines()
@@ -76,11 +75,11 @@ export default function SalesCenter() {
     [scoped, seeAllOwners, actor],
   )
 
-  // 业务线筛选项与用户中心二期保持一致：取渠道树里的业务线名称，并受数据范围限制
-  const lines = useMemo(() => {
-    const all = channels.map((c) => c.name)
-    return scope ? all.filter((l) => scope.includes(l)) : all
-  }, [channels, scope])
+  // 业务线筛选项来源于当前列表实际包含的业务线数据
+  const lines = useMemo(
+    () => Array.from(new Set(poolAll.map((s) => s.businessLine).filter(Boolean))) as string[],
+    [poolAll],
+  )
 
   const leadText = (s: Student) =>
     `${s.phone ?? ''} ${s.studentId} ${s.localName ?? s.name} ${s.country ?? ''} ${s.channelSource ?? ''} ${s.salesLatestNote ?? ''}`.toLowerCase()
