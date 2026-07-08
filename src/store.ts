@@ -6,6 +6,7 @@ dayjs.extend(utc)
 import type {
   Account,
   AuditLog,
+  CallRecord,
   ChannelLevelNode,
   ChannelLine,
   Coupon,
@@ -18,7 +19,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v33'
+const KEY = 'dinoai_crm_state_v34'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -30,6 +31,7 @@ export type AppState = {
   roles: Role[]
   accounts: Account[]
   logs: AuditLog[]
+  callRecords: CallRecord[]
 }
 
 const listeners = new Set<() => void>()
@@ -167,6 +169,11 @@ export function genPackageId() {
 export function genCouponId() {
   const used = new Set((safeState()?.coupons ?? []).map((c) => c.id))
   return uniqueCode(() => `CP${Math.floor(1000 + Math.random() * 9000)}`, used)
+}
+
+// 生成通话记录 ID（递增，天然唯一）
+export function genCallId() {
+  return uid('call_')
 }
 
 // ---------- seed ----------
@@ -612,7 +619,41 @@ function seed(): AppState {
     },
   ]
 
-  return { channels, students, orders, packages, coupons, landingPages, roles, accounts, logs }
+  // 外呼通话记录（演示：坐席对「我的跟进」中的线索发起外呼后归档的通话小结）
+  const callRecords: CallRecord[] = [
+    {
+      id: uid('call_'),
+      studentId: '2060199610824356004', customer: '지원', phone: '+82 10-8821-2390', businessLine: '韩国',
+      result: '已接通', duration: '00:03', note: '【外呼自动记录】接通后沟通约 3 分钟，家长了解了销售内容并咨询优惠，对价格仍有顾虑，倾向再列出对比后决定，已约定下次回访。',
+      agent: 'jiangshuang@dinoai.ai', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      id: uid('call_'),
+      studentId: '2060199610824356003', customer: 'Hana', phone: '+60 17-451 9920', businessLine: '马来',
+      result: '已接通', duration: '00:43', note: '【外呼自动记录】接通后沟通约 3 分钟，家长了解了销售内容并咨询优惠，对价格仍有顾虑，倾向再列出对比后决定，已约定下次回访。',
+      agent: 'jiangshuang@dinoai.ai', time: now.subtract(3, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      id: uid('call_'),
+      studentId: '2060199610824356003', customer: 'Hana', phone: '+60 17-451 9920', businessLine: '马来',
+      result: '已接通', duration: '00:04', note: '【外呼自动记录】家长在忙暂不方便详谈，简单介绍了体验课，家长同意稍晚再联系，已征得同意约定时间为晚上 8 点后。',
+      agent: 'jiangshuang@dinoai.ai', time: now.subtract(4, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      id: uid('call_'),
+      studentId: '2060199610824356003', customer: 'Hana', phone: '+60 17-451 9920', businessLine: '马来',
+      result: '已接通', duration: '02:15', note: '已联系家长，确认体验时间，家长同意周末试听。',
+      agent: 'admin@dinoai.ai', time: now.subtract(10, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      id: uid('call_'),
+      studentId: '2060199610824356004', customer: '지원', phone: '+82 10-8821-2390', businessLine: '韩国',
+      result: '无人接听', duration: '—', note: '首次外呼无人接通，稍后再试。',
+      agent: 'admin@dinoai.ai', time: now.subtract(13, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+    },
+  ]
+
+  return { channels, students, orders, packages, coupons, landingPages, roles, accounts, logs, callRecords }
 }
 
 // ---------- 操作日志 ----------

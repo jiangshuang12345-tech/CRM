@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 import {
   Alert,
@@ -17,11 +17,12 @@ import {
   Typography,
   message,
 } from 'antd'
-import { CheckOutlined, EditOutlined, SearchOutlined } from '@ant-design/icons'
+import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { setState, useStore } from '../store'
-import type { SalesFollowLog, Student, UserType } from '../types'
+import { genCallId, setState, useStore } from '../store'
+import type { CallRecord, CallResult, SalesFollowLog, Student, UserType } from '../types'
+import { CALL_RESULTS } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
@@ -29,6 +30,17 @@ import { resolveUserType } from '../userType'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
+
+const CALL_RESULT_COLOR: Record<CallResult, string> = {
+  已接通: 'green',
+  无人接听: 'red',
+}
+
+function fmtDuration(sec: number) {
+  const m = Math.floor(sec / 60)
+  const s = sec % 60
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
 
 const USER_TYPE_COLOR: Record<UserType, string> = {
   正式用户: 'green',
@@ -49,6 +61,7 @@ const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 export default function SalesCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
+  const callRecords = useStore((s) => s.callRecords)
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('sales') === 'operate'
   const scope = allowedLines()
@@ -59,8 +72,11 @@ export default function SalesCenter() {
   const [poolLine, setPoolLine] = useState<string | undefined>()
   const [followKw, setFollowKw] = useState('')
   const [progressFilter, setProgressFilter] = useState<string | undefined>()
+  const [callKw, setCallKw] = useState('')
+  const [callResultFilter, setCallResultFilter] = useState<string | undefined>()
 
   const [editing, setEditing] = useState<Student | null>(null)
+  const [dialing, setDialing] = useState<Student | null>(null)
   const [form] = Form.useForm()
   const watchProgress = Form.useWatch('progress', form) as string | undefined
 
@@ -100,6 +116,23 @@ export default function SalesCenter() {
         return (!kw || leadText(s).includes(kw)) && (!progressFilter || s.salesProgress === progressFilter)
       }),
     [followAll, followKw, progressFilter],
+  )
+
+  // 通话记录：受数据范围限制，非超管仅看自己坐席的记录
+  const callScoped = useMemo(() => {
+    let list = scope ? callRecords.filter((c) => scope.includes(c.businessLine)) : callRecords
+    if (!seeAllOwners) list = list.filter((c) => c.agent === actor)
+    return list
+  }, [callRecords, scope, seeAllOwners, actor])
+
+  const callData = useMemo(
+    () =>
+      callScoped.filter((c) => {
+        const kw = callKw.trim().toLowerCase()
+        const text = `${c.phone} ${c.studentId} ${c.customer} ${c.note}`.toLowerCase()
+        return (!kw || text.includes(kw)) && (!callResultFilter || c.result === callResultFilter)
+      }),
+    [callScoped, callKw, callResultFilter],
   )
 
   const claim = (s: Student) => {
@@ -161,6 +194,45 @@ export default function SalesCenter() {
     }))
     setEditing(null)
     message.success(converted ? t('sales.converted') : t('sales.saved'))
+  }
+
+  // 保存外呼通话小结：生成通话记录 + 归档到该线索的销售跟进记录
+  const saveCall = (result: CallResult, duration: string, rawNote: string) => {
+    if (!dialing) return
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+    const note = `${t('sales.dial.autoNote')}${rawNote.trim()}`
+    const owner = dialing.salesOwner ?? actor
+    const record: CallRecord = {
+      id: genCallId(),
+      studentId: dialing.studentId,
+      customer: dialing.localName || dialing.name,
+      phone: dialing.phone ?? '',
+      businessLine: dialing.businessLine,
+      result,
+      duration,
+      note,
+      agent: actor,
+      time: now,
+    }
+    setState((prev) => ({
+      ...prev,
+      callRecords: [record, ...prev.callRecords],
+      students: prev.students.map((x) =>
+        x.studentId === dialing.studentId
+          ? {
+              ...x,
+              salesLatestNote: note,
+              salesUpdatedAt: now,
+              salesHistory: [
+                { progress: x.salesProgress || '跟进中', note, time: now, owner },
+                ...(x.salesHistory || []),
+              ],
+            }
+          : x,
+      ),
+    }))
+    setDialing(null)
+    message.success(t('sales.dialed'))
   }
 
   const typeCol = {
@@ -241,16 +313,43 @@ export default function SalesCenter() {
           {
             title: t('common.action'),
             key: 'op',
-            width: 120,
+            width: 180,
             fixed: 'right' as const,
             render: (_: unknown, r: Student) => (
-              <Button type="link" icon={<EditOutlined />} onClick={() => openFollow(r)}>
-                {t('sales.update')}
-              </Button>
+              <Space size={0}>
+                <Button type="link" icon={<PhoneOutlined />} disabled={!r.phone} onClick={() => setDialing(r)}>
+                  {t('sales.dial')}
+                </Button>
+                <Button type="link" icon={<EditOutlined />} onClick={() => openFollow(r)}>
+                  {t('sales.update')}
+                </Button>
+              </Space>
             ),
           },
         ]
       : []),
+  ]
+
+  const callColumns: ColumnsType<CallRecord> = [
+    { title: t('sales.call.time'), dataIndex: 'time', width: 180 },
+    { title: t('sales.call.customer'), dataIndex: 'customer', width: 140 },
+    { title: t('user.col.phone'), dataIndex: 'phone', width: 160 },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 100, render: (v) => <Tag>{v}</Tag> },
+    {
+      title: t('sales.call.result'),
+      dataIndex: 'result',
+      width: 110,
+      render: (v: CallResult) => <Tag color={CALL_RESULT_COLOR[v]}>{t(`sales.callResult.${v}`)}</Tag>,
+    },
+    { title: t('sales.call.duration'), dataIndex: 'duration', width: 90 },
+    {
+      title: t('sales.call.note'),
+      dataIndex: 'note',
+      width: 340,
+      ellipsis: true,
+      render: (v: string) => v || <Text type="secondary">—</Text>,
+    },
+    { title: t('sales.call.agent'), dataIndex: 'agent', width: 190 },
   ]
 
   const totalLeads = scoped.filter(isSalesLead).length
@@ -325,8 +424,43 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: 2130 }}
+                  scroll={{ x: 2190 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
+                  pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
+                />
+              </>
+            ),
+          },
+          {
+            key: 'calls',
+            label: `${t('sales.tab.calls')} (${callScoped.length})`,
+            children: (
+              <>
+                <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.callsBanner')} />
+                <Space wrap style={{ marginBottom: 16 }}>
+                  <Input
+                    allowClear
+                    prefix={<SearchOutlined />}
+                    placeholder={t('sales.searchCalls')}
+                    style={{ width: 340 }}
+                    value={callKw}
+                    onChange={(e) => setCallKw(e.target.value)}
+                  />
+                  <Select
+                    allowClear
+                    placeholder={t('sales.call.result')}
+                    style={{ width: 150 }}
+                    value={callResultFilter}
+                    onChange={setCallResultFilter}
+                    options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
+                  />
+                </Space>
+                <Table
+                  rowKey="id"
+                  columns={callColumns}
+                  dataSource={callData}
+                  scroll={{ x: 1310 }}
+                  locale={{ emptyText: t('sales.emptyCalls') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
               </>
@@ -349,7 +483,115 @@ export default function SalesCenter() {
         onCancel={() => setEditing(null)}
         onOk={saveFollow}
       />
+
+      <Modal_Dial t={t} dialing={dialing} onCancel={() => setDialing(null)} onSave={saveCall} />
     </Card>
+  )
+}
+
+// 外呼弹窗：模拟发起呼叫 → 挂断后填写通话小结
+function Modal_Dial({
+  t,
+  dialing,
+  onCancel,
+  onSave,
+}: {
+  t: (k: string, v?: Record<string, string | number>) => string
+  dialing: Student | null
+  onCancel: () => void
+  onSave: (result: CallResult, duration: string, note: string) => void
+}) {
+  const [phase, setPhase] = useState<'calling' | 'summary'>('calling')
+  const [seconds, setSeconds] = useState(0)
+  const [result, setResult] = useState<CallResult>('已接通')
+  const [note, setNote] = useState('')
+
+  // 打开弹窗时重置状态并开始计时
+  useEffect(() => {
+    if (dialing) {
+      setPhase('calling')
+      setSeconds(0)
+      setResult('已接通')
+      setNote('')
+    }
+  }, [dialing])
+
+  useEffect(() => {
+    if (!dialing || phase !== 'calling') return
+    const id = setInterval(() => setSeconds((s) => s + 1), 1000)
+    return () => clearInterval(id)
+  }, [dialing, phase])
+
+  const duration = result === '无人接听' ? '—' : fmtDuration(seconds)
+
+  const submit = () => {
+    if (!note.trim()) {
+      message.warning(t('sales.dial.noteRequired'))
+      return
+    }
+    onSave(result, duration, note)
+  }
+
+  return (
+    <Modal
+      open={!!dialing}
+      title={t('sales.dial.title', { name: dialing?.localName || dialing?.name || '' })}
+      onCancel={onCancel}
+      width={520}
+      destroyOnClose
+      footer={
+        phase === 'calling'
+          ? [
+              <Button key="hangup" danger type="primary" icon={<PhoneOutlined />} onClick={() => setPhase('summary')}>
+                {t('sales.dial.hangup')}
+              </Button>,
+            ]
+          : [
+              <Button key="cancel" onClick={onCancel}>
+                {t('common.cancel')}
+              </Button>,
+              <Button key="save" type="primary" onClick={submit}>
+                {t('sales.dial.save')}
+              </Button>,
+            ]
+      }
+    >
+      <div style={{ padding: '4px 0 12px' }}>
+        <div style={{ fontSize: 15 }}>
+          <Text strong>{dialing?.localName || dialing?.name}</Text>
+          <Tag style={{ marginInlineStart: 8 }}>{dialing?.businessLine}</Tag>
+        </div>
+        <div style={{ color: '#8c8c8c', marginTop: 4 }}>
+          <PhoneOutlined /> {dialing?.phone}
+        </div>
+      </div>
+
+      {phase === 'calling' ? (
+        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+          <div style={{ color: '#52c41a', marginBottom: 8 }}>{t('sales.dial.connected')}</div>
+          <div style={{ fontSize: 34, fontWeight: 600, letterSpacing: 2 }}>{fmtDuration(seconds)}</div>
+        </div>
+      ) : (
+        <Form layout="vertical" style={{ marginTop: 4 }}>
+          <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('sales.dial.summaryTip')} />
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            <Form.Item label={t('sales.call.result')}>
+              <Select
+                value={result}
+                onChange={(v) => setResult(v)}
+                options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
+              />
+            </Form.Item>
+            <Form.Item label={t('sales.call.duration')}>
+              <Input value={duration} disabled />
+            </Form.Item>
+          </div>
+          <Form.Item label={t('sales.call.note')} required>
+            <Input.TextArea rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('sales.f.notePlaceholder')} />
+          </Form.Item>
+        </Form>
+      )}
+    </Modal>
   )
 }
 

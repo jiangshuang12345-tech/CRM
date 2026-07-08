@@ -133,6 +133,24 @@ export type SalesFollowLog = {
   owner: string
 }
 
+// 外呼通话结果
+export type CallResult = '已接通' | '无人接听'
+export const CALL_RESULTS: CallResult[] = ['已接通', '无人接听']
+
+// 外呼通话记录（坐席点击号码发起外呼，挂断后填写通话小结，归档到客户档案与销售跟进记录）
+export type CallRecord = {
+  id: string
+  studentId: string
+  customer: string // 客户姓名
+  phone: string
+  businessLine: string
+  result: CallResult // 通话结果
+  duration: string // 时长（mm:ss，无人接听为 —）
+  note: string // 本次跟进记录
+  agent: string // 外呼坐席
+  time: string // 起呼时间
+}
+
 export type OrderStatus = '待支付' | '已支付' | '已退款' | '已取消'
 
 export type Order = {
