@@ -45,13 +45,16 @@ function emit() {
 }
 
 function load(): AppState {
+  const seeded = seed()
   try {
     const raw = localStorage.getItem(KEY)
-    if (raw) return JSON.parse(raw)
+    if (raw) {
+      // 合并种子默认值：即使旧数据缺少新增字段（如 callRecords），也不会因 undefined 而崩溃
+      return { ...seeded, ...(JSON.parse(raw) as Partial<AppState>) }
+    }
   } catch {
     /* ignore */
   }
-  const seeded = seed()
   localStorage.setItem(KEY, JSON.stringify(seeded))
   return seeded
 }

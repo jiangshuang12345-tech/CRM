@@ -61,7 +61,7 @@ const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 export default function SalesCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
-  const callRecords = useStore((s) => s.callRecords)
+  const callRecords = useStore((s) => s.callRecords ?? [])
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('sales') === 'operate'
   const scope = allowedLines()
