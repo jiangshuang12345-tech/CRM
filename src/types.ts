@@ -47,9 +47,9 @@ export type ChannelLine = {
   children: ChannelType[]
 }
 
-export type UserStatus = '未付费-未体验' | '未付费-已体验' | '付费' | '付费逾期'
+export type UserStatus = '未付费-未体验' | '未付费-体验中' | '未付费-已体验' | '付费' | '付费逾期'
 
-export const USER_STATUSES: UserStatus[] = ['未付费-未体验', '未付费-已体验', '付费', '付费逾期']
+export const USER_STATUSES: UserStatus[] = ['未付费-未体验', '未付费-体验中', '未付费-已体验', '付费', '付费逾期']
 
 export type LoginMethod = '谷歌邮箱' | 'Facebook' | 'kakao' | '手机号' | 'AppID'
 
@@ -137,7 +137,7 @@ export type SalesFollowLog = {
 export type LessonType = '体验课' | '正式课'
 export const LESSON_TYPES: LessonType[] = ['体验课', '正式课']
 
-export type LessonStatus = '已完课' | '已预约' | '已取消'
+export type LessonStatus = '进行中' | '已完课' | '已预约' | '已取消'
 
 // 报告里的能力评估项（score：1-5）
 export type LessonRating = { label: string; score: number }

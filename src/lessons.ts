@@ -50,6 +50,11 @@ export function hasCompletedTrial(lessons: LessonRecord[], studentId: string): b
   return lessons.some((l) => l.studentId === studentId && l.lessonType === '体验课' && l.status === '已完课')
 }
 
+// 是否体验中：存在「进行中」状态的体验课
+export function hasInProgressTrial(lessons: LessonRecord[], studentId: string): boolean {
+  return lessons.some((l) => l.studentId === studentId && l.lessonType === '体验课' && l.status === '进行中')
+}
+
 // 是否付费用户（付费 / 付费逾期）
 export function isPaidStatus(s: Pick<Student, 'status'>): boolean {
   return s.status === '付费' || s.status === '付费逾期'
@@ -58,8 +63,11 @@ export function isPaidStatus(s: Pick<Student, 'status'>): boolean {
 // 计算用户状态：
 // - 有付费订单 → 保留「付费 / 付费逾期」
 // - 无付费订单 + 体验课完课（任意一节）→ 未付费-已体验
-// - 无付费订单 + 体验课未完课 → 未付费-未体验
+// - 无付费订单 + 存在「进行中」体验课且无「已完课」体验课 → 未付费-体验中
+// - 其余（无付费订单且无完课/进行中体验课）→ 未付费-未体验
 export function resolveUserStatus(student: Student, lessons: LessonRecord[]): UserStatus {
   if (isPaidStatus(student)) return student.status
-  return hasCompletedTrial(lessons, student.studentId) ? '未付费-已体验' : '未付费-未体验'
+  if (hasCompletedTrial(lessons, student.studentId)) return '未付费-已体验'
+  if (hasInProgressTrial(lessons, student.studentId)) return '未付费-体验中'
+  return '未付费-未体验'
 }

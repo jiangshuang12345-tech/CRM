@@ -32,6 +32,7 @@ const { Text } = Typography
 
 const STATUS_COLOR: Record<UserStatus, string> = {
   '未付费-未体验': 'default',
+  '未付费-体验中': 'gold',
   '未付费-已体验': 'blue',
   付费: 'green',
   付费逾期: 'red',

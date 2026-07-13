@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v36'
+const KEY = 'dinoai_crm_state_v37'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -342,6 +342,12 @@ function seed(): AppState {
       studentId: '2060199610824355848', name: 'Somchai Prom', localName: 'สมชาย', userType: '正式用户', gender: '男',
       birthday: '2016-02-10', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'somchai.prom@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO', channelSource: 'TH_ASO',
       countryCode: '+66', channelCode: 'Th55Abc', country: '泰国', appChannel: 'App Store', registerTime: now.subtract(3, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
+    },
+    {
+      // 未付费 + 体验中（有进行中体验课、无完课体验课）+ 无手机号 → 直接进入用户中心
+      studentId: '2060199610824355849', name: 'Aisha Rahman', localName: 'Aisha', userType: '正式用户', gender: '女',
+      birthday: '2016-06-25', ageGroup: '6-8', loginMethod: '谷歌邮箱', account: 'aisha.rahman@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO', channelSource: 'ID_ASO',
+      countryCode: '+62', channelCode: 'Id77Xyz', country: '印尼', appChannel: 'Google Play', registerTime: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
     },
     {
       // 已领取跟进中的线索（供「我的跟进」演示）
@@ -768,6 +774,11 @@ function seed(): AppState {
         teacherComment: 'Nice trial session. Recommended Level 1 to build a speaking foundation.',
         homework: '复习本节问候语，鼓励开口表达。',
       },
+    },
+    // Aisha（未付费）：体验课「进行中」且无完课体验课 → 用户状态显示「未付费-体验中」
+    {
+      id: uid('ls_'), studentId: '2060199610824355849', courseLabel: 'T1-U1-LC1-L1', lessonType: '体验课', status: '进行中',
+      teacher: 'Mia L.', replayUrl: '#replay',
     },
   ]
 
