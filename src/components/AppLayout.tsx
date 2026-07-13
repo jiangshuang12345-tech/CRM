@@ -44,6 +44,8 @@ export default function AppLayout() {
   const [openKeys, setOpenKeys] = useState<string[]>([])
   const navigate = useNavigate()
   const location = useLocation()
+  // 取一级路径，保证子路由（如 /users-v2/:id 详情页）也能高亮菜单并显示标题
+  const basePath = `/${location.pathname.split('/')[1] ?? ''}`
   const session = useSession()
   const { t, lang, setLang } = useI18n()
   const { can } = usePerm()
@@ -161,7 +163,7 @@ export default function AppLayout() {
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[location.pathname]}
+          selectedKeys={[basePath]}
           openKeys={openKeys}
           onOpenChange={(keys) => setOpenKeys(keys as string[])}
           items={NAV}
@@ -182,7 +184,7 @@ export default function AppLayout() {
           }}
         >
           <Text strong style={{ fontSize: 18 }}>
-            {TITLES[location.pathname] ?? t('app.brand')}
+            {TITLES[basePath] ?? t('app.brand')}
           </Text>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <Dropdown

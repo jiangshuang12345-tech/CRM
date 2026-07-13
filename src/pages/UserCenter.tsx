@@ -15,6 +15,7 @@ import {
 } from 'antd'
 import { EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
+import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
 import type { LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
@@ -125,7 +126,13 @@ export default function UserCenter() {
   }
 
   const columns: ColumnsType<Student> = [
-    { title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left' },
+    {
+      title: t('user.col.id'),
+      dataIndex: 'studentId',
+      width: 190,
+      fixed: 'left',
+      render: (v: string) => <Link to={`/users-v2/${v}`}>{v}</Link>,
+    },
     {
       title: t('user.col.name'),
       dataIndex: 'localName',

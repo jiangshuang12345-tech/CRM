@@ -11,15 +11,17 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { AppChannel, LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
+import type { AppChannel, LessonRecord, LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
 import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
+import { latestTrialReport } from '../lessons'
+import { ReportModal } from '../components/ReportModal'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -51,6 +53,7 @@ const USER_TYPE_COLOR: Record<UserType, string> = {
 export default function UserCenterP1() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
+  const lessons = useStore((s) => s.lessons ?? [])
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('users') === 'operate'
   const scope = allowedLines()
@@ -61,6 +64,7 @@ export default function UserCenterP1() {
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
+  const [reportLesson, setReportLesson] = useState<LessonRecord | null>(null)
   const [form] = Form.useForm()
 
   // 数据权限：底层仍按业务线隔离（一期不展示业务线，仅展示国家）
@@ -223,21 +227,29 @@ export default function UserCenterP1() {
           <Text type="secondary">—</Text>
         ),
     },
-    ...(canEdit
-      ? [
-          {
-            title: t('common.action'),
-            key: 'action',
-            width: 120,
-            fixed: 'right' as const,
-            render: (_: unknown, r: Student) => (
+    {
+      title: t('common.action'),
+      key: 'action',
+      width: 200,
+      fixed: 'right' as const,
+      render: (_: unknown, r: Student) => {
+        const trial = latestTrialReport(lessons, r.studentId)
+        return (
+          <Space size={0}>
+            {trial && (
+              <Button type="link" icon={<FileTextOutlined />} onClick={() => setReportLesson(trial)}>
+                {t('user.trialReport')}
+              </Button>
+            )}
+            {canEdit && (
               <Button type="link" icon={<EditOutlined />} onClick={() => openEdit(r)}>
                 {t('user.editInfo')}
               </Button>
-            ),
-          },
-        ]
-      : []),
+            )}
+          </Space>
+        )
+      },
+    },
   ]
 
   return (
@@ -369,6 +381,8 @@ export default function UserCenterP1() {
           ]}
         />
       </Modal>
+
+      <ReportModal lesson={reportLesson} onClose={() => setReportLesson(null)} />
     </Card>
   )
 }

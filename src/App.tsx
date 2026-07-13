@@ -7,6 +7,7 @@ import AppLayout from './components/AppLayout'
 import ChannelManagement from './pages/ChannelManagement'
 import UserCenter from './pages/UserCenter'
 import UserCenterP1 from './pages/UserCenterP1'
+import UserDetail from './pages/UserDetail'
 import SalesCenter from './pages/SalesCenter'
 import OrderCenter from './pages/OrderCenter'
 import CoursePackagePage from './pages/CoursePackage'
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
           <Route path="sales" element={<Guard module="sales"><SalesCenter /></Guard>} />
           <Route path="users-v2" element={<Guard module="users"><UserCenter /></Guard>} />
+          <Route path="users-v2/:studentId" element={<Guard module="users"><UserDetail /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />
           <Route path="coupons" element={<Guard module="coupons"><CouponPage /></Guard>} />

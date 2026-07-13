@@ -12,6 +12,7 @@ import type {
   Coupon,
   CoursePackage,
   LandingPage,
+  LessonRecord,
   ModuleKey,
   Order,
   Role,
@@ -19,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v34'
+const KEY = 'dinoai_crm_state_v35'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -32,6 +33,7 @@ export type AppState = {
   accounts: Account[]
   logs: AuditLog[]
   callRecords: CallRecord[]
+  lessons: LessonRecord[]
 }
 
 const listeners = new Set<() => void>()
@@ -656,7 +658,104 @@ function seed(): AppState {
     },
   ]
 
-  return { channels, students, orders, packages, coupons, landingPages, roles, accounts, logs, callRecords }
+  // 课时记录（课标）：已完课的体验课/正式课，附 Trial Report / Lesson Report 与回放
+  const lessons: LessonRecord[] = [
+    // 김지우（付费）：1 节体验课 + 3 节正式课，均已完课
+    {
+      id: uid('ls_'), studentId: '2060199610824355842', courseLabel: 'T1-U10-LC1-L2', lessonType: '体验课', status: '已完课',
+      teacher: 'Emma W.', completedAt: now.subtract(20, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      report: {
+        summary: '首次体验课，学生能听懂课堂指令并完成基础问答，对动物主题词汇表现出浓厚兴趣。',
+        ratings: [
+          { label: 'Speaking', score: 4 },
+          { label: 'Listening', score: 4 },
+          { label: 'Vocabulary', score: 3 },
+          { label: 'Engagement', score: 5 },
+        ],
+        teacherComment: 'Ji-woo is an enthusiastic learner with a solid listening foundation. Recommended to start at Level 1 to strengthen speaking output.',
+        homework: '复习本节 8 个动物单词，完成配套 App 的 Unit 10 跟读练习。',
+      },
+    },
+    {
+      id: uid('ls_'), studentId: '2060199610824355842', courseLabel: 'TCELA-L1-U2-LC1-11', lessonType: '正式课', status: '已完课',
+      teacher: 'Emma W.', completedAt: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      report: {
+        summary: '本节围绕 “My Family” 主题展开，学生能用完整句型介绍家庭成员，语音语调自然。',
+        ratings: [
+          { label: 'Participation', score: 5 },
+          { label: 'Accuracy', score: 4 },
+          { label: 'Fluency', score: 4 },
+          { label: 'Homework', score: 5 },
+        ],
+        teacherComment: 'Great progress on sentence structure. Keep practicing the /th/ sound.',
+        homework: '录制一段 1 分钟家庭介绍音频并上传。',
+      },
+    },
+    {
+      id: uid('ls_'), studentId: '2060199610824355842', courseLabel: 'TCELA-L1-U2-LC1-12', lessonType: '正式课', status: '已完课',
+      teacher: 'Liam K.', completedAt: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      report: {
+        summary: '复习 Unit 2 核心句型并完成小测，学生词汇掌握牢固，能主动发起对话。',
+        ratings: [
+          { label: 'Participation', score: 5 },
+          { label: 'Accuracy', score: 5 },
+          { label: 'Fluency', score: 4 },
+          { label: 'Homework', score: 4 },
+        ],
+        teacherComment: 'Excellent retention. Ready to move on to Unit 3.',
+        homework: '完成 Unit 2 单元测试，预习 Unit 3 单词卡。',
+      },
+    },
+    // Abdullah（付费）：体验课 + 正式课
+    {
+      id: uid('ls_'), studentId: '2060199610824355843', courseLabel: 'T1-U3-LC1-L1', lessonType: '体验课', status: '已完课',
+      teacher: 'Sophia R.', completedAt: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      report: {
+        summary: 'Trial lesson on greetings. Student is shy at first but warms up quickly and imitates pronunciation well.',
+        ratings: [
+          { label: 'Speaking', score: 3 },
+          { label: 'Listening', score: 4 },
+          { label: 'Vocabulary', score: 3 },
+          { label: 'Engagement', score: 4 },
+        ],
+        teacherComment: 'Recommended Level 1. Focus on building confidence in speaking.',
+        homework: 'Practice greetings with a family member.',
+      },
+    },
+    {
+      id: uid('ls_'), studentId: '2060199610824355843', courseLabel: 'TCELA-L1-U1-LC1-03', lessonType: '正式课', status: '已完课',
+      teacher: 'Sophia R.', completedAt: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      report: {
+        summary: '本节学习颜色与数字，学生能准确认读 1-10 并说出常见颜色。',
+        ratings: [
+          { label: 'Participation', score: 4 },
+          { label: 'Accuracy', score: 4 },
+          { label: 'Fluency', score: 3 },
+          { label: 'Homework', score: 4 },
+        ],
+        teacherComment: 'Good improvement in confidence. Encourage more full-sentence answers.',
+        homework: 'Complete the color matching worksheet.',
+      },
+    },
+    // Seo-yeon（付费逾期）：仅体验课
+    {
+      id: uid('ls_'), studentId: '2060199610824355846', courseLabel: 'T1-U1-LC1-L1', lessonType: '体验课', status: '已完课',
+      teacher: 'Olivia M.', completedAt: now.subtract(10, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      report: {
+        summary: '体验课表现活跃，能跟读并模仿老师的语音语调，具备一定听说基础。',
+        ratings: [
+          { label: 'Speaking', score: 4 },
+          { label: 'Listening', score: 5 },
+          { label: 'Vocabulary', score: 4 },
+          { label: 'Engagement', score: 5 },
+        ],
+        teacherComment: 'Seo-yeon shows strong listening skills. Recommended Level 1.',
+        homework: '复习本节问候语，完成 App 跟读。',
+      },
+    },
+  ]
+
+  return { channels, students, orders, packages, coupons, landingPages, roles, accounts, logs, callRecords, lessons }
 }
 
 // ---------- 操作日志 ----------

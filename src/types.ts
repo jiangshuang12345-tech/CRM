@@ -133,6 +133,35 @@ export type SalesFollowLog = {
   owner: string
 }
 
+// ---- 课程 / 课时报告 ----
+export type LessonType = '体验课' | '正式课'
+export const LESSON_TYPES: LessonType[] = ['体验课', '正式课']
+
+export type LessonStatus = '已完课' | '已预约' | '已取消'
+
+// 报告里的能力评估项（score：1-5）
+export type LessonRating = { label: string; score: number }
+
+export type LessonReport = {
+  summary: string // 课堂小结
+  ratings: LessonRating[] // 能力评估
+  teacherComment: string // 老师评语
+  homework?: string // 课后作业
+}
+
+// 课时记录（课标）：体验课/正式课，含报告与回放
+export type LessonRecord = {
+  id: string
+  studentId: string
+  courseLabel: string // 课标，如 TCELA-L1-U2-LC1-11
+  lessonType: LessonType // 体验课 / 正式课
+  status: LessonStatus
+  teacher?: string // 授课老师
+  completedAt?: string // 完课时间（已完课才有，UTC）
+  replayUrl?: string // 回放链接
+  report?: LessonReport // Trial Report / Lesson Report 内容
+}
+
 // 外呼通话结果
 export type CallResult = '已接通' | '无人接听'
 export const CALL_RESULTS: CallResult[] = ['已接通', '无人接听']
