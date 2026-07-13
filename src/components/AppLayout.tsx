@@ -53,14 +53,16 @@ export default function AppLayout() {
   const accounts = useStore((s) => s.accounts)
   const roles = useStore((s) => s.roles)
 
-  const phase2Label = (text: string) => (
+  const phaseLabel = (text: string, phaseText: string, color: string) => (
     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
       {text}
-      <Tag color="orange" style={{ margin: 0, lineHeight: '16px', fontSize: 11, padding: '0 5px' }}>
-        {t('app.phase2')}
+      <Tag color={color} style={{ margin: 0, lineHeight: '16px', fontSize: 11, padding: '0 5px' }}>
+        {phaseText}
       </Tag>
     </span>
   )
+  const phase2Label = (text: string) => phaseLabel(text, t('app.phase2'), 'orange')
+  const phase3Label = (text: string) => phaseLabel(text, t('app.phase3'), 'purple')
 
   const visible = (key: string) => can(NAV_MODULE[key]) !== 'none'
 
@@ -78,8 +80,8 @@ export default function AppLayout() {
     { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
   ].filter((n) => visible(n.key))
 
-  // 二期功能（销售中心 → 用户中心二期 → 营销中心 → 系统配置）
-  const salesNav = [{ key: '/sales', icon: <SolutionOutlined />, label: phase2Label(t('app.nav.sales')) }].filter((n) =>
+  // 销售中心（三期）
+  const salesNav = [{ key: '/sales', icon: <SolutionOutlined />, label: phase3Label(t('app.nav.sales')) }].filter((n) =>
     visible(n.key),
   )
   const usersV2Nav = [
