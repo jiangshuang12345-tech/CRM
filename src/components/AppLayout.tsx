@@ -93,7 +93,6 @@ export default function AppLayout() {
 
   const NAV = [
     ...topNav,
-    ...salesNav,
     ...usersV2Nav,
     ...(marketingChildren.length
       ? [
@@ -106,6 +105,8 @@ export default function AppLayout() {
         ]
       : []),
     ...systemNav,
+    // 三期功能放到最下面
+    ...salesNav,
   ]
 
   const TITLES: Record<string, string> = {
