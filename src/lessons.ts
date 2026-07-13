@@ -1,5 +1,8 @@
 import type { LessonRecord } from './types'
 
+// 试听课报告外链（点击「试听报告」跳转的原型页面）
+export const TRIAL_REPORT_URL = 'https://jiangshuang12345-tech.github.io/CT-Trial-Report/'
+
 // 某学生的全部课时
 export function studentLessons(lessons: LessonRecord[], studentId: string): LessonRecord[] {
   return lessons.filter((l) => l.studentId === studentId)

@@ -15,13 +15,12 @@ import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from 
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { AppChannel, LessonRecord, LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
+import type { AppChannel, LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
 import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
-import { latestTrialReport } from '../lessons'
-import { ReportModal } from '../components/ReportModal'
+import { latestTrialReport, TRIAL_REPORT_URL } from '../lessons'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -64,7 +63,6 @@ export default function UserCenterP1() {
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
-  const [reportLesson, setReportLesson] = useState<LessonRecord | null>(null)
   const [form] = Form.useForm()
 
   // 数据权限：底层仍按业务线隔离（一期不展示业务线，仅展示国家）
@@ -237,7 +235,11 @@ export default function UserCenterP1() {
         return (
           <Space size={0}>
             {trial && (
-              <Button type="link" icon={<FileTextOutlined />} onClick={() => setReportLesson(trial)}>
+              <Button
+                type="link"
+                icon={<FileTextOutlined />}
+                onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
+              >
                 {t('user.trialReport')}
               </Button>
             )}
@@ -381,8 +383,6 @@ export default function UserCenterP1() {
           ]}
         />
       </Modal>
-
-      <ReportModal lesson={reportLesson} onClose={() => setReportLesson(null)} />
     </Card>
   )
 }

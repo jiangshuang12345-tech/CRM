@@ -8,7 +8,7 @@ import type { LessonRecord, LoginMethod, UserStatus, UserType } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
-import { completedLessons, reportKind } from '../lessons'
+import { completedLessons, reportKind, TRIAL_REPORT_URL } from '../lessons'
 import { ReportModal, ReplayModal } from '../components/ReportModal'
 import LocalTime from '../components/LocalTime'
 
@@ -68,14 +68,28 @@ export default function UserDetail() {
       title: t('lesson.col.report'),
       key: 'report',
       width: 150,
-      render: (_: unknown, r: LessonRecord) =>
-        r.report ? (
+      render: (_: unknown, r: LessonRecord) => {
+        // 体验课 → Trial Report 跳转外部原型页；正式课 → Lesson Report 内部弹窗
+        if (r.lessonType === '体验课') {
+          return (
+            <Button
+              type="link"
+              style={{ padding: 0 }}
+              icon={<FileTextOutlined />}
+              onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
+            >
+              {reportKind(r)}
+            </Button>
+          )
+        }
+        return r.report ? (
           <Button type="link" style={{ padding: 0 }} icon={<FileTextOutlined />} onClick={() => setReportLesson(r)}>
             {reportKind(r)}
           </Button>
         ) : (
           <Text type="secondary">—</Text>
-        ),
+        )
+      },
     },
     {
       title: t('lesson.col.replay'),
