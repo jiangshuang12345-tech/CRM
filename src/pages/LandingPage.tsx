@@ -6,6 +6,7 @@ import {
   DatePicker,
   Divider,
   Form,
+  InputNumber,
   Modal,
   Select,
   Space,
@@ -180,6 +181,7 @@ export default function LandingPageManagement() {
       param2: ch?.params?.param2 || undefined,
       packageId: v.packageId,
       packageName: pkg?.name,
+      originalPrice: v.originalPrice != null && v.originalPrice !== '' ? String(v.originalPrice) : undefined,
       couponId: v.couponId,
       couponCode: v.couponCode,
       validFrom: range?.[0]?.format('YYYY-MM-DD HH:mm:ss'),
@@ -225,6 +227,13 @@ export default function LandingPageManagement() {
       ),
     },
     { title: t('lp.col.package'), dataIndex: 'packageName', width: 200, render: (v) => v || <Text type="secondary">—</Text> },
+    {
+      title: t('lp.col.strikePrice'),
+      dataIndex: 'originalPrice',
+      width: 110,
+      render: (v: string | undefined) =>
+        v ? <Text delete type="secondary">{v}</Text> : <Text type="secondary">—</Text>,
+    },
     {
       title: t('lp.col.coupon'),
       dataIndex: 'couponId',
@@ -301,7 +310,7 @@ export default function LandingPageManagement() {
         rowKey="id"
         columns={columns}
         dataSource={landingPages}
-        scroll={{ x: 1620 }}
+        scroll={{ x: 1730 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -384,6 +393,16 @@ export default function LandingPageManagement() {
               optionFilterProp="label"
               onChange={() => setPreview(null)}
               options={pkgOptions.map((p) => ({ label: `${p.id} · ${p.name}`, value: p.id }))}
+            />
+          </Form.Item>
+
+          <Form.Item name="originalPrice" label={t('lp.f.strikePrice')} tooltip={t('lp.f.strikePriceTip')}>
+            <InputNumber
+              min={0}
+              precision={2}
+              style={{ width: '100%' }}
+              placeholder={t('lp.f.optional')}
+              onChange={() => setPreview(null)}
             />
           </Form.Item>
 

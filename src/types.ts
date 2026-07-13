@@ -221,6 +221,7 @@ export type LandingPage = {
   param2?: string // 渠道参数2
   packageId?: string
   packageName?: string
+  originalPrice?: string // 划线价（非必填，仅展示用）
   couponId?: string
   couponCode?: string
   validFrom?: string
