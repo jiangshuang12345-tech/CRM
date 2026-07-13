@@ -8,8 +8,8 @@ import type { LessonRecord, LoginMethod, UserStatus, UserType } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
-import { completedLessons, reportKind, TRIAL_REPORT_URL } from '../lessons'
-import { ReportModal, ReplayModal } from '../components/ReportModal'
+import { completedLessons, openReplayVideo, reportKind, TRIAL_REPORT_URL } from '../lessons'
+import { ReportModal } from '../components/ReportModal'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -27,7 +27,6 @@ export default function UserDetail() {
   const scope = allowedLines()
 
   const [reportLesson, setReportLesson] = useState<LessonRecord | null>(null)
-  const [replayLesson, setReplayLesson] = useState<LessonRecord | null>(null)
 
   const student = useMemo(() => students.find((s) => s.studentId === studentId), [students, studentId])
   const inScope = student && (!scope || scope.includes(student.businessLine))
@@ -97,7 +96,7 @@ export default function UserDetail() {
       width: 110,
       render: (_: unknown, r: LessonRecord) =>
         r.replayUrl ? (
-          <Button type="link" style={{ padding: 0 }} icon={<PlayCircleOutlined />} onClick={() => setReplayLesson(r)}>
+          <Button type="link" style={{ padding: 0 }} icon={<PlayCircleOutlined />} onClick={() => openReplayVideo(r.replayUrl)}>
             {t('lesson.viewReplay')}
           </Button>
         ) : (
@@ -161,7 +160,6 @@ export default function UserDetail() {
       </Card>
 
       <ReportModal lesson={reportLesson} onClose={() => setReportLesson(null)} />
-      <ReplayModal lesson={replayLesson} onClose={() => setReplayLesson(null)} />
     </Space>
   )
 }
