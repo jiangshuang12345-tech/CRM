@@ -13,7 +13,7 @@ import {
   Tag,
   Typography,
 } from 'antd'
-import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -23,7 +23,6 @@ import { USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
-import { latestTrialReport, TRIAL_REPORT_URL } from '../lessons'
 import { inUserCenter } from '../funnel'
 import { setBizFilter, useBizFilter } from '../bizFilter'
 import LocalTime from '../components/LocalTime'
@@ -53,7 +52,6 @@ export default function UserCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
-  const lessons = useStore((s) => s.lessons ?? [])
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('users') === 'operate'
   const scope = allowedLines()
@@ -205,29 +203,16 @@ export default function UserCenter() {
     {
       title: t('common.action'),
       key: 'action',
-      width: 200,
+      width: 140,
       fixed: 'right' as const,
-      render: (_: unknown, r: Student) => {
-        const trial = latestTrialReport(lessons, r.studentId)
-        return (
-          <Space size={0}>
-            {trial && (
-              <Button
-                type="link"
-                icon={<FileTextOutlined />}
-                onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
-              >
-                {t('user.trialReport')}
-              </Button>
-            )}
-            {canEdit && (
-              <Button type="link" icon={<EditOutlined />} onClick={() => openEdit(r)}>
-                {t('user.editInfo')}
-              </Button>
-            )}
-          </Space>
-        )
-      },
+      render: (_: unknown, r: Student) =>
+        canEdit ? (
+          <Button type="link" icon={<EditOutlined />} onClick={() => openEdit(r)}>
+            {t('user.editInfo')}
+          </Button>
+        ) : (
+          <Text type="secondary">—</Text>
+        ),
     },
   ]
 
