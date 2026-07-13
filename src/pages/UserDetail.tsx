@@ -8,13 +8,18 @@ import type { LessonRecord, LoginMethod, UserStatus, UserType } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
-import { completedLessons, openReplayVideo, reportKind, TRIAL_REPORT_URL } from '../lessons'
+import { completedLessons, openReplayVideo, reportKind, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
 import { ReportModal } from '../components/ReportModal'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
 
-const STATUS_COLOR: Record<UserStatus, string> = { 注册: 'default', 付费: 'green', 付费逾期: 'red' }
+const STATUS_COLOR: Record<UserStatus, string> = {
+  '未付费-未体验': 'default',
+  '未付费-已体验': 'blue',
+  付费: 'green',
+  付费逾期: 'red',
+}
 const USER_TYPE_COLOR: Record<UserType, string> = { 正式用户: 'green', 测试用户: 'gold' }
 
 export default function UserDetail() {
@@ -117,7 +122,10 @@ export default function UserDetail() {
           <Descriptions.Item label={t('user.col.id')}>{student.studentId}</Descriptions.Item>
           <Descriptions.Item label={t('user.col.name')}>{student.localName || student.name}</Descriptions.Item>
           <Descriptions.Item label={t('user.col.status')}>
-            <Tag color={STATUS_COLOR[student.status]}>{t(`enum.status.${student.status}`)}</Tag>
+            {(() => {
+              const st = resolveUserStatus(student, lessons)
+              return <Tag color={STATUS_COLOR[st]}>{t(`enum.status.${st}`)}</Tag>
+            })()}
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.userType')}>
             <Tag color={USER_TYPE_COLOR[resolveUserType(student)]}>{t(`enum.userType.${resolveUserType(student)}`)}</Tag>

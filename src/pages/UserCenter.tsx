@@ -23,6 +23,7 @@ import { USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
+import { resolveUserStatus } from '../lessons'
 import { inUserCenter } from '../funnel'
 import { setBizFilter, useBizFilter } from '../bizFilter'
 import LocalTime from '../components/LocalTime'
@@ -30,7 +31,8 @@ import LocalTime from '../components/LocalTime'
 const { Text } = Typography
 
 const STATUS_COLOR: Record<UserStatus, string> = {
-  注册: 'default',
+  '未付费-未体验': 'default',
+  '未付费-已体验': 'blue',
   付费: 'green',
   付费逾期: 'red',
 }
@@ -52,6 +54,7 @@ export default function UserCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
+  const lessons = useStore((s) => s.lessons ?? [])
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('users') === 'operate'
   const scope = allowedLines()
@@ -73,8 +76,8 @@ export default function UserCenter() {
     () =>
       students.filter((s) => {
         if (scope && !scope.includes(s.businessLine)) return false
-        // 分流规则：已注册未体验且有手机号的用户进入「销售中心」，其余展示在此
-        if (!inUserCenter(s)) return false
+        // 分流规则：未付费-未体验且有手机号的用户进入「销售中心」，其余展示在此
+        if (!inUserCenter(s, lessons)) return false
         const kw = keyword.trim().toLowerCase()
         const matchKw =
           !kw ||
@@ -82,11 +85,11 @@ export default function UserCenter() {
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
           s.account.toLowerCase().includes(kw)
         const matchLine = !lineFilter || s.businessLine === lineFilter
-        const matchStatus = !statusFilter || s.status === statusFilter
+        const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
         return matchKw && matchLine && matchStatus && matchType
       }),
-    [students, keyword, lineFilter, statusFilter, typeFilter, scope],
+    [students, lessons, keyword, lineFilter, statusFilter, typeFilter, scope],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -142,8 +145,11 @@ export default function UserCenter() {
     {
       title: t('user.col.status'),
       dataIndex: 'status',
-      width: 100,
-      render: (v: UserStatus) => <Tag color={STATUS_COLOR[v]}>{t(`enum.status.${v}`)}</Tag>,
+      width: 130,
+      render: (_: UserStatus, r: Student) => {
+        const st = resolveUserStatus(r, lessons)
+        return <Tag color={STATUS_COLOR[st]}>{t(`enum.status.${st}`)}</Tag>
+      },
     },
     {
       title: t('user.col.userType'),

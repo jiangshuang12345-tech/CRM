@@ -61,6 +61,7 @@ const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 export default function SalesCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
+  const lessons = useStore((s) => s.lessons ?? [])
   const callRecords = useStore((s) => s.callRecords ?? [])
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('sales') === 'operate'
@@ -85,10 +86,10 @@ export default function SalesCenter() {
     [students, scope],
   )
 
-  const poolAll = useMemo(() => scoped.filter(isPoolLead), [scoped])
+  const poolAll = useMemo(() => scoped.filter((s) => isPoolLead(s, lessons)), [scoped, lessons])
   const followAll = useMemo(
-    () => scoped.filter(isClaimedLead).filter((s) => seeAllOwners || s.salesOwner === actor),
-    [scoped, seeAllOwners, actor],
+    () => scoped.filter((s) => isClaimedLead(s, lessons)).filter((s) => seeAllOwners || s.salesOwner === actor),
+    [scoped, lessons, seeAllOwners, actor],
   )
 
   // 业务线筛选项来源于当前列表实际包含的业务线数据
@@ -352,7 +353,7 @@ export default function SalesCenter() {
     { title: t('sales.call.agent'), dataIndex: 'agent', width: 190 },
   ]
 
-  const totalLeads = scoped.filter(isSalesLead).length
+  const totalLeads = scoped.filter((s) => isSalesLead(s, lessons)).length
 
   return (
     <Card className="page-card" bordered={false} title={<span className="section-title">{t('sales.title')}</span>}>

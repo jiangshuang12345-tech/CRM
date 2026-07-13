@@ -1,4 +1,4 @@
-import type { LessonRecord } from './types'
+import type { LessonRecord, Student, UserStatus } from './types'
 
 // 试听课报告外链（点击「试听报告」跳转的原型页面）
 export const TRIAL_REPORT_URL = 'https://jiangshuang12345-tech.github.io/CT-Trial-Report/'
@@ -43,4 +43,23 @@ export function latestTrialReport(lessons: LessonRecord[], studentId: string): L
 // 报告类型：体验课 → Trial Report，正式课 → Lesson Report
 export function reportKind(l: LessonRecord): 'Trial Report' | 'Lesson Report' {
   return l.lessonType === '体验课' ? 'Trial Report' : 'Lesson Report'
+}
+
+// 是否已体验：存在任意一节「已完课」的体验课
+export function hasCompletedTrial(lessons: LessonRecord[], studentId: string): boolean {
+  return lessons.some((l) => l.studentId === studentId && l.lessonType === '体验课' && l.status === '已完课')
+}
+
+// 是否付费用户（付费 / 付费逾期）
+export function isPaidStatus(s: Pick<Student, 'status'>): boolean {
+  return s.status === '付费' || s.status === '付费逾期'
+}
+
+// 计算用户状态：
+// - 有付费订单 → 保留「付费 / 付费逾期」
+// - 无付费订单 + 体验课完课（任意一节）→ 未付费-已体验
+// - 无付费订单 + 体验课未完课 → 未付费-未体验
+export function resolveUserStatus(student: Student, lessons: LessonRecord[]): UserStatus {
+  if (isPaidStatus(student)) return student.status
+  return hasCompletedTrial(lessons, student.studentId) ? '未付费-已体验' : '未付费-未体验'
 }

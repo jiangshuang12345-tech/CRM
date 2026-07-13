@@ -13,7 +13,8 @@ import LocalTime from '../components/LocalTime'
 const { Text } = Typography
 
 const USER_STATUS_COLOR: Record<UserStatus, string> = {
-  注册: 'default',
+  '未付费-未体验': 'default',
+  '未付费-已体验': 'blue',
   付费: 'green',
   付费逾期: 'red',
 }
