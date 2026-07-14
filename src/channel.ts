@@ -40,6 +40,12 @@ export function hasLandingChannel(channels: ChannelLine[], s: ChannelUser): bool
   return !!channelPathByCode(channels, s.channelCode)
 }
 
+// 业务线展示：业务线来自渠道归因（CRM 渠道服务于投放落地页）。
+// 仅投 App、无渠道码的用户没有渠道归因，业务线可能为空。
+export function businessLineOf(channels: ChannelLine[], s: ChannelUser): string {
+  return hasLandingChannel(channels, s) ? s.businessLine : ''
+}
+
 // 注册渠道/渠道来源展示：
 // 1) 有落地页渠道码：解析到最低级别渠道路径；
 // 2) 无渠道码（仅投 App）：用线下导表「投放渠道」(channelSource) 回填渠道来源。

@@ -9,7 +9,7 @@ import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
 import { completedLessons, openReplayVideo, reportKind, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
-import { lineLabel, registerChannelText } from '../channel'
+import { businessLineOf, lineLabel, registerChannelText } from '../channel'
 import { ReportModal } from '../components/ReportModal'
 import LocalTime from '../components/LocalTime'
 
@@ -141,7 +141,11 @@ export default function UserDetail() {
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.account')}>{student.account}</Descriptions.Item>
           <Descriptions.Item label={t('user.col.line')}>
-            <Tag>{student.businessLine}</Tag>
+            {businessLineOf(channels, student) ? (
+              <Tag>{businessLineOf(channels, student)}</Tag>
+            ) : (
+              <Text type="secondary">-</Text>
+            )}
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.country')}>
             <Tag>{lineLabel(student)}</Tag>

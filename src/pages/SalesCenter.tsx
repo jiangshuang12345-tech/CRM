@@ -28,7 +28,7 @@ import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
 import { resolveUserType } from '../userType'
 import { useLineScope } from '../useLineScope'
-import { lineLabel, registerChannelText } from '../channel'
+import { businessLineOf, lineLabel, registerChannelText } from '../channel'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
@@ -84,22 +84,32 @@ export default function SalesCenter() {
   const [form] = Form.useForm()
   const watchProgress = Form.useWatch('progress', form) as string | undefined
 
+  // 无业务线（无渠道归因）的用户不参与业务线过滤，始终展示
+  const lineHit = (s: Student) => {
+    const bl = businessLineOf(channels, s)
+    return !bl || matchLine(bl)
+  }
   const poolAll = useMemo(
-    () => students.filter((s) => isPoolLead(s, lessons)).filter((s) => matchLine(s.businessLine)),
-    [students, lessons, lineSel, matchLine],
+    () => students.filter((s) => isPoolLead(s, lessons)).filter(lineHit),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [students, channels, lessons, lineSel, matchLine],
   )
   const followAll = useMemo(
     () =>
       students
         .filter((s) => isClaimedLead(s, lessons))
-        .filter((s) => matchLine(s.businessLine))
+        .filter(lineHit)
         .filter((s) => seeAllOwners || s.salesOwner === actor),
-    [students, lessons, lineSel, matchLine, seeAllOwners, actor],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [students, channels, lessons, lineSel, matchLine, seeAllOwners, actor],
   )
 
-  // 业务线筛选选项：渠道业务线 + 学员中出现的业务线
+  // 业务线筛选选项：渠道业务线 + 学员中出现的业务线（空业务线不入选项）
   const lineOptions = useMemo(
-    () => Array.from(new Set([...channels.map((c) => c.name), ...students.map((s) => s.businessLine)].filter(Boolean))),
+    () =>
+      Array.from(
+        new Set([...channels.map((c) => c.name), ...students.map((s) => businessLineOf(channels, s))].filter(Boolean)),
+      ),
     [channels, students],
   )
 
@@ -262,7 +272,15 @@ export default function SalesCenter() {
       render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
+    {
+      title: t('user.col.line'),
+      dataIndex: 'businessLine',
+      width: 110,
+      render: (_, r) => {
+        const bl = businessLineOf(channels, r)
+        return bl ? <Tag>{bl}</Tag> : <Text type="secondary">-</Text>
+      },
+    },
     { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
       title: t('user.col.channel'),

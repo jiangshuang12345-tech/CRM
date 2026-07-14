@@ -26,7 +26,7 @@ import { hasPhoneLogin, resolveUserType } from '../userType'
 import { resolveUserStatus } from '../lessons'
 import { inUserCenter } from '../funnel'
 import { useLineScope } from '../useLineScope'
-import { lineLabel, registerChannelText } from '../channel'
+import { businessLineOf, lineLabel, registerChannelText } from '../channel'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
@@ -68,9 +68,12 @@ export default function UserCenter() {
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
-  // 业务线筛选选项：渠道业务线 + 数据中出现的业务线
+  // 业务线筛选选项：渠道业务线 + 数据中出现的业务线（无渠道归因的空业务线不入选项）
   const lineOptions = useMemo(
-    () => Array.from(new Set([...channels.map((c) => c.name), ...students.map((s) => s.businessLine)].filter(Boolean))),
+    () =>
+      Array.from(
+        new Set([...channels.map((c) => c.name), ...students.map((s) => businessLineOf(channels, s))].filter(Boolean)),
+      ),
     [channels, students],
   )
 
@@ -87,9 +90,11 @@ export default function UserCenter() {
           s.account.toLowerCase().includes(kw)
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
-        return matchKw && matchLine(s.businessLine) && matchStatus && matchType
+        // 无业务线（无渠道归因）的用户不参与业务线过滤，始终展示
+        const bl = businessLineOf(channels, s)
+        return matchKw && (!bl || matchLine(bl)) && matchStatus && matchType
       }),
-    [students, lessons, keyword, lineSel, statusFilter, typeFilter, matchLine],
+    [students, channels, lessons, keyword, lineSel, statusFilter, typeFilter, matchLine],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -172,7 +177,15 @@ export default function UserCenter() {
       width: 200,
       render: (v) => <Text>{v}</Text>,
     },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
+    {
+      title: t('user.col.line'),
+      dataIndex: 'businessLine',
+      width: 110,
+      render: (_, r) => {
+        const bl = businessLineOf(channels, r)
+        return bl ? <Tag>{bl}</Tag> : <Text type="secondary">-</Text>
+      },
+    },
     { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
       title: t('user.col.channel'),
