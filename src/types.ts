@@ -214,6 +214,7 @@ export type CoursePackage = {
 // 落地页：一键生成投放链接，关联渠道、商品包、优惠券
 export type LandingPage = {
   id: string
+  name: string // 落地页名称
   businessLine: string
   channelCode: string
   channelName?: string

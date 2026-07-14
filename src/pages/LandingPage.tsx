@@ -6,6 +6,7 @@ import {
   DatePicker,
   Divider,
   Form,
+  Input,
   InputNumber,
   Modal,
   Select,
@@ -174,6 +175,7 @@ export default function LandingPageManagement() {
     const range = v.validRange as [dayjs.Dayjs, dayjs.Dayjs] | undefined
     const lp: LandingPage = {
       id: uid('lp_'),
+      name: v.name?.trim(),
       businessLine: v.businessLine,
       channelCode: v.channelCode,
       channelName: ch?.path,
@@ -207,6 +209,13 @@ export default function LandingPageManagement() {
     })
 
   const columns: ColumnsType<LandingPage> = [
+    {
+      title: t('lp.col.name'),
+      dataIndex: 'name',
+      width: 160,
+      fixed: 'left',
+      render: (v: string | undefined) => (v ? <Text strong>{v}</Text> : <Text type="secondary">—</Text>),
+    },
     { title: t('lp.col.line'), dataIndex: 'businessLine', width: 90, render: (v) => <Tag color="magenta">{v}</Tag> },
     {
       title: t('lp.col.channel'),
@@ -310,7 +319,7 @@ export default function LandingPageManagement() {
         rowKey="id"
         columns={columns}
         dataSource={landingPages}
-        scroll={{ x: 1730 }}
+        scroll={{ x: 1890 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -326,6 +335,13 @@ export default function LandingPageManagement() {
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false} style={{ marginTop: 12 }}>
+          <Form.Item
+            name="name"
+            label={t('lp.f.name')}
+            rules={[{ required: true, message: t('lp.f.namePlaceholder') }]}
+          >
+            <Input allowClear placeholder={t('lp.f.namePlaceholder')} maxLength={50} />
+          </Form.Item>
           <Form.Item
             name="businessLine"
             label={t('lp.f.line')}

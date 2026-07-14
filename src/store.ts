@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v37'
+const KEY = 'dinoai_crm_state_v38'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -447,6 +447,7 @@ function seed(): AppState {
   const landingPages: LandingPage[] = [
     {
       id: uid('lp_'),
+      name: '韩国启蒙季度大促落地页',
       businessLine: '韩国',
       channelCode: 'K2000Gh',
       channelName: '自然流量 / ASO / App Store 搜索',
@@ -462,6 +463,7 @@ function seed(): AppState {
     },
     {
       id: uid('lp_'),
+      name: '越南 TikTok 达人年度畅学落地页',
       businessLine: '越南',
       channelCode: 'Tk88Vzq',
       channelName: 'KOL / TikTok 达人 / @minh_edu',
