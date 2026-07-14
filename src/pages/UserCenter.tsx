@@ -26,7 +26,7 @@ import { hasPhoneLogin, resolveUserType } from '../userType'
 import { resolveUserStatus } from '../lessons'
 import { inUserCenter } from '../funnel'
 import { useLineScope } from '../useLineScope'
-import { registerChannelText } from '../channel'
+import { lineLabel, registerChannelText } from '../channel'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
@@ -172,14 +172,19 @@ export default function UserCenter() {
       width: 200,
       render: (v) => <Text>{v}</Text>,
     },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',
       width: 260,
       render: (_: string, r) => registerChannelText(channels, r),
     },
-    { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
+    {
+      title: t('user.col.code'),
+      dataIndex: 'channelCode',
+      width: 200,
+      render: (v: string) => (v ? <Text code>{v}</Text> : <Text type="secondary">-</Text>),
+    },
     {
       title: t('user.col.regTime'),
       dataIndex: 'registerTime',

@@ -28,7 +28,7 @@ import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
 import { resolveUserType } from '../userType'
 import { useLineScope } from '../useLineScope'
-import { registerChannelText } from '../channel'
+import { lineLabel, registerChannelText } from '../channel'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
@@ -262,7 +262,7 @@ export default function SalesCenter() {
       render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',

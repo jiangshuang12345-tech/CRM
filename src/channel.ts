@@ -21,11 +21,32 @@ export function channelPathByCode(channels: ChannelLine[], code?: string): strin
   return null
 }
 
-// 注册渠道展示：优先按 code 解析到最低级别渠道，否则回退到存储的 registerChannel
-export function registerChannelText(
-  channels: ChannelLine[],
-  s: { businessLine: string; registerChannel: string; channelCode?: string },
-): string {
-  const path = channelPathByCode(channels, s.channelCode) ?? s.registerChannel
-  return `${s.businessLine} · ${path}`
+type ChannelUser = {
+  businessLine: string
+  registerChannel: string
+  channelCode?: string
+  channelSource?: string
+  country?: string
+}
+
+// 业务线展示：CRM 渠道仅用于投放落地页配置，无渠道码（仅投 App）的用户
+// 业务线取「注册时的国家」；有落地页渠道码的用户，国家即业务线，二者一致。
+export function lineLabel(s: { businessLine: string; country?: string }): string {
+  return s.country || s.businessLine
+}
+
+// 是否为「有落地页渠道码」的用户（渠道码能在渠道树中解析到实际渠道）
+export function hasLandingChannel(channels: ChannelLine[], s: ChannelUser): boolean {
+  return !!channelPathByCode(channels, s.channelCode)
+}
+
+// 注册渠道/渠道来源展示：
+// 1) 有落地页渠道码：解析到最低级别渠道路径；
+// 2) 无渠道码（仅投 App）：用线下导表「投放渠道」(channelSource) 回填渠道来源。
+export function registerChannelText(channels: ChannelLine[], s: ChannelUser): string {
+  const line = lineLabel(s)
+  const path = channelPathByCode(channels, s.channelCode)
+  if (path) return `${line} · ${path}`
+  const source = s.channelSource || s.registerChannel
+  return source ? `${line} · ${source}` : line
 }
