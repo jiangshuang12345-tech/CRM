@@ -340,7 +340,7 @@ export default function LandingPageManagement() {
             label={t('lp.f.name')}
             rules={[{ required: true, message: t('lp.f.namePlaceholder') }]}
           >
-            <Input allowClear placeholder={t('lp.f.namePlaceholder')} maxLength={50} />
+            <Input allowClear autoComplete="off" placeholder={t('lp.f.namePlaceholder')} maxLength={50} />
           </Form.Item>
           <Form.Item
             name="businessLine"
