@@ -262,7 +262,8 @@ export default function SalesCenter() {
       render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
+    { title: t('user.col.line'), dataIndex: 'businessLine', width: 110, render: (v) => <Tag>{v}</Tag> },
+    { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',
@@ -389,7 +390,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={poolColumns}
                   dataSource={poolData}
-                  scroll={{ x: 1280 }}
+                  scroll={{ x: 1390 }}
                   locale={{ emptyText: t('sales.emptyPool') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
@@ -424,7 +425,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: 2190 }}
+                  scroll={{ x: 2300 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />

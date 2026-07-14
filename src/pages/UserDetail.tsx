@@ -141,6 +141,9 @@ export default function UserDetail() {
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.account')}>{student.account}</Descriptions.Item>
           <Descriptions.Item label={t('user.col.line')}>
+            <Tag>{student.businessLine}</Tag>
+          </Descriptions.Item>
+          <Descriptions.Item label={t('user.col.country')}>
             <Tag>{lineLabel(student)}</Tag>
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.channel')}>{registerChannelText(channels, student)}</Descriptions.Item>
