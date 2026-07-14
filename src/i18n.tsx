@@ -384,7 +384,7 @@ const zh: Dict = {
   'user.courseInfo': '课程信息',
   'user.courseInfoTip': '展示该用户所有「已完课」的课标（体验课 + 正式课），按完课时间倒序排列。',
   'lesson.col.label': '课标',
-  'lesson.col.type': '课时类型',
+  'lesson.col.type': '课程类型',
   'lesson.col.teacher': '老师',
   'lesson.col.completedAt': '完课时间',
   'lesson.col.report': '报告',

@@ -6,8 +6,9 @@ import { useStore } from '../store'
 import type { Order, OrderStatus, UserStatus, UserType } from '../types'
 import { USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
-import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
+import { useLineScope } from '../useLineScope'
+import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -38,13 +39,18 @@ export default function OrderCenter() {
   const { t } = useI18n()
   const orders = useStore((s) => s.orders)
   const students = useStore((s) => s.students)
+  const channels = useStore((s) => s.channels)
   const [keyword, setKeyword] = useState('')
   const [orderStatus, setOrderStatus] = useState<string | undefined>()
   const [payMethod, setPayMethod] = useState<string | undefined>()
   const [countryFilter, setCountryFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
-  const { allowedLines } = usePerm()
-  const scope = allowedLines()
+  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
+
+  const lineOptions = useMemo(
+    () => Array.from(new Set([...channels.map((c) => c.name), ...students.map((s) => s.businessLine)].filter(Boolean))),
+    [channels, students],
+  )
 
   const lineOf = useMemo(() => {
     const map = new Map(students.map((s) => [s.studentId, s.businessLine]))
@@ -62,14 +68,13 @@ export default function OrderCenter() {
   }, [students])
 
   const countries = useMemo(() => {
-    const inScope = scope ? students.filter((s) => scope.includes(s.businessLine)) : students
-    return Array.from(new Set(inScope.map((s) => s.country || s.businessLine).filter(Boolean))) as string[]
-  }, [students, scope])
+    return Array.from(new Set(students.map((s) => s.country || s.businessLine).filter(Boolean))) as string[]
+  }, [students])
 
   const data = useMemo(
     () =>
       orders.filter((o) => {
-        if (scope && !scope.includes(lineOf(o.studentId))) return false
+        if (!matchLine(lineOf(o.studentId))) return false
         const kw = keyword.trim().toLowerCase()
         const matchKw =
           !kw ||
@@ -84,7 +89,7 @@ export default function OrderCenter() {
           (!typeFilter || typeOf(o.studentId) === typeFilter)
         )
       }),
-    [orders, keyword, orderStatus, payMethod, countryFilter, typeFilter, lineOf, countryOf, typeOf, scope],
+    [orders, keyword, orderStatus, payMethod, countryFilter, typeFilter, lineOf, countryOf, typeOf, lineSel, matchLine],
   )
 
   const columns: ColumnsType<Order> = [
@@ -165,6 +170,7 @@ export default function OrderCenter() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
         <Select
           allowClear
           placeholder={t('user.col.country')}

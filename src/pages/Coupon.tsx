@@ -33,6 +33,8 @@ import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
 import type { BusinessLine, Coupon, CouponCode, CouponProduct, CouponStatus } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
+import { useLineScope } from '../useLineScope'
+import LineFilter from '../components/LineFilter'
 
 const { Text, Title } = Typography
 const { RangePicker } = DatePicker
@@ -378,16 +380,16 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
 export default function CouponPage() {
   const { t } = useI18n()
   const coupons = useStore((s) => s.coupons)
-  const { can, allowedLines } = usePerm()
+  const channels = useStore((s) => s.channels)
+  const { can } = usePerm()
   const canEdit = can('coupons') === 'operate'
-  const scope = allowedLines()
+  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const [view, setView] = useState<'list' | 'create'>('list')
   const [createLine, setCreateLine] = useState<BusinessLine>('韩国')
   const [pickLineOpen, setPickLineOpen] = useState(false)
   const [pickedLine, setPickedLine] = useState<BusinessLine | null>(null)
 
   const [keyword, setKeyword] = useState('')
-  const [lineFilter, setLineFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
 
   const [editCoupon, setEditCoupon] = useState<Coupon | null>(null)
@@ -401,37 +403,24 @@ export default function CouponPage() {
 
   const [detailCoupon, setDetailCoupon] = useState<Coupon | null>(null)
 
-  // 业务线筛选项来源于列表实际包含的业务线数据（受数据范围限制）
+  // 业务线筛选项：渠道业务线 + 列表实际包含的业务线
   const lineOptions = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          coupons
-            .filter((c) => !scope || scope.includes(c.businessLine))
-            .map((c) => c.businessLine)
-            .filter(Boolean),
-        ),
-      ),
-    [coupons, scope],
+    () => Array.from(new Set([...channels.map((c) => c.name), ...coupons.map((c) => c.businessLine)].filter(Boolean))),
+    [channels, coupons],
   )
 
   const data = useMemo(
     () =>
       coupons.filter((c) => {
-        if (scope && !scope.includes(c.businessLine)) return false
         const kw = keyword.trim().toLowerCase()
         const matchKw =
           !kw ||
           c.id.toLowerCase().includes(kw) ||
           c.name.toLowerCase().includes(kw) ||
           c.codes.some((cc) => cc.code.toLowerCase().includes(kw) || cc.kol.toLowerCase().includes(kw))
-        return (
-          matchKw &&
-          (!lineFilter || c.businessLine === lineFilter) &&
-          (!statusFilter || c.status === statusFilter)
-        )
+        return matchKw && matchLine(c.businessLine) && (!statusFilter || c.status === statusFilter)
       }),
-    [coupons, keyword, lineFilter, statusFilter, scope],
+    [coupons, keyword, lineSel, statusFilter, matchLine],
   )
 
   const confirmPickLine = () => {
@@ -623,14 +612,7 @@ export default function CouponPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <Select
-          allowClear
-          placeholder={t('cp.filterLine')}
-          style={{ width: 140 }}
-          value={lineFilter}
-          onChange={setLineFilter}
-          options={lineOptions.map((l) => ({ label: l, value: l }))}
-        />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
         <Select
           allowClear
           placeholder={t('cp.filterStatus')}

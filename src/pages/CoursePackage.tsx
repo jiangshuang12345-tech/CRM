@@ -23,6 +23,8 @@ import { BUSINESS_LINES, LINE_CURRENCY } from '../types'
 import type { BusinessLine, CoursePackage } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
+import { useLineScope } from '../useLineScope'
+import LineFilter from '../components/LineFilter'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
@@ -39,18 +41,19 @@ function currencyOptions(line?: BusinessLine) {
 export default function CoursePackagePage() {
   const { t } = useI18n()
   const packages = useStore((s) => s.packages)
+  const channels = useStore((s) => s.channels)
   const { can, actor } = usePerm()
   const canEdit = can('packages') === 'operate'
   const [keyword, setKeyword] = useState('')
-  const [lineFilter, setLineFilter] = useState<string | undefined>()
+  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const [modal, setModal] = useState<{ mode: 'add' | 'edit'; record?: CoursePackage } | null>(null)
   const [form] = Form.useForm()
   const watchLine = Form.useWatch('businessLine', form) as BusinessLine | undefined
 
-  // 业务线筛选项来源于列表实际包含的业务线数据
+  // 业务线筛选项：渠道业务线 + 列表实际包含的业务线
   const lineOptions = useMemo(
-    () => Array.from(new Set(packages.map((p) => p.businessLine).filter(Boolean))),
-    [packages],
+    () => Array.from(new Set([...channels.map((c) => c.name), ...packages.map((p) => p.businessLine)].filter(Boolean))),
+    [channels, packages],
   )
 
   const data = useMemo(
@@ -58,9 +61,9 @@ export default function CoursePackagePage() {
       packages.filter((p) => {
         const kw = keyword.trim().toLowerCase()
         const matchKw = !kw || p.id.toLowerCase().includes(kw) || p.name.toLowerCase().includes(kw)
-        return matchKw && (!lineFilter || p.businessLine === lineFilter)
+        return matchKw && matchLine(p.businessLine)
       }),
-    [packages, keyword, lineFilter],
+    [packages, keyword, lineSel, matchLine],
   )
 
   const openAdd = () => {
@@ -221,14 +224,7 @@ export default function CoursePackagePage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <Select
-          allowClear
-          placeholder={t('pkg.filterLine')}
-          style={{ width: 150 }}
-          value={lineFilter}
-          onChange={setLineFilter}
-          options={lineOptions.map((l) => ({ label: l, value: l }))}
-        />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
       </Space>
 
       <Table

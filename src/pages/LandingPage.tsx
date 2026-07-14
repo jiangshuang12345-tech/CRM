@@ -26,6 +26,8 @@ import { setState, uid, useStore } from '../store'
 import type { ChannelLevelNode, ChannelLine, ChannelParams, LandingPage } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
+import { useLineScope } from '../useLineScope'
+import LineFilter from '../components/LineFilter'
 
 const { Text, Paragraph } = Typography
 
@@ -91,16 +93,16 @@ function copy(text: string, ok: string) {
 
 export default function LandingPageManagement() {
   const { t } = useI18n()
-  const { can, allowedLines, actor } = usePerm()
+  const { can, actor } = usePerm()
   const canEdit = can('landing') === 'operate'
-  const scope = allowedLines()
+  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const channels = useStore((s) => s.channels)
   const packages = useStore((s) => s.packages)
   const coupons = useStore((s) => s.coupons)
   const landingPagesAll = useStore((s) => s.landingPages)
   const landingPages = useMemo(
-    () => (scope ? landingPagesAll.filter((lp) => scope.includes(lp.businessLine)) : landingPagesAll),
-    [landingPagesAll, scope],
+    () => landingPagesAll.filter((lp) => matchLine(lp.businessLine)),
+    [landingPagesAll, lineSel, matchLine],
   )
 
   const [open, setOpen] = useState(false)
@@ -110,10 +112,12 @@ export default function LandingPageManagement() {
   const couponId = Form.useWatch('couponId', form) as string | undefined
   const channelCode = Form.useWatch('channelCode', form) as string | undefined
 
-  const lines = useMemo(() => {
-    const all = channels.map((c) => c.name)
-    return scope ? all.filter((l) => scope.includes(l)) : all
-  }, [channels, scope])
+  // 生成弹窗里可选业务线 + 列表筛选选项
+  const lines = useMemo(() => channels.map((c) => c.name), [channels])
+  const lineOptions = useMemo(
+    () => Array.from(new Set([...lines, ...landingPagesAll.map((lp) => lp.businessLine)].filter(Boolean))),
+    [lines, landingPagesAll],
+  )
   const codeOptions = useMemo(() => {
     const c = channels.find((x) => x.name === line)
     return c ? collectCodes(c) : []
@@ -314,6 +318,10 @@ export default function LandingPageManagement() {
       <div style={{ marginBottom: 12 }}>
         <Text type="secondary">{t('lp.intro')}</Text>
       </div>
+
+      <Space wrap style={{ marginBottom: 16 }}>
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
+      </Space>
 
       <Table
         rowKey="id"

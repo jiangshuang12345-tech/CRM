@@ -9,6 +9,7 @@ import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
 import { completedLessons, openReplayVideo, reportKind, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
+import { registerChannelText } from '../channel'
 import { ReportModal } from '../components/ReportModal'
 import LocalTime from '../components/LocalTime'
 
@@ -28,6 +29,7 @@ export default function UserDetail() {
   const navigate = useNavigate()
   const { studentId = '' } = useParams()
   const students = useStore((s) => s.students)
+  const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const { allowedLines } = usePerm()
   const scope = allowedLines()
@@ -141,7 +143,7 @@ export default function UserDetail() {
           <Descriptions.Item label={t('user.col.line')}>
             <Tag>{student.businessLine}</Tag>
           </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.channel')}>{`${student.businessLine} · ${student.registerChannel}`}</Descriptions.Item>
+          <Descriptions.Item label={t('user.col.channel')}>{registerChannelText(channels, student)}</Descriptions.Item>
           <Descriptions.Item label={t('user.col.code')}>
             <Text code>{student.channelCode}</Text>
           </Descriptions.Item>

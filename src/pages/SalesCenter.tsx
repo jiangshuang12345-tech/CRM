@@ -27,6 +27,9 @@ import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
 import { resolveUserType } from '../userType'
+import { useLineScope } from '../useLineScope'
+import { registerChannelText } from '../channel'
+import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -61,16 +64,16 @@ const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 export default function SalesCenter() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
+  const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const callRecords = useStore((s) => s.callRecords ?? [])
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('sales') === 'operate'
-  const scope = allowedLines()
-  const seeAllOwners = scope === null // 全业务线（超管）可见全部领取记录
+  const seeAllOwners = allowedLines() === null // 全业务线（超管）可见全部领取记录
+  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
 
   const [tab, setTab] = useState('pool')
   const [poolKw, setPoolKw] = useState('')
-  const [poolLine, setPoolLine] = useState<string | undefined>()
   const [followKw, setFollowKw] = useState('')
   const [progressFilter, setProgressFilter] = useState<string | undefined>()
   const [callKw, setCallKw] = useState('')
@@ -81,21 +84,23 @@ export default function SalesCenter() {
   const [form] = Form.useForm()
   const watchProgress = Form.useWatch('progress', form) as string | undefined
 
-  const scoped = useMemo(
-    () => (scope ? students.filter((s) => scope.includes(s.businessLine)) : students),
-    [students, scope],
+  const poolAll = useMemo(
+    () => students.filter((s) => isPoolLead(s, lessons)).filter((s) => matchLine(s.businessLine)),
+    [students, lessons, lineSel, matchLine],
   )
-
-  const poolAll = useMemo(() => scoped.filter((s) => isPoolLead(s, lessons)), [scoped, lessons])
   const followAll = useMemo(
-    () => scoped.filter((s) => isClaimedLead(s, lessons)).filter((s) => seeAllOwners || s.salesOwner === actor),
-    [scoped, lessons, seeAllOwners, actor],
+    () =>
+      students
+        .filter((s) => isClaimedLead(s, lessons))
+        .filter((s) => matchLine(s.businessLine))
+        .filter((s) => seeAllOwners || s.salesOwner === actor),
+    [students, lessons, lineSel, matchLine, seeAllOwners, actor],
   )
 
-  // 业务线筛选项来源于当前列表实际包含的业务线数据
-  const lines = useMemo(
-    () => Array.from(new Set(poolAll.map((s) => s.businessLine).filter(Boolean))) as string[],
-    [poolAll],
+  // 业务线筛选选项：渠道业务线 + 学员中出现的业务线
+  const lineOptions = useMemo(
+    () => Array.from(new Set([...channels.map((c) => c.name), ...students.map((s) => s.businessLine)].filter(Boolean))),
+    [channels, students],
   )
 
   const leadText = (s: Student) =>
@@ -105,9 +110,9 @@ export default function SalesCenter() {
     () =>
       poolAll.filter((s) => {
         const kw = poolKw.trim().toLowerCase()
-        return (!kw || leadText(s).includes(kw)) && (!poolLine || s.businessLine === poolLine)
+        return !kw || leadText(s).includes(kw)
       }),
-    [poolAll, poolKw, poolLine],
+    [poolAll, poolKw],
   )
 
   const followData = useMemo(
@@ -119,12 +124,12 @@ export default function SalesCenter() {
     [followAll, followKw, progressFilter],
   )
 
-  // 通话记录：受数据范围限制，非超管仅看自己坐席的记录
+  // 通话记录：按业务线默认勾选过滤，非超管仅看自己坐席的记录
   const callScoped = useMemo(() => {
-    let list = scope ? callRecords.filter((c) => scope.includes(c.businessLine)) : callRecords
+    let list = callRecords.filter((c) => matchLine(c.businessLine))
     if (!seeAllOwners) list = list.filter((c) => c.agent === actor)
     return list
-  }, [callRecords, scope, seeAllOwners, actor])
+  }, [callRecords, lineSel, matchLine, seeAllOwners, actor])
 
   const callData = useMemo(
     () =>
@@ -261,8 +266,8 @@ export default function SalesCenter() {
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',
-      width: 220,
-      render: (v: string, r) => `${r.businessLine} · ${v}`,
+      width: 260,
+      render: (_: string, r) => registerChannelText(channels, r),
     },
     {
       title: t('user.col.regTime'),
@@ -353,7 +358,7 @@ export default function SalesCenter() {
     { title: t('sales.call.agent'), dataIndex: 'agent', width: 190 },
   ]
 
-  const totalLeads = scoped.filter((s) => isSalesLead(s, lessons)).length
+  const totalLeads = students.filter((s) => isSalesLead(s, lessons)).length
 
   return (
     <Card className="page-card" bordered={false} title={<span className="section-title">{t('sales.title')}</span>}>
@@ -378,14 +383,7 @@ export default function SalesCenter() {
                     value={poolKw}
                     onChange={(e) => setPoolKw(e.target.value)}
                   />
-                  <Select
-                    allowClear
-                    placeholder={t('user.col.line')}
-                    style={{ width: 140 }}
-                    value={poolLine}
-                    onChange={setPoolLine}
-                    options={lines.map((c) => ({ label: c, value: c }))}
-                  />
+                  <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
                 </Space>
                 <Table
                   rowKey="studentId"
@@ -412,6 +410,7 @@ export default function SalesCenter() {
                     value={followKw}
                     onChange={(e) => setFollowKw(e.target.value)}
                   />
+                  <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
                   <Select
                     allowClear
                     placeholder={t('sales.col.progress')}
@@ -447,6 +446,7 @@ export default function SalesCenter() {
                     value={callKw}
                     onChange={(e) => setCallKw(e.target.value)}
                   />
+                  <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
                   <Select
                     allowClear
                     placeholder={t('sales.call.result')}

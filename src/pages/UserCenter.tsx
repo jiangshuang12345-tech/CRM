@@ -25,7 +25,9 @@ import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
 import { resolveUserStatus } from '../lessons'
 import { inUserCenter } from '../funnel'
-import { setBizFilter, useBizFilter } from '../bizFilter'
+import { useLineScope } from '../useLineScope'
+import { registerChannelText } from '../channel'
+import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -56,27 +58,25 @@ export default function UserCenter() {
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
-  const { can, allowedLines, actor } = usePerm()
+  const { can, actor } = usePerm()
   const canEdit = can('users') === 'operate'
-  const scope = allowedLines()
+  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const [keyword, setKeyword] = useState('')
-  const lineFilter = useBizFilter()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
   const [form] = Form.useForm()
 
-  // 数据范围内的业务线（null 表示全部）
-  const lines = useMemo(() => {
-    const all = channels.map((c) => c.name)
-    return scope ? all.filter((l) => scope.includes(l)) : all
-  }, [channels, scope])
+  // 业务线筛选选项：渠道业务线 + 数据中出现的业务线
+  const lineOptions = useMemo(
+    () => Array.from(new Set([...channels.map((c) => c.name), ...students.map((s) => s.businessLine)].filter(Boolean))),
+    [channels, students],
+  )
 
   const data = useMemo(
     () =>
       students.filter((s) => {
-        if (scope && !scope.includes(s.businessLine)) return false
         // 分流规则：未付费-未体验且有手机号的用户进入「销售中心」，其余展示在此
         if (!inUserCenter(s, lessons)) return false
         const kw = keyword.trim().toLowerCase()
@@ -85,12 +85,11 @@ export default function UserCenter() {
           s.studentId.toLowerCase().includes(kw) ||
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
           s.account.toLowerCase().includes(kw)
-        const matchLine = !lineFilter || s.businessLine === lineFilter
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
-        return matchKw && matchLine && matchStatus && matchType
+        return matchKw && matchLine(s.businessLine) && matchStatus && matchType
       }),
-    [students, lessons, keyword, lineFilter, statusFilter, typeFilter, scope],
+    [students, lessons, keyword, lineSel, statusFilter, typeFilter, matchLine],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -177,8 +176,8 @@ export default function UserCenter() {
     {
       title: t('user.col.channel'),
       dataIndex: 'registerChannel',
-      width: 220,
-      render: (v: string, r) => `${r.businessLine} · ${v}`,
+      width: 260,
+      render: (_: string, r) => registerChannelText(channels, r),
     },
     { title: t('user.col.code'), dataIndex: 'channelCode', width: 200, render: (v) => <Text code>{v}</Text> },
     {
@@ -235,14 +234,7 @@ export default function UserCenter() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <Select
-          allowClear
-          placeholder={t('user.col.line')}
-          style={{ width: 150 }}
-          value={lineFilter}
-          onChange={setBizFilter}
-          options={lines.map((c) => ({ label: c, value: c }))}
-        />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
         <Select
           allowClear
           placeholder={t('user.col.userType')}
