@@ -64,6 +64,7 @@ export default function UserCenter() {
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
+  const [countryFilter, setCountryFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
   const [form] = Form.useForm()
@@ -75,6 +76,12 @@ export default function UserCenter() {
         new Set([...channels.map((c) => c.name), ...students.map((s) => businessLineOf(channels, s))].filter(Boolean)),
       ),
     [channels, students],
+  )
+
+  // 国家筛选选项：数据中出现的注册国家
+  const countryOptions = useMemo(
+    () => Array.from(new Set(students.map((s) => lineLabel(s)).filter(Boolean))),
+    [students],
   )
 
   const data = useMemo(
@@ -90,11 +97,12 @@ export default function UserCenter() {
           s.account.toLowerCase().includes(kw)
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
+        const matchCountry = !countryFilter || lineLabel(s) === countryFilter
         // 无业务线（无渠道归因）的用户不参与业务线过滤，始终展示
         const bl = businessLineOf(channels, s)
-        return matchKw && (!bl || matchLine(bl)) && matchStatus && matchType
+        return matchKw && (!bl || matchLine(bl)) && matchStatus && matchType && matchCountry
       }),
-    [students, channels, lessons, keyword, lineSel, statusFilter, typeFilter, matchLine],
+    [students, channels, lessons, keyword, lineSel, statusFilter, typeFilter, countryFilter, matchLine],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -254,6 +262,14 @@ export default function UserCenter() {
           onChange={(e) => setKeyword(e.target.value)}
         />
         <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
+        <Select
+          allowClear
+          placeholder={t('user.col.country')}
+          style={{ width: 140 }}
+          value={countryFilter}
+          onChange={setCountryFilter}
+          options={countryOptions.map((c) => ({ label: c, value: c }))}
+        />
         <Select
           allowClear
           placeholder={t('user.col.userType')}

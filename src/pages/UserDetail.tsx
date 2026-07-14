@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Button, Card, Descriptions, Space, Table, Tag, Typography } from 'antd'
 import { ArrowLeftOutlined, FileTextOutlined, PlayCircleOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
@@ -10,7 +10,6 @@ import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
 import { completedLessons, openReplayVideo, reportKind, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
 import { businessLineOf, lineLabel, registerChannelText } from '../channel'
-import { ReportModal } from '../components/ReportModal'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -33,8 +32,6 @@ export default function UserDetail() {
   const lessons = useStore((s) => s.lessons ?? [])
   const { allowedLines } = usePerm()
   const scope = allowedLines()
-
-  const [reportLesson, setReportLesson] = useState<LessonRecord | null>(null)
 
   const student = useMemo(() => students.find((s) => s.studentId === studentId), [students, studentId])
   const inScope = student && (!scope || scope.includes(student.businessLine))
@@ -75,28 +72,17 @@ export default function UserDetail() {
       title: t('lesson.col.report'),
       key: 'report',
       width: 150,
-      render: (_: unknown, r: LessonRecord) => {
-        // 体验课 → Trial Report 跳转外部原型页；正式课 → Lesson Report 内部弹窗
-        if (r.lessonType === '体验课') {
-          return (
-            <Button
-              type="link"
-              style={{ padding: 0 }}
-              icon={<FileTextOutlined />}
-              onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
-            >
-              {reportKind(r)}
-            </Button>
-          )
-        }
-        return r.report ? (
-          <Button type="link" style={{ padding: 0 }} icon={<FileTextOutlined />} onClick={() => setReportLesson(r)}>
-            {reportKind(r)}
-          </Button>
-        ) : (
-          <Text type="secondary">—</Text>
-        )
-      },
+      render: (_: unknown, r: LessonRecord) => (
+        // Trial Report / Lesson Report 交互一致：均跳转外部原型页（内容暂复用 Trial Report）
+        <Button
+          type="link"
+          style={{ padding: 0 }}
+          icon={<FileTextOutlined />}
+          onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
+        >
+          {reportKind(r)}
+        </Button>
+      ),
     },
     {
       title: t('lesson.col.replay'),
@@ -176,8 +162,6 @@ export default function UserDetail() {
           pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
         />
       </Card>
-
-      <ReportModal lesson={reportLesson} onClose={() => setReportLesson(null)} />
     </Space>
   )
 }
