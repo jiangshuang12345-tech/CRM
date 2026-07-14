@@ -257,7 +257,7 @@ export default function CoursePackagePage() {
             />
           </Form.Item>
           <Form.Item name="name" label={t('pkg.label.name')} rules={[{ required: true, message: t('pkg.nameRequired') }]}>
-            <Input placeholder={t('pkg.namePlaceholder')} />
+            <Input autoComplete="off" placeholder={t('pkg.namePlaceholder')} />
           </Form.Item>
           <Form.Item name="currency" label={t('pkg.label.currency')} rules={[{ required: true, message: t('pkg.currencyRequired') }]}>
             <Select placeholder={t('pkg.currencyPlaceholder')} options={currencyOptions(watchLine)} />
