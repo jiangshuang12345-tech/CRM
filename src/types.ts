@@ -220,8 +220,10 @@ export type LandingPage = {
   channelName?: string
   param1?: string // 渠道参数1（生成时带入链接）
   param2?: string // 渠道参数2
-  packageId?: string
+  packageId?: string // 兼容旧数据：单个商品包
   packageName?: string
+  packageIds?: string[] // 商品包（支持多选）
+  packageNames?: string[]
   originalPrice?: string // 划线价（非必填，仅展示用）
   couponId?: string
   couponCode?: string
@@ -319,9 +321,9 @@ export type Coupon = {
   creator: string
   total: number
   remaining: number
-  // 发放及领取规则
-  claimStart: string
-  claimEnd: string
+  // 发放及领取规则（领取有效期已下线，旧数据兼容保留）
+  claimStart?: string
+  claimEnd?: string
   // 使用规则
   useStart: string
   useEnd: string

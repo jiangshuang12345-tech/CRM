@@ -138,7 +138,7 @@ export default function LandingPageManagement() {
   const hasTemplate = !!line && !!LANDING_TEMPLATES[line]
 
   const onLineChange = () => {
-    form.setFieldsValue({ channelCode: undefined, packageId: undefined, couponId: undefined, couponCode: undefined })
+    form.setFieldsValue({ channelCode: undefined, packageIds: undefined, couponId: undefined, couponCode: undefined })
     setPreview(null)
   }
 
@@ -147,9 +147,10 @@ export default function LandingPageManagement() {
     if (!v.businessLine || !LANDING_TEMPLATES[v.businessLine]) return null
     if (!v.channelCode) return null
     const ch = codeOptions.find((c) => c.code === v.channelCode)
+    const pkgIds: string[] = v.packageIds ?? []
     return LANDING_TEMPLATES[v.businessLine]({
       channel: v.channelCode,
-      packageId: v.packageId,
+      packageId: pkgIds.join(','),
       coupon: v.couponCode,
       params: paramSuffix(ch?.params),
     })
@@ -175,7 +176,8 @@ export default function LandingPageManagement() {
       return
     }
     const ch = codeOptions.find((c) => c.code === v.channelCode)
-    const pkg = packages.find((p) => p.id === v.packageId)
+    const pkgIds: string[] = v.packageIds ?? []
+    const pkgNames = pkgIds.map((id) => packages.find((p) => p.id === id)?.name ?? id)
     const range = v.validRange as [dayjs.Dayjs, dayjs.Dayjs] | undefined
     const lp: LandingPage = {
       id: uid('lp_'),
@@ -185,8 +187,10 @@ export default function LandingPageManagement() {
       channelName: ch?.path,
       param1: ch?.params?.param1 || undefined,
       param2: ch?.params?.param2 || undefined,
-      packageId: v.packageId,
-      packageName: pkg?.name,
+      packageIds: pkgIds,
+      packageNames: pkgNames,
+      packageId: pkgIds[0],
+      packageName: pkgNames[0],
       originalPrice: v.originalPrice != null && v.originalPrice !== '' ? String(v.originalPrice) : undefined,
       couponId: v.couponId,
       couponCode: v.couponCode,
@@ -239,7 +243,23 @@ export default function LandingPageManagement() {
         </span>
       ),
     },
-    { title: t('lp.col.package'), dataIndex: 'packageName', width: 200, render: (v) => v || <Text type="secondary">—</Text> },
+    {
+      title: t('lp.col.package'),
+      dataIndex: 'packageName',
+      width: 220,
+      render: (_, r) => {
+        const names = r.packageNames?.length ? r.packageNames : r.packageName ? [r.packageName] : []
+        return names.length ? (
+          <Space direction="vertical" size={2}>
+            {names.map((n, i) => (
+              <Tag key={i} color="geekblue" style={{ marginInlineEnd: 0 }}>{n}</Tag>
+            ))}
+          </Space>
+        ) : (
+          <Text type="secondary">—</Text>
+        )
+      },
+    },
     {
       title: t('lp.col.strikePrice'),
       dataIndex: 'originalPrice',
@@ -405,13 +425,15 @@ export default function LandingPageManagement() {
           )}
 
           <Form.Item
-            name="packageId"
+            name="packageIds"
             label={t('lp.f.package')}
             tooltip={t('lp.f.packageTip')}
             rules={[{ required: true, message: t('common.pleaseSelect') }]}
           >
             <Select
+              mode="multiple"
               showSearch
+              allowClear
               placeholder={line ? t('common.pleaseSelect') : t('lp.f.pickLineFirst')}
               disabled={!line}
               optionFilterProp="label"

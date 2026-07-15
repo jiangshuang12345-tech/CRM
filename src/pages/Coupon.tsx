@@ -231,7 +231,6 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
 
   const submit = async () => {
     const v = await form.validateFields()
-    const [claimStart, claimEnd] = v.claimRange as [Dayjs, Dayjs]
     const [useStart, useEnd] = v.useRange as [Dayjs, Dayjs]
     const codes: CouponCode[] = (v.codes as CouponCode[]).map((c) => ({
       ...c,
@@ -247,14 +246,12 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       creator: actor,
       total: v.total,
       remaining: v.total,
-      claimStart: claimStart.format('YYYY-MM-DD HH:mm:ss'),
-      claimEnd: claimEnd.format('YYYY-MM-DD HH:mm:ss'),
       useStart: useStart.format('YYYY-MM-DD HH:mm:ss'),
       useEnd: useEnd.format('YYYY-MM-DD HH:mm:ss'),
       products: v.products ?? [],
       thresholdAmount: v.thresholdAmount,
       deductAmount: v.deductAmount,
-      status: claimEnd.isBefore(dayjs()) ? '已结束' : '已生效',
+      status: useEnd.isBefore(dayjs()) ? '已结束' : '已生效',
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     }
     setState((prev) => ({ ...prev, coupons: [coupon, ...prev.coupons] }))
@@ -322,9 +319,6 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
           ]}
         >
           <CodePicker />
-        </Form.Item>
-        <Form.Item name="claimRange" label={t('cp.claimValid')} rules={[{ required: true, message: t('cp.claimRequired') }]}>
-          <RangePicker showTime style={{ width: 400 }} placeholder={[t('pkg.startTime'), t('pkg.endTime')]} />
         </Form.Item>
 
         <Divider />
@@ -484,7 +478,7 @@ export default function CouponPage() {
         c.id === extendCoupon.id
           ? {
               ...c,
-              claimEnd: extendTime.format('YYYY-MM-DD HH:mm:ss'),
+              useEnd: extendTime.format('YYYY-MM-DD HH:mm:ss'),
               status: extendTime.isAfter(dayjs()) ? '已生效' : c.status,
             }
           : c,
@@ -696,7 +690,7 @@ export default function CouponPage() {
           <div style={{ marginTop: 8 }}>
             <div style={{ marginBottom: 16 }}>
               <Text type="secondary">{t('cp.currentEnd')}</Text>
-              <Text strong>{extendCoupon.claimEnd}</Text>
+              <Text strong>{extendCoupon.useEnd}</Text>
             </div>
             <Space>
               <Text>{t('cp.changeTime')}</Text>
@@ -755,9 +749,6 @@ export default function CouponPage() {
             <Descriptions column={2} bordered size="small">
               <Descriptions.Item label={t('cp.col.total')}>{detailCoupon.total.toLocaleString()}</Descriptions.Item>
               <Descriptions.Item label={t('cp.col.remaining')}>{detailCoupon.remaining.toLocaleString()}</Descriptions.Item>
-              <Descriptions.Item label={t('cp.claimValidLabel')} span={2}>
-                {detailCoupon.claimStart} ~ {detailCoupon.claimEnd}
-              </Descriptions.Item>
             </Descriptions>
 
             <Divider orientation="left" plain>
