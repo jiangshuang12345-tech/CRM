@@ -209,6 +209,7 @@ export type CoursePackage = {
   creator: string
   status: PackageStatus
   createdAt: string
+  bestValue?: boolean // Best Value 标签（选中后在前端页面展示推荐标签）
 }
 
 // 落地页：一键生成投放链接，关联渠道、商品包、优惠券
@@ -316,7 +317,7 @@ export type Coupon = {
   name: string
   codes: CouponCode[]
   businessLine: BusinessLine
-  couponType: '满减券'
+  couponType: '折扣券'
   currency: string
   creator: string
   total: number
@@ -328,9 +329,8 @@ export type Coupon = {
   useStart: string
   useEnd: string
   products: CouponProduct[]
-  // 权益规则（满减）
-  thresholdAmount: number
-  deductAmount: number
+  // 权益规则（折扣率：百分比，如 10 表示立减 10%）
+  discountRate: number
   status: CouponStatus
   createdAt: string
 }

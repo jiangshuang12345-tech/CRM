@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v39'
+const KEY = 'dinoai_crm_state_v41'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -408,38 +408,38 @@ function seed(): AppState {
     {
       id: 'PKG1003', businessLine: '越南', name: 'Dino English 年度畅学商品包', currency: LINE_CURRENCY['越南'].code,
       price: 2990000, validStart: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'), validEnd: now.add(350, 'day').format('YYYY-MM-DD HH:mm:ss'),
-      creator: 'admin@dinoai.ai', status: '下架', createdAt: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      creator: 'admin@dinoai.ai', status: '下架', createdAt: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'), bestValue: true,
     },
   ]
 
   const coupons: Coupon[] = [
     {
-      id: 'CP4017', name: '26年6月韩国新客满减券',
+      id: 'CP4017', name: '26年6月韩国新客折扣券',
       codes: [
         { id: uid('cc_'), code: genCouponCode(), kol: '@seoyeon_edu', used: 412 },
         { id: uid('cc_'), code: genCouponCode(), kol: '@jiwoo_mom', used: 187 },
         { id: uid('cc_'), code: genCouponCode(), kol: '官方自投', used: 172 },
       ],
-      businessLine: '韩国', couponType: '满减券',
+      businessLine: '韩国', couponType: '折扣券',
       currency: 'KRW', creator: 'admin@dinoai.ai', total: 100000, remaining: 99229,
       claimStart: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), claimEnd: now.add(12, 'day').format('YYYY-MM-DD HH:mm:ss'),
       useStart: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), useEnd: now.add(30, 'day').format('YYYY-MM-DD HH:mm:ss'),
       products: [{ id: 'PKG1001', name: 'Dino English 启蒙季度商品包', price: 99000 }],
-      thresholdAmount: 99000, deductAmount: 20000, status: '已生效',
+      discountRate: 20, status: '已生效',
       createdAt: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
-      id: 'CP4016', name: '26年6月沙特拉新满减券',
+      id: 'CP4016', name: '26年6月沙特拉新折扣券',
       codes: [
         { id: uid('cc_'), code: genCouponCode(), kol: '@sara.ksa', used: 1203 },
         { id: uid('cc_'), code: genCouponCode(), kol: '官方自投', used: 1016 },
       ],
-      businessLine: '沙特', couponType: '满减券',
+      businessLine: '沙特', couponType: '折扣券',
       currency: 'USD', creator: 'admin@dinoai.ai', total: 100000, remaining: 97781,
       claimStart: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'), claimEnd: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
       useStart: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'), useEnd: now.add(10, 'day').format('YYYY-MM-DD HH:mm:ss'),
       products: [{ id: 'PKG1002', name: 'Dino English 月度体验商品包', price: 149 }],
-      thresholdAmount: 149, deductAmount: 30, status: '已结束',
+      discountRate: 10, status: '已结束',
       createdAt: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
   ]

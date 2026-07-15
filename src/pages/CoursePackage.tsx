@@ -10,6 +10,7 @@ import {
   Modal,
   Select,
   Space,
+  Switch,
   Table,
   Tag,
   Typography,
@@ -28,6 +29,27 @@ import LineFilter from '../components/LineFilter'
 
 const { Text } = Typography
 const { RangePicker } = DatePicker
+
+// 前端页面展示的 Best Value 推荐标签样式
+function BestValueTag() {
+  return (
+    <span
+      style={{
+        display: 'inline-block',
+        background: 'linear-gradient(90deg, #ff7a45, #ff4d4f)',
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 600,
+        lineHeight: '20px',
+        padding: '0 10px',
+        borderRadius: 10,
+        whiteSpace: 'nowrap',
+      }}
+    >
+      Best Value
+    </span>
+  )
+}
 
 function currencyOptions(line?: BusinessLine) {
   const opts = [{ label: '美元 (USD)', value: 'USD' }]
@@ -77,6 +99,7 @@ export default function CoursePackagePage() {
       name: record.name,
       currency: record.currency,
       price: record.price,
+      bestValue: record.bestValue ?? false,
       validRange: [dayjs(record.validStart), dayjs(record.validEnd)],
     })
   }
@@ -91,6 +114,7 @@ export default function CoursePackagePage() {
         name: v.name,
         currency: v.currency,
         price: v.price,
+        bestValue: !!v.bestValue,
         validStart: validStart.format('YYYY-MM-DD HH:mm:ss'),
         validEnd: validEnd.format('YYYY-MM-DD HH:mm:ss'),
         creator: actor,
@@ -110,6 +134,7 @@ export default function CoursePackagePage() {
                 name: v.name,
                 currency: v.currency,
                 price: v.price,
+                bestValue: !!v.bestValue,
                 validStart: validStart.format('YYYY-MM-DD HH:mm:ss'),
                 validEnd: validEnd.format('YYYY-MM-DD HH:mm:ss'),
               }
@@ -140,7 +165,17 @@ export default function CoursePackagePage() {
   const columns: ColumnsType<CoursePackage> = [
     { title: t('pkg.col.id'), dataIndex: 'id', width: 120 },
     { title: t('pkg.col.line'), dataIndex: 'businessLine', width: 100, render: (v) => <Tag color="geekblue">{v}</Tag> },
-    { title: t('pkg.col.name'), dataIndex: 'name', width: 220 },
+    {
+      title: t('pkg.col.name'),
+      dataIndex: 'name',
+      width: 240,
+      render: (v: string, r) => (
+        <Space size={6}>
+          <span>{v}</span>
+          {r.bestValue && <BestValueTag />}
+        </Space>
+      ),
+    },
     {
       title: t('pkg.col.price'),
       dataIndex: 'price',
@@ -260,6 +295,14 @@ export default function CoursePackagePage() {
           </Form.Item>
           <Form.Item name="price" label={t('pkg.label.price')} rules={[{ required: true, message: t('pkg.priceRequired') }]}>
             <InputNumber style={{ width: '100%' }} min={0} placeholder={t('pkg.pricePlaceholder')} />
+          </Form.Item>
+          <Form.Item
+            name="bestValue"
+            label={t('pkg.label.bestValue')}
+            tooltip={t('pkg.bestValueTip')}
+            valuePropName="checked"
+          >
+            <Switch checkedChildren="Best Value" unCheckedChildren={t('pkg.bestValueOff')} />
           </Form.Item>
           <Form.Item name="validRange" label={t('pkg.label.valid')} rules={[{ required: true, message: t('pkg.validRequired') }]}>
             <RangePicker

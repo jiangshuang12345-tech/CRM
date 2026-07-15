@@ -16,7 +16,7 @@ import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
 import type { AppChannel, LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
-import { AGE_GROUPS, APP_CHANNELS, USER_STATUSES, USER_TYPES } from '../types'
+import { AGE_GROUPS, APP_CHANNELS, LOGIN_METHODS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
@@ -61,6 +61,7 @@ export default function UserCenterP1() {
   const [keyword, setKeyword] = useState('')
   const [countryFilter, setCountryFilter] = useState<string | undefined>()
   const [channelFilter, setChannelFilter] = useState<string | undefined>()
+  const [methodFilter, setMethodFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
@@ -89,11 +90,12 @@ export default function UserCenterP1() {
           s.account.toLowerCase().includes(kw)
         const matchCountry = !countryFilter || s.country === countryFilter
         const matchChannel = !channelFilter || s.appChannel === channelFilter
+        const matchMethod = !methodFilter || s.loginMethod === methodFilter
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
-        return matchKw && matchCountry && matchChannel && matchStatus && matchType
+        return matchKw && matchCountry && matchChannel && matchMethod && matchStatus && matchType
       }),
-    [scoped, lessons, keyword, countryFilter, channelFilter, statusFilter, typeFilter],
+    [scoped, lessons, keyword, countryFilter, channelFilter, methodFilter, statusFilter, typeFilter],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -192,11 +194,17 @@ export default function UserCenterP1() {
       render: (v) => <Text>{v}</Text>,
     },
     {
-      title: t('user.col.appChannel'),
+      title: t('user.col.channelSource'),
       dataIndex: 'appChannel',
       width: 140,
       render: (v: AppChannel | undefined) =>
         v ? <Tag color={APP_CHANNEL_COLOR[v]}>{v}</Tag> : <Text type="secondary">—</Text>,
+    },
+    {
+      title: t('user.col.code'),
+      dataIndex: 'channelCode',
+      width: 160,
+      render: (v: string | undefined) => (v ? <Text code>{v}</Text> : <Text type="secondary">—</Text>),
     },
     {
       title: t('user.col.country'),
@@ -280,7 +288,15 @@ export default function UserCenterP1() {
         />
         <Select
           allowClear
-          placeholder={t('user.col.appChannel')}
+          placeholder={t('user.col.method')}
+          style={{ width: 130 }}
+          value={methodFilter}
+          onChange={setMethodFilter}
+          options={LOGIN_METHODS.map((m) => ({ label: t(`enum.method.${m}`), value: m }))}
+        />
+        <Select
+          allowClear
+          placeholder={t('user.col.channelSource')}
           style={{ width: 150 }}
           value={channelFilter}
           onChange={setChannelFilter}
@@ -308,7 +324,7 @@ export default function UserCenterP1() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1810 }}
+        scroll={{ x: 1970 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 

@@ -241,7 +241,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       name: v.name,
       codes,
       businessLine: line,
-      couponType: '满减券',
+      couponType: '折扣券',
       currency: v.currency,
       creator: actor,
       total: v.total,
@@ -249,8 +249,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       useStart: useStart.format('YYYY-MM-DD HH:mm:ss'),
       useEnd: useEnd.format('YYYY-MM-DD HH:mm:ss'),
       products: v.products ?? [],
-      thresholdAmount: v.thresholdAmount,
-      deductAmount: v.deductAmount,
+      discountRate: v.discountRate,
       status: useEnd.isBefore(dayjs()) ? '已结束' : '已生效',
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     }
@@ -281,7 +280,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         style={{ maxWidth: 760 }}
         initialValues={{
           businessLine: line,
-          couponType: '满减券',
+          couponType: '折扣券',
           creator: actor,
         }}
       >
@@ -290,7 +289,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
           <Select disabled options={[{ label: line, value: line }]} />
         </Form.Item>
         <Form.Item name="couponType" label={t('cp.couponType')} tooltip={t('cp.couponTypeTip')}>
-          <Select disabled options={[{ label: t('enum.couponType.满减券'), value: '满减券' }]} />
+          <Select disabled options={[{ label: t('enum.couponType.折扣券'), value: '折扣券' }]} />
         </Form.Item>
         <Form.Item name="currency" label={t('cp.currency')} rules={[{ required: true, message: t('cp.currencyRequired') }]}>
           <Select placeholder={t('cp.currencyPlaceholder')} options={currencyOptions(line)} style={{ maxWidth: 280 }} />
@@ -332,29 +331,20 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
 
         <Divider />
         <Title level={5}>{t('cp.benefitRule')}</Title>
-        <Form.Item label={t('cp.fullMinus')} required style={{ marginBottom: 0 }}>
-          <Space align="baseline" wrap>
-            <span>{t('cp.full')}</span>
-            <Form.Item name="thresholdAmount" rules={[{ required: true, message: t('cp.thresholdRequired') }]}>
-              <InputNumber min={0} placeholder={t('cp.threshold')} style={{ width: 160 }} />
-            </Form.Item>
-            <span>{t('cp.minus')}</span>
-            <Form.Item
-              name="deductAmount"
-              dependencies={['thresholdAmount']}
-              rules={[
-                { required: true, message: t('cp.deductRequired') },
-                ({ getFieldValue }) => ({
-                  validator: (_, val) =>
-                    val == null || val <= (getFieldValue('thresholdAmount') ?? Infinity)
-                      ? Promise.resolve()
-                      : Promise.reject(new Error(t('cp.deductInvalid'))),
-                }),
-              ]}
-            >
-              <InputNumber min={0} placeholder={t('cp.deduct')} style={{ width: 160 }} />
-            </Form.Item>
-          </Space>
+        <Form.Item
+          name="discountRate"
+          label={t('cp.discountRate')}
+          tooltip={t('cp.discountRateTip')}
+          rules={[{ required: true, message: t('cp.discountRateRequired') }]}
+        >
+          <InputNumber
+            min={0.01}
+            max={100}
+            precision={2}
+            addonAfter="%"
+            placeholder={t('cp.discountRatePlaceholder')}
+            style={{ width: 220 }}
+          />
         </Form.Item>
 
         <Divider />
@@ -525,6 +515,14 @@ export default function CouponPage() {
       align: 'right',
       render: (v) => v.toLocaleString(),
     },
+    {
+      title: t('cp.discountRate'),
+      dataIndex: 'discountRate',
+      width: 100,
+      align: 'right',
+      render: (v: number | undefined) =>
+        v != null ? <Tag color="volcano">{t('cp.discountValue', { rate: v })}</Tag> : <Text type="secondary">—</Text>,
+    },
     { title: t('cp.col.creator'), dataIndex: 'creator', width: 170 },
     {
       title: t('cp.col.status'),
@@ -621,7 +619,7 @@ export default function CouponPage() {
         rowKey="id"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1580 }}
+        scroll={{ x: 1680 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -734,7 +732,7 @@ export default function CouponPage() {
               <Descriptions.Item label={t('cp.col.line')}>
                 <Tag color="geekblue">{detailCoupon.businessLine}</Tag>
               </Descriptions.Item>
-              <Descriptions.Item label={t('cp.couponType')}>{t('enum.couponType.满减券')}</Descriptions.Item>
+              <Descriptions.Item label={t('cp.couponType')}>{t('enum.couponType.折扣券')}</Descriptions.Item>
               <Descriptions.Item label={t('cp.currency')}>{detailCoupon.currency}</Descriptions.Item>
               <Descriptions.Item label={t('cp.creator')}>{detailCoupon.creator}</Descriptions.Item>
               <Descriptions.Item label={t('cp.col.status')}>
@@ -758,12 +756,8 @@ export default function CouponPage() {
               <Descriptions.Item label={t('cp.useValidLabel')}>
                 {detailCoupon.useStart} ~ {detailCoupon.useEnd}
               </Descriptions.Item>
-              <Descriptions.Item label={t('cp.fullMinus')}>
-                {t('cp.fullMinusValue', {
-                  threshold: detailCoupon.thresholdAmount.toLocaleString(),
-                  deduct: detailCoupon.deductAmount.toLocaleString(),
-                  currency: detailCoupon.currency,
-                })}
+              <Descriptions.Item label={t('cp.discountRate')}>
+                {t('cp.discountValue', { rate: detailCoupon.discountRate })}
               </Descriptions.Item>
             </Descriptions>
             <div style={{ marginTop: 12 }}>
