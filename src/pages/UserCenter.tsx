@@ -185,18 +185,9 @@ export default function UserCenter() {
       width: 200,
       render: (v) => <Text>{v}</Text>,
     },
-    {
-      title: t('user.col.line'),
-      dataIndex: 'businessLine',
-      width: 110,
-      render: (_, r) => {
-        const bl = businessLineOf(channels, r)
-        return bl ? <Tag>{bl}</Tag> : <Text type="secondary">-</Text>
-      },
-    },
     { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
-      title: t('user.col.channel'),
+      title: t('user.col.channelSource'),
       dataIndex: 'registerChannel',
       width: 260,
       render: (_: string, r) => registerChannelText(channels, r),
@@ -292,7 +283,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 2170 }}
+        scroll={{ x: 2060 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
