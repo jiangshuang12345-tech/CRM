@@ -15,12 +15,13 @@ import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from 
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
-import type { AppChannel, LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
-import { AGE_GROUPS, APP_CHANNELS, LOGIN_METHODS, USER_STATUSES, USER_TYPES } from '../types'
+import type { LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
+import { AGE_GROUPS, LOGIN_METHODS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
 import { latestTrialReport, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
+import { channelSourceText } from '../channel'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -41,11 +42,6 @@ const METHOD_COLOR: Record<LoginMethod, string> = {
   AppID: 'purple',
 }
 
-const APP_CHANNEL_COLOR: Record<AppChannel, string> = {
-  'App Store': 'blue',
-  'Google Play': 'green',
-}
-
 const USER_TYPE_COLOR: Record<UserType, string> = {
   正式用户: 'green',
   测试用户: 'gold',
@@ -54,13 +50,14 @@ const USER_TYPE_COLOR: Record<UserType, string> = {
 export default function UserCenterP1() {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
+  const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('users') === 'operate'
   const scope = allowedLines()
   const [keyword, setKeyword] = useState('')
   const [countryFilter, setCountryFilter] = useState<string | undefined>()
-  const [channelFilter, setChannelFilter] = useState<string | undefined>()
+  const [sourceFilter, setSourceFilter] = useState<string | undefined>()
   const [methodFilter, setMethodFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
@@ -79,6 +76,13 @@ export default function UserCenterP1() {
     [scoped],
   )
 
+  // 渠道来源筛选项：列表中出现的渠道来源展示值
+  const sourceOptions = useMemo(
+    () =>
+      Array.from(new Set(scoped.map((s) => channelSourceText(channels, s)).filter((v) => v && v !== '—'))),
+    [scoped, channels],
+  )
+
   const data = useMemo(
     () =>
       scoped.filter((s) => {
@@ -89,13 +93,13 @@ export default function UserCenterP1() {
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
           s.account.toLowerCase().includes(kw)
         const matchCountry = !countryFilter || s.country === countryFilter
-        const matchChannel = !channelFilter || s.appChannel === channelFilter
+        const matchSource = !sourceFilter || channelSourceText(channels, s) === sourceFilter
         const matchMethod = !methodFilter || s.loginMethod === methodFilter
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
-        return matchKw && matchCountry && matchChannel && matchMethod && matchStatus && matchType
+        return matchKw && matchCountry && matchSource && matchMethod && matchStatus && matchType
       }),
-    [scoped, lessons, keyword, countryFilter, channelFilter, methodFilter, statusFilter, typeFilter],
+    [scoped, channels, lessons, keyword, countryFilter, sourceFilter, methodFilter, statusFilter, typeFilter],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -195,10 +199,12 @@ export default function UserCenterP1() {
     },
     {
       title: t('user.col.channelSource'),
-      dataIndex: 'appChannel',
-      width: 140,
-      render: (v: AppChannel | undefined) =>
-        v ? <Tag color={APP_CHANNEL_COLOR[v]}>{v}</Tag> : <Text type="secondary">—</Text>,
+      dataIndex: 'adChannel',
+      width: 200,
+      render: (_: unknown, r: Student) => {
+        const txt = channelSourceText(channels, r)
+        return txt === '—' ? <Text type="secondary">—</Text> : <span>{txt}</span>
+      },
     },
     {
       title: t('user.col.code'),
@@ -296,11 +302,12 @@ export default function UserCenterP1() {
         />
         <Select
           allowClear
+          showSearch
           placeholder={t('user.col.channelSource')}
-          style={{ width: 150 }}
-          value={channelFilter}
-          onChange={setChannelFilter}
-          options={APP_CHANNELS.map((c) => ({ label: c, value: c }))}
+          style={{ width: 180 }}
+          value={sourceFilter}
+          onChange={setSourceFilter}
+          options={sourceOptions.map((c) => ({ label: c, value: c }))}
         />
         <Select
           allowClear

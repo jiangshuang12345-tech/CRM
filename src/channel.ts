@@ -27,6 +27,20 @@ type ChannelUser = {
   channelCode?: string
   channelSource?: string
   country?: string
+  adChannel?: string
+  subChannel?: string
+}
+
+// 渠道来源展示（用户中心一期）：
+// 1) 有渠道 code（落地页投放）：展示广告渠道名称；
+// 2) 无渠道 code（直接投 App）：展示三方归因「投放渠道 / 子渠道」。
+export function channelSourceText(channels: ChannelLine[], s: ChannelUser): string {
+  if (s.channelCode) {
+    return s.adChannel || channelPathByCode(channels, s.channelCode) || s.registerChannel || '—'
+  }
+  const parts = [s.adChannel, s.subChannel].filter(Boolean)
+  if (parts.length) return parts.join(' / ')
+  return s.channelSource || s.registerChannel || '—'
 }
 
 // 业务线展示：CRM 渠道仅用于投放落地页配置，无渠道码（仅投 App）的用户

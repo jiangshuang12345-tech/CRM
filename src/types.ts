@@ -108,6 +108,11 @@ export type Student = {
   channelCode: string
   country?: string // 注册时 IP 对应的国家（一期用户中心）
   appChannel?: AppChannel // 注册渠道（一期：App Store / Google Play）
+  // 渠道来源展示：
+  // 1) 有渠道 code（落地页投放）：广告渠道名称
+  // 2) 无渠道 code（直接投 App）：三方归因「投放渠道 / 子渠道」
+  adChannel?: string // 广告渠道 / 投放渠道（如 Meta Ads、googleadwords_int、Facebook Ads）
+  subChannel?: string // 子渠道（三方归因，如 Instagram、Facebook、ACI_Search）
   registerTime: string // UTC
   status: UserStatus
   expireTime?: string // 到期时间

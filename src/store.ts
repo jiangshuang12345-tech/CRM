@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v41'
+const KEY = 'dinoai_crm_state_v42'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -291,7 +291,7 @@ function seed(): AppState {
   const students: Student[] = [
     {
       studentId: '2060199610824355842', name: 'Ji-woo Kim', localName: '김지우', userType: '正式用户', gender: '男',
-      birthday: '2016-05-12', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO',
+      birthday: '2016-05-12', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO', adChannel: 'App Store',
       countryCode: '+82', channelCode: 'K2000Gh', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: 'admin@dinoai.ai',
       editHistory: [
         {
@@ -313,46 +313,46 @@ function seed(): AppState {
     },
     {
       studentId: '2060199610824355843', name: 'Abdullah Al-Saud', localName: 'عبدالله', userType: '正式用户', gender: '男',
-      birthday: '2015-09-03', ageGroup: '9-12', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta',
+      birthday: '2015-09-03', ageGroup: '9-12', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta', adChannel: 'Meta Ads',
       countryCode: '+966', channelCode: 'Fb73Mxa', country: '沙特', appChannel: 'Google Play', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       studentId: '2060199610824355844', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', userType: '测试用户', gender: '女',
-      birthday: '2017-01-20', ageGroup: '6-8', loginMethod: '手机号', account: '+84 00000-1234', phone: '+84 00000-1234', businessLine: '越南', registerChannel: 'KOL / TikTok', channelSource: 'VN_META_JULY',
+      birthday: '2017-01-20', ageGroup: '6-8', loginMethod: '手机号', account: '+84 00000-1234', phone: '+84 00000-1234', businessLine: '越南', registerChannel: 'KOL / TikTok', channelSource: 'VN_META_JULY', adChannel: 'KOL',
       countryCode: '+84', channelCode: 'Tk88Vzq', country: '越南', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验', salesProgress: '待领取',
     },
     {
       studentId: '2060199610824355845', name: 'Tan Wei Ming', localName: '陈伟明', userType: '测试用户', gender: '男',
-      birthday: '2016-11-08', ageGroup: '13-17', loginMethod: 'AppID', account: 'weiming.tan@icloud.com', businessLine: '马来', registerChannel: '自然流量', channelSource: 'MY_ASO_ORGANIC',
+      birthday: '2016-11-08', ageGroup: '13-17', loginMethod: 'AppID', account: 'weiming.tan@icloud.com', businessLine: '马来', registerChannel: '自然流量', channelSource: 'MY_ASO_ORGANIC', adChannel: 'googleadwords_int', subChannel: 'ACI_Search',
       countryCode: '+60', channelCode: '', country: '马来西亚', appChannel: 'App Store', registerTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费逾期', expireTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       studentId: '2060199610824355846', name: 'Seo-yeon Park', localName: '박서연', userType: '正式用户', gender: '女',
-      birthday: '2017-03-22', ageGroup: '6-8', loginMethod: 'kakao', account: '+82 10-9876-5432', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram',
+      birthday: '2017-03-22', ageGroup: '6-8', loginMethod: 'kakao', account: '+82 10-9876-5432', phone: '+82 10-9876-5432', businessLine: '韩国', registerChannel: 'KOL / Instagram', adChannel: 'KOL',
       countryCode: '+82', channelCode: 'Ig58Kpq', country: '韩国', appChannel: 'Google Play', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费逾期', expireTime: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'),
     },
     {
       // 已注册未体验 + 有手机号（正式）→ 进入「销售中心-待领取」
       studentId: '2060199610824355847', name: 'Putri Ayu', localName: 'Putri', userType: '正式用户', gender: '女',
-      birthday: '2015-07-15', ageGroup: '9-12', loginMethod: '手机号', account: '+62 812-3456-7890', phone: '+62 812-3456-7890', businessLine: '其他', registerChannel: 'KOL / TikTok', channelSource: 'ID_TIKTOK_JULY',
+      birthday: '2015-07-15', ageGroup: '9-12', loginMethod: '手机号', account: '+62 812-3456-7890', phone: '+62 812-3456-7890', businessLine: '其他', registerChannel: 'KOL / TikTok', channelSource: 'ID_TIKTOK_JULY', adChannel: 'Facebook Ads', subChannel: 'Instagram',
       countryCode: '+62', channelCode: '', country: '印尼', appChannel: 'Google Play', registerTime: now.subtract(6, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验', salesProgress: '待领取',
     },
     {
       // 未付费 + 已体验（有完课体验课）+ 无手机号（第三方登录）→ 直接进入用户中心
       studentId: '2060199610824355848', name: 'Somchai Prom', localName: 'สมชาย', userType: '正式用户', gender: '男',
-      birthday: '2016-02-10', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'somchai.prom@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO', channelSource: 'TH_ASO',
+      birthday: '2016-02-10', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'somchai.prom@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO', channelSource: 'TH_ASO', adChannel: 'googleadwords_int', subChannel: 'ACI_Display',
       countryCode: '+66', channelCode: '', country: '泰国', appChannel: 'App Store', registerTime: now.subtract(3, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
     },
     {
       // 未付费 + 体验中（有进行中体验课、无完课体验课）+ 无手机号 → 直接进入用户中心
       studentId: '2060199610824355849', name: 'Aisha Rahman', localName: 'Aisha', userType: '正式用户', gender: '女',
-      birthday: '2016-06-25', ageGroup: '6-8', loginMethod: '谷歌邮箱', account: 'aisha.rahman@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO', channelSource: 'ID_ASO',
+      birthday: '2016-06-25', ageGroup: '6-8', loginMethod: '谷歌邮箱', account: 'aisha.rahman@gmail.com', businessLine: '其他', registerChannel: '自然流量 / ASO', channelSource: 'ID_ASO', adChannel: 'Facebook Ads', subChannel: 'Facebook',
       countryCode: '+62', channelCode: '', country: '印尼', appChannel: 'Google Play', registerTime: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
     },
     {
       // 已领取跟进中的线索（供「我的跟进」演示）
       studentId: '2060199610824356003', name: 'Hana', localName: 'Hana', userType: '正式用户', gender: '女',
-      birthday: '2016-04-18', ageGroup: '9-12', loginMethod: '手机号', account: '+60 17-451 9920', phone: '+60 17-451 9920', businessLine: '马来', registerChannel: 'Google Search', channelSource: 'MY_GOOGLE_SEARCH',
+      birthday: '2016-04-18', ageGroup: '9-12', loginMethod: '手机号', account: '+60 17-451 9920', phone: '+60 17-451 9920', businessLine: '马来', registerChannel: 'Google Search', channelSource: 'MY_GOOGLE_SEARCH', adChannel: 'googleadwords_int', subChannel: 'ACI_Search',
       countryCode: '+60', channelCode: '', country: '马来西亚', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
       salesOwner: 'admin@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '已联系家长，确认体验时间', salesNextFollow: now.add(4, 'hour').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
@@ -362,7 +362,7 @@ function seed(): AppState {
     },
     {
       studentId: '2060199610824356004', name: 'Ji-won', localName: '지원', userType: '正式用户', gender: '男',
-      birthday: '2015-12-01', ageGroup: '9-12', loginMethod: '手机号', account: '+82 10-8821-2390', phone: '+82 10-8821-2390', businessLine: '韩国', registerChannel: 'Meta', channelSource: 'KR_META_SUMMER',
+      birthday: '2015-12-01', ageGroup: '9-12', loginMethod: '手机号', account: '+82 10-8821-2390', phone: '+82 10-8821-2390', businessLine: '韩国', registerChannel: 'Meta', channelSource: 'KR_META_SUMMER', adChannel: 'Facebook Ads', subChannel: 'Facebook',
       countryCode: '+82', channelCode: '', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
       salesOwner: 'admin@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '家长还在了解课程价格', salesNextFollow: now.add(1, 'day').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
