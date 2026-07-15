@@ -17,7 +17,7 @@ import {
   Typography,
   message,
 } from 'antd'
-import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined } from '@ant-design/icons'
+import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SwapOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { genCallId, setState, useStore } from '../store'
@@ -67,10 +67,21 @@ export default function SalesCenter() {
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const callRecords = useStore((s) => s.callRecords ?? [])
-  const { can, allowedLines, actor } = usePerm()
+  const accounts = useStore((s) => s.accounts)
+  const roles = useStore((s) => s.roles)
+  const { can, allowedLines, actor, account } = usePerm()
   const canEdit = can('sales') === 'operate'
-  const seeAllOwners = allowedLines() === null // 全业务线（超管）可见全部领取记录
+  const isLeader = !!account?.salesLead // 销售组长
+  // 全业务线（超管）或销售组长可见组内全部领取记录
+  const seeAllOwners = allowedLines() === null || isLeader
+  const canReassign = canEdit && seeAllOwners // 组长 / 超管可重新分配线索
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
+
+  // 可被分配的销售：启用状态、且角色具备销售模块「操作」权限
+  const salesAccounts = useMemo(
+    () => accounts.filter((a) => a.status === '启用' && roles.find((r) => r.id === a.roleId)?.perms.sales === 'operate'),
+    [accounts, roles],
+  )
 
   const [tab, setTab] = useState('pool')
   const [poolKw, setPoolKw] = useState('')
@@ -81,6 +92,8 @@ export default function SalesCenter() {
 
   const [editing, setEditing] = useState<Student | null>(null)
   const [dialing, setDialing] = useState<Student | null>(null)
+  const [reassigning, setReassigning] = useState<Student | null>(null)
+  const [reassignTo, setReassignTo] = useState<string | undefined>()
   const [form] = Form.useForm()
   const watchProgress = Form.useWatch('progress', form) as string | undefined
 
@@ -212,6 +225,43 @@ export default function SalesCenter() {
     message.success(converted ? t('sales.converted') : t('sales.saved'))
   }
 
+  const openReassign = (s: Student) => {
+    setReassigning(s)
+    setReassignTo(undefined)
+  }
+
+  // 重新分配线索：改写归属销售 + 归档到跟进记录
+  const doReassign = () => {
+    if (!reassigning) return
+    if (!reassignTo) {
+      message.warning(t('sales.reassign.required'))
+      return
+    }
+    const target = salesAccounts.find((a) => a.email === reassignTo)
+    const name = target?.name ?? reassignTo
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+    const note = t('sales.reassign.note', { name })
+    setState((prev) => ({
+      ...prev,
+      students: prev.students.map((x) =>
+        x.studentId === reassigning.studentId
+          ? {
+              ...x,
+              salesOwner: reassignTo,
+              salesLatestNote: note,
+              salesUpdatedAt: now,
+              salesHistory: [
+                { progress: x.salesProgress || '跟进中', note, time: now, owner: actor },
+                ...(x.salesHistory || []),
+              ],
+            }
+          : x,
+      ),
+    }))
+    setReassigning(null)
+    message.success(t('sales.reassigned', { name }))
+  }
+
   // 保存外呼通话小结：生成通话记录 + 归档到该线索的销售跟进记录
   const saveCall = (result: CallResult, duration: string, rawNote: string) => {
     if (!dialing) return
@@ -338,7 +388,7 @@ export default function SalesCenter() {
           {
             title: t('common.action'),
             key: 'op',
-            width: 180,
+            width: canReassign ? 280 : 180,
             fixed: 'right' as const,
             render: (_: unknown, r: Student) => (
               <Space size={0}>
@@ -348,6 +398,11 @@ export default function SalesCenter() {
                 <Button type="link" icon={<EditOutlined />} onClick={() => openFollow(r)}>
                   {t('sales.update')}
                 </Button>
+                {canReassign && (
+                  <Button type="link" icon={<SwapOutlined />} onClick={() => openReassign(r)}>
+                    {t('sales.reassign')}
+                  </Button>
+                )}
               </Space>
             ),
           },
@@ -420,6 +475,9 @@ export default function SalesCenter() {
             label: `${t('sales.tab.follow')} (${followAll.length})`,
             children: (
               <>
+                {isLeader && (
+                  <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.leaderTip')} />
+                )}
                 <Space wrap style={{ marginBottom: 16 }}>
                   <Input
                     allowClear
@@ -443,7 +501,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: 2300 }}
+                  scroll={{ x: canReassign ? 2400 : 2300 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
@@ -505,6 +563,34 @@ export default function SalesCenter() {
       />
 
       <Modal_Dial t={t} dialing={dialing} onCancel={() => setDialing(null)} onSave={saveCall} />
+
+      <Modal
+        open={!!reassigning}
+        title={t('sales.reassign.title')}
+        onCancel={() => setReassigning(null)}
+        onOk={doReassign}
+        okText={t('sales.reassign')}
+        cancelText={t('common.cancel')}
+        width={480}
+        destroyOnClose
+      >
+        <div style={{ marginBottom: 12 }}>
+          <Text type="secondary">{t('sales.reassign.current')}：</Text>
+          <Text strong>{reassigning?.salesOwner || '—'}</Text>
+        </div>
+        <div style={{ marginBottom: 6 }}>{t('sales.reassign.to')}</div>
+        <Select
+          style={{ width: '100%' }}
+          showSearch
+          optionFilterProp="label"
+          placeholder={t('sales.reassign.toPlaceholder')}
+          value={reassignTo}
+          onChange={setReassignTo}
+          options={salesAccounts
+            .filter((a) => a.email !== reassigning?.salesOwner)
+            .map((a) => ({ label: `${a.name}（${a.email}）`, value: a.email }))}
+        />
+      </Modal>
     </Card>
   )
 }

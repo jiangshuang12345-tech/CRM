@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v42'
+const KEY = 'dinoai_crm_state_v43'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -354,19 +354,19 @@ function seed(): AppState {
       studentId: '2060199610824356003', name: 'Hana', localName: 'Hana', userType: '正式用户', gender: '女',
       birthday: '2016-04-18', ageGroup: '9-12', loginMethod: '手机号', account: '+60 17-451 9920', phone: '+60 17-451 9920', businessLine: '马来', registerChannel: 'Google Search', channelSource: 'MY_GOOGLE_SEARCH', adChannel: 'googleadwords_int', subChannel: 'ACI_Search',
       countryCode: '+60', channelCode: '', country: '马来西亚', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
-      salesOwner: 'admin@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '已联系家长，确认体验时间', salesNextFollow: now.add(4, 'hour').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+      salesOwner: 'sales.my@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '已联系家长，确认体验时间', salesNextFollow: now.add(4, 'hour').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
-        { progress: '跟进中', note: '已联系家长，确认体验时间', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'admin@dinoai.ai' },
-        { progress: '跟进中', note: '销售已领取，开始跟进已注册用户', time: now.subtract(20, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'admin@dinoai.ai' },
+        { progress: '跟进中', note: '已联系家长，确认体验时间', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai' },
+        { progress: '跟进中', note: '销售已领取，开始跟进已注册用户', time: now.subtract(20, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai' },
       ],
     },
     {
       studentId: '2060199610824356004', name: 'Ji-won', localName: '지원', userType: '正式用户', gender: '男',
       birthday: '2015-12-01', ageGroup: '9-12', loginMethod: '手机号', account: '+82 10-8821-2390', phone: '+82 10-8821-2390', businessLine: '韩国', registerChannel: 'Meta', channelSource: 'KR_META_SUMMER', adChannel: 'Facebook Ads', subChannel: 'Facebook',
       countryCode: '+82', channelCode: '', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
-      salesOwner: 'admin@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '家长还在了解课程价格', salesNextFollow: now.add(1, 'day').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+      salesOwner: 'sales.kr@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '家长还在了解课程价格', salesNextFollow: now.add(1, 'day').format('YYYY-MM-DD HH:mm:ss'), salesUpdatedAt: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
-        { progress: '暂不跟进', note: '家长还在了解课程价格', time: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'admin@dinoai.ai' },
+        { progress: '暂不跟进', note: '家长还在了解课程价格', time: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.kr@dinoai.ai' },
       ],
     },
   ]
@@ -610,6 +610,34 @@ function seed(): AppState {
       roleId: 'role_mentor',
       businessLines: ['韩国'],
       status: '停用',
+    },
+    {
+      id: uid('acc_'),
+      email: 'sales.lead@dinoai.ai',
+      name: '销售组长 · Kim',
+      roleId: 'role_support',
+      businessLines: ['韩国', '马来'],
+      status: '启用',
+      salesLead: true,
+      lastLogin: now.subtract(30, 'minute').format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      id: uid('acc_'),
+      email: 'sales.kr@dinoai.ai',
+      name: '销售专员 · 韩国',
+      roleId: 'role_support',
+      businessLines: ['韩国'],
+      status: '启用',
+      lastLogin: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      id: uid('acc_'),
+      email: 'sales.my@dinoai.ai',
+      name: '销售专员 · 马来',
+      roleId: 'role_support',
+      businessLines: ['马来'],
+      status: '启用',
+      lastLogin: now.subtract(4, 'hour').format('YYYY-MM-DD HH:mm:ss'),
     },
   ]
 

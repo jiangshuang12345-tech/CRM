@@ -289,6 +289,7 @@ export type Account = {
   businessLines: string[] // 数据权限范围（dataScope='line' 时生效）
   status: AccountStatus
   lastLogin?: string
+  salesLead?: boolean // 销售组长：可查看并重新分配组内（业务线范围）全部销售的跟进线索
 }
 
 // 操作日志（审计）
