@@ -138,6 +138,12 @@ export type SalesFollowLog = {
   owner: string
 }
 
+export type SalesSettings = {
+  autoDropEnabled: boolean
+  autoDropHours: number
+  allocations: { email: string; weight: number }[]
+}
+
 // ---- 课程 / 课时报告 ----
 export type LessonType = '体验课' | '正式课'
 export const LESSON_TYPES: LessonType[] = ['体验课', '正式课']

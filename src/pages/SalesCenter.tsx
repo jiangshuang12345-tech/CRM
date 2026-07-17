@@ -7,9 +7,11 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Modal,
   Select,
   Space,
+  Switch,
   Table,
   Tabs,
   Tag,
@@ -17,11 +19,11 @@ import {
   Typography,
   message,
 } from 'antd'
-import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SwapOutlined } from '@ant-design/icons'
+import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { genCallId, setState, useStore } from '../store'
-import type { CallRecord, CallResult, SalesFollowLog, Student, UserType } from '../types'
+import type { CallRecord, CallResult, SalesFollowLog, SalesSettings, Student, UserType } from '../types'
 import { CALL_RESULTS } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
@@ -67,6 +69,7 @@ export default function SalesCenter() {
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const callRecords = useStore((s) => s.callRecords ?? [])
+  const salesSettings = useStore((s) => s.salesSettings)
   const accounts = useStore((s) => s.accounts)
   const roles = useStore((s) => s.roles)
   const { can, allowedLines, actor, account } = usePerm()
@@ -94,6 +97,7 @@ export default function SalesCenter() {
   const [dialing, setDialing] = useState<Student | null>(null)
   const [reassigning, setReassigning] = useState<Student | null>(null)
   const [reassignTo, setReassignTo] = useState<string | undefined>()
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const [form] = Form.useForm()
   const watchProgress = Form.useWatch('progress', form) as string | undefined
 
@@ -435,7 +439,18 @@ export default function SalesCenter() {
   const totalLeads = students.filter((s) => isSalesLead(s, lessons)).length
 
   return (
-    <Card className="page-card" bordered={false} title={<span className="section-title">{t('sales.title')}</span>}>
+    <Card
+      className="page-card"
+      bordered={false}
+      title={<span className="section-title">{t('sales.title')}</span>}
+      extra={
+        isLeader && (
+          <Button icon={<SettingOutlined />} onClick={() => setSettingsOpen(true)}>
+            {t('sales.settings')}
+          </Button>
+        )
+      }
+    >
       <Alert type="warning" showIcon message={t('phase3.banner')} style={{ marginBottom: 16 }} />
       <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.flow')} description={t('sales.intro')} />
 
@@ -591,6 +606,21 @@ export default function SalesCenter() {
             .map((a) => ({ label: `${a.name}（${a.email}）`, value: a.email }))}
         />
       </Modal>
+
+      {settingsOpen && salesSettings && (
+        <Modal_Settings
+          t={t}
+          open={settingsOpen}
+          initialSettings={salesSettings}
+          salesAccounts={salesAccounts}
+          onCancel={() => setSettingsOpen(false)}
+          onOk={(newSettings) => {
+            setState((prev) => ({ ...prev, salesSettings: newSettings }))
+            setSettingsOpen(false)
+            message.success(t('sales.settings.saved'))
+          }}
+        />
+      )}
     </Card>
   )
 }
@@ -769,6 +799,112 @@ function Modal_Follow({
   )
 }
 
+function Modal_Settings({
+  t,
+  open,
+  initialSettings,
+  salesAccounts,
+  onCancel,
+  onOk,
+}: {
+  t: (k: string, v?: Record<string, string | number>) => string
+  open: boolean
+  initialSettings: SalesSettings
+  salesAccounts: { email: string; name: string }[]
+  onCancel: () => void
+  onOk: (settings: SalesSettings) => void
+}) {
+  const [form] = Form.useForm()
+  const enabled = Form.useWatch('autoDropEnabled', form)
+
+  return (
+    <Modal
+      open={open}
+      title={t('sales.settings.title')}
+      onCancel={onCancel}
+      onOk={async () => {
+        const v = await form.validateFields()
+        onOk(v as SalesSettings)
+      }}
+      width={640}
+      destroyOnClose
+      okText={t('common.save')}
+      cancelText={t('common.cancel')}
+    >
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{
+          ...initialSettings,
+          allocations: salesAccounts.map((a) => {
+            const existing = initialSettings.allocations?.find((x: any) => x.email === a.email)
+            return { email: a.email, weight: existing ? existing.weight : 1 }
+          }),
+        }}
+      >
+        <div style={{ marginBottom: 24 }}>
+          <Text strong style={{ fontSize: 16 }}>
+            {t('sales.settings.dropRule')}
+          </Text>
+          <div style={{ marginTop: 12, padding: '16px', background: '#f5f5f5', borderRadius: 6 }}>
+            <Form.Item name="autoDropEnabled" valuePropName="checked" style={{ marginBottom: 12 }}>
+              <Switch checkedChildren={t('common.enable')} unCheckedChildren={t('common.disable')} />
+            </Form.Item>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: enabled ? 'inherit' : '#bfbfbf' }}>
+              <span>{t('sales.settings.dropDesc1')}</span>
+              <Form.Item name="autoDropHours" noStyle rules={[{ required: true }]}>
+                <InputNumber min={1} max={720} disabled={!enabled} />
+              </Form.Item>
+              <span>{t('sales.settings.dropDesc2')}</span>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <Text strong style={{ fontSize: 16 }}>
+            {t('sales.settings.ratio')}
+          </Text>
+          <div style={{ marginTop: 12 }}>
+            <Table
+              size="small"
+              pagination={false}
+              dataSource={salesAccounts}
+              rowKey="email"
+              columns={[
+                { title: t('sales.col.owner'), dataIndex: 'name', width: 220, render: (v, r) => `${v} (${r.email})` },
+                {
+                  title: t('sales.settings.weight'),
+                  key: 'weight',
+                  render: (_, r, i) => (
+                    <Form.Item name={['allocations', i, 'weight']} noStyle rules={[{ required: true }]}>
+                      <InputNumber min={0} max={100} />
+                    </Form.Item>
+                  ),
+                },
+                {
+                  title: 'Email',
+                  key: 'email',
+                  width: 0,
+                  render: (_, r, i) => (
+                    <Form.Item name={['allocations', i, 'email']} hidden>
+                      <Input />
+                    </Form.Item>
+                  ),
+                },
+              ]}
+            />
+            <div style={{ marginTop: 8 }}>
+              <Text type="secondary" style={{ fontSize: 12 }}>
+                {t('sales.settings.ratioTip')}
+              </Text>
+            </div>
+          </div>
+        </div>
+      </Form>
+    </Modal>
+  )
+}
+
 // 轻量 Modal 包装
 function ModalWrapper(props: {
   open: boolean
@@ -794,3 +930,5 @@ function ModalWrapper(props: {
     </Modal>
   )
 }
+
+
