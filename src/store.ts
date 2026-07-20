@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v45'
+const KEY = 'dinoai_crm_state_v46'
 
 export type SalesSettings = {
   autoDropEnabled: boolean
@@ -499,6 +499,7 @@ function seed(): AppState {
         users: 'none',
         sales: 'none',
         sales_config: 'none',
+        sales_reassign: 'none',
         orders: 'none',
         system: 'none',
       },
@@ -517,6 +518,7 @@ function seed(): AppState {
         users: 'view',
         sales: 'view',
         sales_config: 'operate',
+        sales_reassign: 'none',
         orders: 'view',
         system: 'none',
       },
@@ -535,6 +537,7 @@ function seed(): AppState {
         users: 'operate',
         sales: 'operate',
         sales_config: 'none',
+        sales_reassign: 'none',
         orders: 'view',
         system: 'none',
       },
@@ -553,6 +556,7 @@ function seed(): AppState {
         users: 'operate',
         sales: 'operate',
         sales_config: 'operate',
+        sales_reassign: 'operate',
         orders: 'operate',
         system: 'operate',
       },
@@ -572,6 +576,26 @@ function seed(): AppState {
         users: 'view',
         sales: 'operate',
         sales_config: 'none',
+        sales_reassign: 'none',
+        orders: 'view',
+        system: 'none',
+      },
+    },
+    {
+      id: 'role_sales_leader',
+      name: '销售组长',
+      desc: '管理销售团队线索分配与掉库规则',
+      builtin: true,
+      dataScope: 'line',
+      perms: {
+        channels: 'none',
+        landing: 'none',
+        packages: 'none',
+        coupons: 'none',
+        users: 'view',
+        sales: 'operate',
+        sales_config: 'operate',
+        sales_reassign: 'operate',
         orders: 'view',
         system: 'none',
       },
@@ -627,10 +651,9 @@ function seed(): AppState {
       id: uid('acc_'),
       email: 'sales.lead@dinoai.ai',
       name: '销售组长 · Kim',
-      roleId: 'role_support',
+      roleId: 'role_sales_leader',
       businessLines: ['韩国', '马来'],
       status: '启用',
-      salesLead: true,
       lastLogin: now.subtract(30, 'minute').format('YYYY-MM-DD HH:mm:ss'),
     },
     {

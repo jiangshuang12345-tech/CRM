@@ -26,7 +26,6 @@ import {
 import type { ColumnsType } from 'antd/es/table'
 import { addLog, setState, uid, useStore } from '../store'
 import type { Account, AuditLog, DataScope, ModuleKey, PermLevel, Role } from '../types'
-import { PERMISSION_MODULES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 
@@ -38,8 +37,19 @@ const LEVEL_META: Record<PermLevel, { color: string }> = {
   operate: { color: 'green' },
 }
 
+const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
+  { key: 'channels' },
+  { key: 'landing' },
+  { key: 'packages' },
+  { key: 'coupons' },
+  { key: 'users' },
+  { key: 'sales', sub: ['sales_reassign', 'sales_config'] },
+  { key: 'orders' },
+  { key: 'system' },
+]
+
 const EMPTY_PERMS = (): Record<ModuleKey, PermLevel> =>
-  PERMISSION_MODULES.reduce(
+  MODULE_HIERARCHY.flatMap(m => [m.key, ...(m.sub || [])]).reduce(
     (acc, m) => ({ ...acc, [m]: 'none' }),
     {} as Record<ModuleKey, PermLevel>,
   )
@@ -56,7 +66,7 @@ export default function SystemConfig() {
   const logs = useStore((s) => s.logs)
   const lines = useMemo(() => channels.map((c) => c.name), [channels])
 
-  const moduleLabel = (m: ModuleKey) => t(`app.nav.${m}`)
+  const moduleLabel = (m: ModuleKey) => (m.includes('_') ? t(`perm.${m}`) : t(`app.nav.${m}`))
   const levelLabel = (lv: PermLevel) => t(`sys.level.${lv}`)
   const scopeLabel = (sc: DataScope) => t(`sys.scope.${sc}`)
   const roleName = (id: string) => roles.find((r) => r.id === id)?.name ?? id
@@ -184,14 +194,19 @@ export default function SystemConfig() {
       : []),
   ]
 
-  // 权限矩阵：行=模块，列=角色
+  // 权限矩阵：行=模块（主模块+子模块平铺），列=角色
+  const matrixData = MODULE_HIERARCHY.flatMap((m) => [m.key, ...(m.sub || [])]).map((m: ModuleKey) => ({ key: m }))
+
   const matrixColumns: ColumnsType<{ key: ModuleKey }> = [
     {
       title: t('sys.module'),
       dataIndex: 'key',
       fixed: 'left',
       width: 150,
-      render: (m: ModuleKey) => <Text strong>{moduleLabel(m)}</Text>,
+      render: (m: ModuleKey) => {
+        const isSub = m.includes('_')
+        return <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0 }}>{moduleLabel(m)}</Text>
+      },
     },
     ...roles.map((r) => ({
       title: r.name,
@@ -204,8 +219,6 @@ export default function SystemConfig() {
       },
     })),
   ]
-  const matrixData = PERMISSION_MODULES.map((m) => ({ key: m }))
-
   // ---------- 成员账号 ----------
   const [accEditing, setAccEditing] = useState<Account | null>(null)
   const [accOpen, setAccOpen] = useState(false)
@@ -495,27 +508,33 @@ export default function SystemConfig() {
               size="small"
               rowKey="key"
               pagination={false}
-              dataSource={PERMISSION_MODULES.map((m) => ({ key: m }))}
+              dataSource={matrixData}
               columns={[
-                { title: t('sys.module'), dataIndex: 'key', render: (m: ModuleKey) => moduleLabel(m) },
+                { title: t('sys.module'), dataIndex: 'key', render: (m: ModuleKey) => {
+                  const isSub = m.includes('_')
+                  return <span style={{ marginLeft: isSub ? 16 : 0, color: isSub ? '#8c8c8c' : 'inherit' }}>{isSub ? `└ ${moduleLabel(m)}` : moduleLabel(m)}</span>
+                } },
                 {
                   title: t('sys.permission'),
                   key: 'lv',
                   width: 280,
-                  render: (_, row: { key: ModuleKey }) => (
-                    <Radio.Group
-                      size="small"
-                      value={draftPerms[row.key]}
-                      onChange={(e) =>
-                        setDraftPerms((prev) => ({ ...prev, [row.key]: e.target.value }))
-                      }
-                      optionType="button"
-                      options={(['none', 'view', 'operate'] as PermLevel[]).map((lv) => ({
-                        label: levelLabel(lv),
-                        value: lv,
-                      }))}
-                    />
-                  ),
+                  render: (_, row: { key: ModuleKey }) => {
+                    const isSub = row.key.includes('_')
+                    return (
+                      <Radio.Group
+                        size="small"
+                        value={draftPerms[row.key]}
+                        onChange={(e) =>
+                          setDraftPerms((prev) => ({ ...prev, [row.key]: e.target.value }))
+                        }
+                        optionType="button"
+                        options={(isSub ? ['none', 'operate'] : ['none', 'view', 'operate'] as PermLevel[]).map((lv) => ({
+                          label: levelLabel(lv as PermLevel),
+                          value: lv,
+                        }))}
+                      />
+                    )
+                  },
                 },
               ]}
             />

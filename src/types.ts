@@ -262,6 +262,7 @@ export type ModuleKey =
   | 'users'
   | 'sales'
   | 'sales_config'
+  | 'sales_reassign'
   | 'orders'
   | 'system'
 
@@ -273,6 +274,7 @@ export const PERMISSION_MODULES: ModuleKey[] = [
   'users',
   'sales',
   'sales_config',
+  'sales_reassign',
   'orders',
   'system',
 ]

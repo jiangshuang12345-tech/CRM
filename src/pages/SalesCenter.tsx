@@ -74,12 +74,12 @@ export default function SalesCenter() {
   const roles = useStore((s) => s.roles)
   const { can, allowedLines, actor, account } = usePerm()
   const canEdit = can('sales') === 'operate'
-  const isLeader = !!account?.salesLead // 销售组长
-  // 全业务线（超管）或销售组长可见组内全部领取记录
-  const seeAllOwners = allowedLines() === null || isLeader
-  const canReassign = canEdit && seeAllOwners // 组长 / 超管可重新分配线索
-  // 分配与掉库设置：拥有独立模块权限（如超管、运营），或作为销售组长
-  const canManageSettings = can('sales_config') === 'operate' || isLeader
+  const canReassign = can('sales_reassign') === 'operate'
+  const canManageSettings = can('sales_config') === 'operate'
+  // 全业务线（超管）或拥有重新分配权限的主管可见范围内全部领取记录
+  const seeAllOwners = allowedLines() === null || canReassign
+  // 当拥有分配与掉库设置权限时，视为 Leader 身份以显示横幅和设置入口
+  const isLeader = canManageSettings
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
 
   // 可被分配的销售：启用状态、且角色具备销售模块「操作」权限

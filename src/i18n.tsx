@@ -91,6 +91,8 @@ const zh: Dict = {
 
   'app.nav.marketing': '营销中心',
   'app.nav.sales': '销售中心',
+  'perm.sales_config': '分配与掉库',
+  'perm.sales_reassign': '重新分配线索',
   'app.nav.channels': '渠道管理',
   'app.nav.landing': '落地页管理',
   'app.nav.users': '用户中心',
@@ -660,6 +662,8 @@ const en: Dict = {
 
   'app.nav.marketing': 'Marketing',
   'app.nav.sales': 'Sales Center',
+  'perm.sales_config': 'Allocation & Drop',
+  'perm.sales_reassign': 'Reassign Leads',
   'app.nav.channels': 'Channels',
   'app.nav.users': 'Users',
   'app.nav.orders': 'Orders',
@@ -1354,7 +1358,7 @@ const ko: Dict = {
   'common.back': '뒤로', 'common.save': '저장', 'common.close': '닫기', 'common.copy': '복사',
   'common.copied': '복사됨', 'common.pleaseSelect': '선택하세요', 'common.noData': '데이터 없음',
   'common.action': '작업', 'common.total': '총 {n}건', 'lang.label': '언어',
-  'app.nav.marketing': '마케팅 센터', 'app.nav.sales': '세일즈 센터', 'app.nav.channels': '채널 관리', 'app.nav.landing': '랜딩 페이지', 'app.nav.users': '사용자 센터', 'app.nav.orders': '주문 센터',
+  'app.nav.marketing': '마케팅 센터', 'app.nav.sales': '세일즈 센터', 'perm.sales_config': '할당 및 만료', 'perm.sales_reassign': '리드 재할당', 'app.nav.channels': '채널 관리', 'app.nav.landing': '랜딩 페이지', 'app.nav.users': '사용자 센터', 'app.nav.orders': '주문 센터',
   'lp.title': '랜딩 페이지 관리', 'lp.intro': '캠페인 랜딩 페이지 링크를 원클릭으로 생성하고 채널·상품 패키지·쿠폰을 연결합니다. 사업 라인별로 자체 템플릿을 사용합니다.', 'lp.genBtn': '랜딩 페이지 생성', 'lp.genTitle': '랜딩 페이지 링크 생성', 'lp.genConfirm': '생성 후 저장', 'lp.genOk': '랜딩 페이지 링크가 생성되었습니다', 'lp.noTemplate': '이 사업 라인에는 랜딩 페이지 템플릿이 없습니다.', 'lp.noTemplateTag': '템플릿 없음', 'lp.previewBtn': '링크 미리보기', 'lp.previewHint': '생성될 링크를 먼저 미리볼 수 있습니다', 'lp.openLink': '링크 열기', 'lp.delTitle': '랜딩 페이지 삭제', 'lp.delContent': '이 랜딩 페이지 링크를 삭제할까요?', 'lp.f.line': '사업 라인', 'lp.f.channel': '채널', 'lp.f.channelTip': '코드가 생성된 채널 중에서 선택', 'lp.f.channelPlaceholder': '채널 선택(코드 포함)', 'lp.f.pickLineFirst': '먼저 사업 라인을 선택하세요', 'lp.f.noChannel': '이 사업 라인에 코드가 생성된 채널이 없습니다', 'lp.f.name': '랜딩 페이지 이름', 'lp.f.namePlaceholder': '랜딩 페이지 이름을 입력하세요', 'lp.col.name': '랜딩 페이지 이름', 'lp.f.package': '상품 패키지', 'lp.f.packageTip': '필수, 일부 템플릿은 패키지 ID를 포함합니다', 'lp.f.strikePrice': '정가(취소선)', 'lp.f.strikePriceTip': '선택 사항, 랜딩 페이지에 표시되는 정가(취소선)', 'lp.col.strikePrice': '정가(취소선)', 'lp.f.coupon': '쿠폰', 'lp.f.couponCode': '쿠폰 코드', 'lp.f.couponCodeTip': '선택 사항, 특정 KOL 코드를 지정할 수 있습니다', 'lp.f.optional': '선택', 'lp.f.validRange': '캠페인 기간', 'lp.f.validRangeTip': '랜딩 페이지의 시작 및 종료 시간(현지 시간)', 'lp.f.validStart': '시작 시간', 'lp.f.validEnd': '종료 시간', 'lp.col.valid': '캠페인 기간', 'lp.col.line': '사업 라인', 'lp.col.channel': '채널', 'lp.col.package': '패키지', 'lp.col.coupon': '쿠폰', 'lp.col.url': '랜딩 페이지 URL', 'lp.col.creator': '생성자', 'lp.col.createTime': '생성 시간',
   'app.nav.packages': '상품 패키지', 'app.nav.coupons': '쿠폰 관리', 'app.nav.usersV2': '사용자 센터-2단계', 'app.nav.system': '시스템 설정', 'app.brand': 'Dino English 콘솔',
   'user.titleV2': '사용자 센터-2단계', 'user.col.appChannel': '가입 채널', 'user.col.channelSource': '채널 소스', 'user.col.country': '국가', 'user.col.ageGroup': '연령대', 'user.label.ageGroup': '연령대', 'user.col.userType': '사용자 유형', 'user.userTypeAutoTip': '휴대폰/kakao 로그인 사용자는 휴대폰 규칙(앞 5자리가 연속 0이면 테스트 사용자)에 따라 자동 판정되며 수동 변경할 수 없습니다', 'enum.userType.正式用户': '정식 사용자', 'enum.userType.测试用户': '테스트 사용자', 'user.hist.title': '수정 이력', 'user.hist.col.time': '작업 시간', 'user.hist.col.action': '작업 행위', 'user.hist.col.detail': '변경 내용', 'user.hist.col.modifier': '수정자', 'user.hist.edit': '정보 수정', 'user.hist.empty': '수정 기록이 없습니다', 'user.hist.blank': '(비어 있음)', 'user.funnelTip': '가입 후 미체험이면서 휴대폰 번호를 확보한 사용자는 「영업 팔로우업」 목록으로 이동되었습니다. 번호가 없는 사용자와 체험/결제 및 이후 상태 사용자는 여기에 표시됩니다.', 'sales.title': '세일즈 센터', 'sales.intro': '이 목록은 「가입 후 미체험」이면서 휴대폰 번호를 확보한 사용자로, 영업이 능동적으로 팔로우업하여 전환하기 위한 것입니다.', 'sales.searchPlaceholder': '사용자 ID / 이름 / 휴대폰', 'sales.col.followStatus': '팔로우업 상태', 'sales.status.pending': '대기', 'sales.status.done': '완료', 'sales.markDone': '완료로 표시', 'sales.markPending': '대기로 되돌리기', 'sales.markedDone': '완료로 표시되었습니다', 'sales.markedPending': '대기로 되돌렸습니다',
