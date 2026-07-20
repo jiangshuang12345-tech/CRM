@@ -87,10 +87,8 @@ export default function SalesCenter() {
   )
 
   const [tab, setTab] = useState('pool')
-  const [poolKw, setPoolKw] = useState('')
-  const [followKw, setFollowKw] = useState('')
+  const [keyword, setKeyword] = useState('')
   const [progressFilter, setProgressFilter] = useState<string | undefined>()
-  const [callKw, setCallKw] = useState('')
   const [callResultFilter, setCallResultFilter] = useState<string | undefined>()
 
   const [editing, setEditing] = useState<Student | null>(null)
@@ -136,19 +134,19 @@ export default function SalesCenter() {
   const poolData = useMemo(
     () =>
       poolAll.filter((s) => {
-        const kw = poolKw.trim().toLowerCase()
+        const kw = keyword.trim().toLowerCase()
         return !kw || leadText(s).includes(kw)
       }),
-    [poolAll, poolKw],
+    [poolAll, keyword],
   )
 
   const followData = useMemo(
     () =>
       followAll.filter((s) => {
-        const kw = followKw.trim().toLowerCase()
+        const kw = keyword.trim().toLowerCase()
         return (!kw || leadText(s).includes(kw)) && (!progressFilter || s.salesProgress === progressFilter)
       }),
-    [followAll, followKw, progressFilter],
+    [followAll, keyword, progressFilter],
   )
 
   // 通话记录：按业务线默认勾选过滤，非超管仅看自己坐席的记录
@@ -161,11 +159,11 @@ export default function SalesCenter() {
   const callData = useMemo(
     () =>
       callScoped.filter((c) => {
-        const kw = callKw.trim().toLowerCase()
+        const kw = keyword.trim().toLowerCase()
         const text = `${c.phone} ${c.studentId} ${c.customer} ${c.note}`.toLowerCase()
         return (!kw || text.includes(kw)) && (!callResultFilter || c.result === callResultFilter)
       }),
-    [callScoped, callKw, callResultFilter],
+    [callScoped, keyword, callResultFilter],
   )
 
   const claim = (s: Student) => {
@@ -454,6 +452,38 @@ export default function SalesCenter() {
       <Alert type="warning" showIcon message={t('phase3.banner')} style={{ marginBottom: 16 }} />
       <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.flow')} description={t('sales.intro')} />
 
+      <Space wrap style={{ marginBottom: 16 }}>
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
+        {tab === 'follow' && (
+          <Select
+            allowClear
+            placeholder={t('sales.col.progress')}
+            style={{ width: 150 }}
+            value={progressFilter}
+            onChange={setProgressFilter}
+            options={(['跟进中', '暂不跟进'] as const).map((p) => ({ label: t(`sales.progress.${p}`), value: p }))}
+          />
+        )}
+        {tab === 'calls' && (
+          <Select
+            allowClear
+            placeholder={t('sales.call.result')}
+            style={{ width: 150 }}
+            value={callResultFilter}
+            onChange={setCallResultFilter}
+            options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
+          />
+        )}
+        <Input
+          allowClear
+          prefix={<SearchOutlined />}
+          placeholder={tab === 'calls' ? t('sales.searchCalls') : t('sales.searchFollow')}
+          style={{ width: 340 }}
+          value={keyword}
+          onChange={(e) => setKeyword(e.target.value)}
+        />
+      </Space>
+
       <Tabs
         activeKey={tab}
         onChange={setTab}
@@ -462,27 +492,14 @@ export default function SalesCenter() {
             key: 'pool',
             label: `${t('sales.tab.pool')} (${poolAll.length})`,
             children: (
-              <>
-                <Space wrap style={{ marginBottom: 16 }}>
-                  <Input
-                    allowClear
-                    prefix={<SearchOutlined />}
-                    placeholder={t('sales.searchPool')}
-                    style={{ width: 320 }}
-                    value={poolKw}
-                    onChange={(e) => setPoolKw(e.target.value)}
-                  />
-                  <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
-                </Space>
-                <Table
-                  rowKey="studentId"
-                  columns={poolColumns}
-                  dataSource={poolData}
-                  scroll={{ x: 1390 }}
-                  locale={{ emptyText: t('sales.emptyPool') }}
-                  pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
-                />
-              </>
+              <Table
+                rowKey="studentId"
+                columns={poolColumns}
+                dataSource={poolData}
+                scroll={{ x: 1390 }}
+                locale={{ emptyText: t('sales.emptyPool') }}
+                pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
+              />
             ),
           },
           {
@@ -493,25 +510,6 @@ export default function SalesCenter() {
                 {isLeader && (
                   <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.leaderTip')} />
                 )}
-                <Space wrap style={{ marginBottom: 16 }}>
-                  <Input
-                    allowClear
-                    prefix={<SearchOutlined />}
-                    placeholder={t('sales.searchFollow')}
-                    style={{ width: 340 }}
-                    value={followKw}
-                    onChange={(e) => setFollowKw(e.target.value)}
-                  />
-                  <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
-                  <Select
-                    allowClear
-                    placeholder={t('sales.col.progress')}
-                    style={{ width: 150 }}
-                    value={progressFilter}
-                    onChange={setProgressFilter}
-                    options={(['跟进中', '暂不跟进'] as const).map((p) => ({ label: t(`sales.progress.${p}`), value: p }))}
-                  />
-                </Space>
                 <Table
                   rowKey="studentId"
                   columns={followColumns}
@@ -529,25 +527,6 @@ export default function SalesCenter() {
             children: (
               <>
                 <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.callsBanner')} />
-                <Space wrap style={{ marginBottom: 16 }}>
-                  <Input
-                    allowClear
-                    prefix={<SearchOutlined />}
-                    placeholder={t('sales.searchCalls')}
-                    style={{ width: 340 }}
-                    value={callKw}
-                    onChange={(e) => setCallKw(e.target.value)}
-                  />
-                  <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
-                  <Select
-                    allowClear
-                    placeholder={t('sales.call.result')}
-                    style={{ width: 150 }}
-                    value={callResultFilter}
-                    onChange={setCallResultFilter}
-                    options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
-                  />
-                </Space>
                 <Table
                   rowKey="id"
                   columns={callColumns}
