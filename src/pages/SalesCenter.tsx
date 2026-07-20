@@ -78,6 +78,7 @@ export default function SalesCenter() {
   // 全业务线（超管）或销售组长可见组内全部领取记录
   const seeAllOwners = allowedLines() === null || isLeader
   const canReassign = canEdit && seeAllOwners // 组长 / 超管可重新分配线索
+  const canManageSettings = canEdit && seeAllOwners // 超管或组长可管理设置
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
 
   // 可被分配的销售：启用状态、且角色具备销售模块「操作」权限
@@ -442,7 +443,7 @@ export default function SalesCenter() {
       bordered={false}
       title={<span className="section-title">{t('sales.title')}</span>}
       extra={
-        isLeader && (
+        canManageSettings && (
           <Button icon={<SettingOutlined />} onClick={() => setSettingsOpen(true)}>
             {t('sales.settings')}
           </Button>
