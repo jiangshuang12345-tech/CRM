@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v44'
+const KEY = 'dinoai_crm_state_v45'
 
 export type SalesSettings = {
   autoDropEnabled: boolean
@@ -498,6 +498,7 @@ function seed(): AppState {
         coupons: 'view',
         users: 'none',
         sales: 'none',
+        sales_config: 'none',
         orders: 'none',
         system: 'none',
       },
@@ -515,6 +516,7 @@ function seed(): AppState {
         coupons: 'operate',
         users: 'view',
         sales: 'view',
+        sales_config: 'operate',
         orders: 'view',
         system: 'none',
       },
@@ -532,6 +534,7 @@ function seed(): AppState {
         coupons: 'none',
         users: 'operate',
         sales: 'operate',
+        sales_config: 'none',
         orders: 'view',
         system: 'none',
       },
@@ -549,6 +552,7 @@ function seed(): AppState {
         coupons: 'operate',
         users: 'operate',
         sales: 'operate',
+        sales_config: 'operate',
         orders: 'operate',
         system: 'operate',
       },
@@ -567,6 +571,7 @@ function seed(): AppState {
         coupons: 'none',
         users: 'view',
         sales: 'operate',
+        sales_config: 'none',
         orders: 'view',
         system: 'none',
       },

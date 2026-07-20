@@ -78,7 +78,8 @@ export default function SalesCenter() {
   // 全业务线（超管）或销售组长可见组内全部领取记录
   const seeAllOwners = allowedLines() === null || isLeader
   const canReassign = canEdit && seeAllOwners // 组长 / 超管可重新分配线索
-  const canManageSettings = canEdit && seeAllOwners // 超管或组长可管理设置
+  // 分配与掉库设置：拥有独立模块权限（如超管、运营），或作为销售组长
+  const canManageSettings = can('sales_config') === 'operate' || isLeader
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
 
   // 可被分配的销售：启用状态、且角色具备销售模块「操作」权限

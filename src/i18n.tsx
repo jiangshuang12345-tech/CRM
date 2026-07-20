@@ -69,6 +69,8 @@ type Dict = Record<string, string>
 const zh: Dict = {
   'common.confirm': '确定',
   'common.cancel': '取消',
+  'common.enable': '开启',
+  'common.disable': '关闭',
   'common.search': '搜索',
   'common.reset': '重置',
   'common.edit': '编辑',
@@ -636,6 +638,8 @@ const zh: Dict = {
 const en: Dict = {
   'common.confirm': 'OK',
   'common.cancel': 'Cancel',
+  'common.enable': 'Enable',
+  'common.disable': 'Disable',
   'common.search': 'Search',
   'common.reset': 'Reset',
   'common.edit': 'Edit',
@@ -1345,7 +1349,7 @@ const ja: Dict = {
 }
 
 const ko: Dict = {
-  'common.confirm': '확인', 'common.cancel': '취소', 'common.search': '검색', 'common.reset': '초기화',
+  'common.confirm': '확인', 'common.cancel': '취소', 'common.enable': '켜기', 'common.disable': '끄기', 'common.search': '검색', 'common.reset': '초기화',
   'common.edit': '편집', 'common.delete': '삭제', 'common.detail': '상세', 'common.add': '추가',
   'common.back': '뒤로', 'common.save': '저장', 'common.close': '닫기', 'common.copy': '복사',
   'common.copied': '복사됨', 'common.pleaseSelect': '선택하세요', 'common.noData': '데이터 없음',
