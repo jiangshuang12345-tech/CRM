@@ -21,7 +21,7 @@ import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
 import { latestTrialReport, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
-import { channelSourceText } from '../channel'
+import { appChannelSourceText, lpChannelSourceText } from '../channel'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -57,7 +57,8 @@ export default function UserCenterP1() {
   const scope = allowedLines()
   const [keyword, setKeyword] = useState('')
   const [countryFilter, setCountryFilter] = useState<string | undefined>()
-  const [sourceFilter, setSourceFilter] = useState<string | undefined>()
+  const [sourceLpFilter, setSourceLpFilter] = useState<string | undefined>()
+  const [sourceAppFilter, setSourceAppFilter] = useState<string | undefined>()
   const [methodFilter, setMethodFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
@@ -76,11 +77,14 @@ export default function UserCenterP1() {
     [scoped],
   )
 
-  // 渠道来源筛选项：列表中出现的渠道来源展示值
-  const sourceOptions = useMemo(
-    () =>
-      Array.from(new Set(scoped.map((s) => channelSourceText(channels, s)).filter((v) => v && v !== '—'))),
+  const sourceLpOptions = useMemo(
+    () => Array.from(new Set(scoped.map((s) => lpChannelSourceText(channels, s)).filter((v) => v && v !== '—'))),
     [scoped, channels],
+  )
+
+  const sourceAppOptions = useMemo(
+    () => Array.from(new Set(scoped.map((s) => appChannelSourceText(s)).filter((v) => v && v !== '—'))),
+    [scoped],
   )
 
   const data = useMemo(
@@ -93,13 +97,14 @@ export default function UserCenterP1() {
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
           s.account.toLowerCase().includes(kw)
         const matchCountry = !countryFilter || s.country === countryFilter
-        const matchSource = !sourceFilter || channelSourceText(channels, s) === sourceFilter
+        const matchSourceLp = !sourceLpFilter || lpChannelSourceText(channels, s) === sourceLpFilter
+        const matchSourceApp = !sourceAppFilter || appChannelSourceText(s) === sourceAppFilter
         const matchMethod = !methodFilter || s.loginMethod === methodFilter
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
-        return matchKw && matchCountry && matchSource && matchMethod && matchStatus && matchType
+        return matchKw && matchCountry && matchSourceLp && matchSourceApp && matchMethod && matchStatus && matchType
       }),
-    [scoped, channels, lessons, keyword, countryFilter, sourceFilter, methodFilter, statusFilter, typeFilter],
+    [scoped, channels, lessons, keyword, countryFilter, sourceLpFilter, sourceAppFilter, methodFilter, statusFilter, typeFilter],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -198,11 +203,20 @@ export default function UserCenterP1() {
       render: (v) => <Text>{v}</Text>,
     },
     {
-      title: t('user.col.channelSource'),
-      dataIndex: 'adChannel',
+      title: t('user.col.channelSourceLp'),
+      dataIndex: 'adChannelLp',
       width: 200,
       render: (_: unknown, r: Student) => {
-        const txt = channelSourceText(channels, r)
+        const txt = lpChannelSourceText(channels, r)
+        return txt === '—' ? <Text type="secondary">—</Text> : <span>{txt}</span>
+      },
+    },
+    {
+      title: t('user.col.channelSourceApp'),
+      dataIndex: 'adChannelApp',
+      width: 200,
+      render: (_: unknown, r: Student) => {
+        const txt = appChannelSourceText(r)
         return txt === '—' ? <Text type="secondary">—</Text> : <span>{txt}</span>
       },
     },
@@ -303,11 +317,20 @@ export default function UserCenterP1() {
         <Select
           allowClear
           showSearch
-          placeholder={t('user.col.channelSource')}
+          placeholder={t('user.col.channelSourceLp')}
           style={{ width: 180 }}
-          value={sourceFilter}
-          onChange={setSourceFilter}
-          options={sourceOptions.map((c) => ({ label: c, value: c }))}
+          value={sourceLpFilter}
+          onChange={setSourceLpFilter}
+          options={sourceLpOptions.map((c) => ({ label: c, value: c }))}
+        />
+        <Select
+          allowClear
+          showSearch
+          placeholder={t('user.col.channelSourceApp')}
+          style={{ width: 180 }}
+          value={sourceAppFilter}
+          onChange={setSourceAppFilter}
+          options={sourceAppOptions.map((c) => ({ label: c, value: c }))}
         />
         <Select
           allowClear
@@ -331,7 +354,7 @@ export default function UserCenterP1() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1970 }}
+        scroll={{ x: 2170 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 

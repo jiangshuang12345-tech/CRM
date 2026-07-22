@@ -43,6 +43,18 @@ export function channelSourceText(channels: ChannelLine[], s: ChannelUser): stri
   return s.channelSource || s.registerChannel || '—'
 }
 
+export function lpChannelSourceText(channels: ChannelLine[], s: ChannelUser): string {
+  if (!s.channelCode) return '—'
+  return s.adChannel || channelPathByCode(channels, s.channelCode) || s.registerChannel || '—'
+}
+
+export function appChannelSourceText(s: ChannelUser): string {
+  if (s.channelCode) return '—'
+  const parts = [s.adChannel, s.subChannel].filter(Boolean)
+  if (parts.length) return parts.join(' / ')
+  return s.channelSource || s.registerChannel || '—'
+}
+
 // 业务线展示：CRM 渠道仅用于投放落地页配置，无渠道码（仅投 App）的用户
 // 业务线取「注册时的国家」；有落地页渠道码的用户，国家即业务线，二者一致。
 export function lineLabel(s: { businessLine: string; country?: string }): string {

@@ -113,6 +113,14 @@ export type Student = {
   // 2) 无渠道 code（直接投 App）：三方归因「投放渠道 / 子渠道」
   adChannel?: string // 广告渠道 / 投放渠道（如 Meta Ads、googleadwords_int、Facebook Ads）
   subChannel?: string // 子渠道（三方归因，如 Instagram、Facebook、ACI_Search）
+  
+  // 新增二期列表字段
+  courseLevel?: string // 课程等级 (e.g. Level1)
+  trialStatusStr?: string // 体验状况 (e.g. 已体验未完课)
+  paymentStatusStr?: string // 付费状况 (e.g. 未付费)
+  paymentPlatform?: string // 支付端 (e.g. app端支付)
+  campaign?: string
+  campaignId?: string
   registerTime: string // UTC
   status: UserStatus
   expireTime?: string // 到期时间

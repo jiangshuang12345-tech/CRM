@@ -174,6 +174,18 @@ export default function UserCenter() {
       },
     },
     {
+      title: t('user.col.ageGroup'),
+      dataIndex: 'ageGroup',
+      width: 100,
+      render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">-</Text>),
+    },
+    {
+      title: t('user.col.courseLevel'),
+      dataIndex: 'courseLevel',
+      width: 110,
+      render: (v: string | undefined) => (v ? <Text>{v}</Text> : <Text type="secondary">-</Text>),
+    },
+    {
       title: t('user.col.method'),
       dataIndex: 'loginMethod',
       width: 120,
@@ -197,6 +209,36 @@ export default function UserCenter() {
       dataIndex: 'channelCode',
       width: 200,
       render: (v: string) => (v ? <Text code>{v}</Text> : <Text type="secondary">-</Text>),
+    },
+    {
+      title: t('user.col.campaign'),
+      dataIndex: 'campaign',
+      width: 150,
+      render: (v: string | undefined) => v || <Text type="secondary">-</Text>,
+    },
+    {
+      title: t('user.col.campaignId'),
+      dataIndex: 'campaignId',
+      width: 180,
+      render: (v: string | undefined) => v || <Text type="secondary">-</Text>,
+    },
+    {
+      title: t('user.col.trialStatus'),
+      dataIndex: 'trialStatusStr',
+      width: 130,
+      render: (v: string | undefined) => v || <Text type="secondary">-</Text>,
+    },
+    {
+      title: t('user.col.paymentStatus'),
+      dataIndex: 'paymentStatusStr',
+      width: 130,
+      render: (v: string | undefined) => v || <Text type="secondary">-</Text>,
+    },
+    {
+      title: t('user.col.paymentPlatform'),
+      dataIndex: 'paymentPlatform',
+      width: 130,
+      render: (v: string | undefined) => v || <Text type="secondary">-</Text>,
     },
     {
       title: t('user.col.regTime'),
@@ -283,7 +325,7 @@ export default function UserCenter() {
         rowKey="studentId"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 2060 }}
+        scroll={{ x: 2990 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
