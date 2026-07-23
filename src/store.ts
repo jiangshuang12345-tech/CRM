@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v48'
+const KEY = 'dinoai_crm_state_v49'
 
 export type SalesSettings = {
   autoDropEnabled: boolean
@@ -515,6 +515,7 @@ function seed(): AppState {
         coupons_revoke: 'view',
         coupons_edit: 'view',
         users: 'none',
+        usersV2: 'none',
         users_edit: 'none',
         sales: 'none',
         sales_claim: 'none',
@@ -557,6 +558,7 @@ function seed(): AppState {
         coupons_revoke: 'operate',
         coupons_edit: 'operate',
         users: 'view',
+        usersV2: 'view',
         users_edit: 'view',
         sales: 'view',
         sales_claim: 'view',
@@ -599,6 +601,7 @@ function seed(): AppState {
         coupons_revoke: 'none',
         coupons_edit: 'none',
         users: 'operate',
+        usersV2: 'operate',
         users_edit: 'operate',
         sales: 'operate',
         sales_claim: 'operate',
@@ -641,6 +644,7 @@ function seed(): AppState {
         coupons_revoke: 'operate',
         coupons_edit: 'operate',
         users: 'operate',
+        usersV2: 'operate',
         users_edit: 'operate',
         sales: 'operate',
         sales_claim: 'operate',
@@ -684,6 +688,7 @@ function seed(): AppState {
         coupons_revoke: 'none',
         coupons_edit: 'none',
         users: 'view',
+        usersV2: 'view',
         users_edit: 'view',
         sales: 'operate',
         sales_claim: 'operate',
@@ -726,6 +731,7 @@ function seed(): AppState {
         coupons_revoke: 'none',
         coupons_edit: 'none',
         users: 'view',
+        usersV2: 'view',
         users_edit: 'view',
         sales: 'operate',
         sales_claim: 'operate',

@@ -32,7 +32,7 @@ const NAV_MODULE: Record<string, ModuleKey> = {
   '/landing': 'landing',
   '/users': 'users',
   '/sales': 'sales',
-  '/users-v2': 'users',
+  '/users-v2': 'usersV2',
   '/orders': 'orders',
   '/packages': 'packages',
   '/coupons': 'coupons',

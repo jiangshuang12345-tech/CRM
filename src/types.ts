@@ -264,7 +264,7 @@ export type DataScope = 'all' | 'line'
 // 受权限管控的功能模块
 export type ModuleKey =
   // 主模块
-  | 'channels' | 'landing' | 'packages' | 'coupons' | 'users' | 'sales' | 'orders' | 'system'
+  | 'channels' | 'landing' | 'packages' | 'coupons' | 'users' | 'usersV2' | 'sales' | 'orders' | 'system'
   // 子权限 - channels
   | 'channels_create' | 'channels_edit' | 'channels_delete' | 'channels_gen_code' | 'channels_params'
   // 子权限 - landing
@@ -285,7 +285,7 @@ export const PERMISSION_MODULES: ModuleKey[] = [
   'landing', 'landing_create', 'landing_delete',
   'packages', 'packages_create', 'packages_edit', 'packages_status',
   'coupons', 'coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit',
-  'users', 'users_edit',
+  'users', 'users_edit', 'usersV2',
   'sales', 'sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config',
   'orders',
   'system', 'system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit',

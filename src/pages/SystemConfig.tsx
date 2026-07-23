@@ -43,6 +43,7 @@ const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
   { key: 'packages', sub: ['packages_create', 'packages_edit', 'packages_status'] },
   { key: 'coupons', sub: ['coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit'] },
   { key: 'users', sub: ['users_edit'] },
+  { key: 'usersV2' },
   { key: 'sales', sub: ['sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config'] },
   { key: 'orders' },
   { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
@@ -201,7 +202,7 @@ export default function SystemConfig() {
       : []),
   ]
 
-  const PHASE3_MODULES = ['users', 'channels', 'landing', 'packages', 'coupons']
+  const PHASE3_MODULES = ['usersV2', 'channels', 'landing', 'packages', 'coupons']
   const isPhase3 = (m: string) => PHASE3_MODULES.some(p => m === p || m.startsWith(p + '_'))
 
   // 权限矩阵：行=模块（主模块+子模块平铺），列=角色

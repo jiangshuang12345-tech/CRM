@@ -23,6 +23,7 @@ function RequireAuth({ children }: { children: JSX.Element }) {
 
 const MODULE_PATH: { module: ModuleKey; path: string }[] = [
   { module: 'users', path: '/users' },
+  { module: 'usersV2', path: '/users-v2' },
   { module: 'sales', path: '/sales' },
   { module: 'orders', path: '/orders' },
   { module: 'channels', path: '/channels' },
@@ -71,8 +72,8 @@ export default function App() {
           <Route path="landing" element={<Guard module="landing"><LandingPageManagement /></Guard>} />
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
           <Route path="sales" element={<Guard module="sales"><SalesCenter /></Guard>} />
-          <Route path="users-v2" element={<Guard module="users"><UserCenter /></Guard>} />
-          <Route path="users-v2/:studentId" element={<Guard module="users"><UserDetail /></Guard>} />
+          <Route path="users-v2" element={<Guard module="usersV2"><UserCenter /></Guard>} />
+          <Route path="users-v2/:studentId" element={<Guard module="usersV2"><UserDetail /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />
           <Route path="coupons" element={<Guard module="coupons"><CouponPage /></Guard>} />
