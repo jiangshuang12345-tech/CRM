@@ -38,15 +38,15 @@ const LEVEL_META: Record<PermLevel, { color: string }> = {
 }
 
 const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
+  { key: 'users', sub: ['users_edit'] },
+  { key: 'sales', sub: ['sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config'] },
+  { key: 'orders' },
+  { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
+  { key: 'usersV2' },
   { key: 'channels', sub: ['channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params'] },
   { key: 'landing', sub: ['landing_create', 'landing_delete'] },
   { key: 'packages', sub: ['packages_create', 'packages_edit', 'packages_status'] },
   { key: 'coupons', sub: ['coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit'] },
-  { key: 'users', sub: ['users_edit'] },
-  { key: 'usersV2' },
-  { key: 'sales', sub: ['sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config'] },
-  { key: 'orders' },
-  { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
 ]
 
 const EMPTY_PERMS = (): Record<ModuleKey, PermLevel> =>
@@ -570,6 +570,7 @@ export default function SystemConfig() {
                         options={(isSub ? ['none', 'operate'] : ['none', 'view', 'operate'] as PermLevel[]).map((lv) => ({
                           label: levelLabel(lv as PermLevel),
                           value: lv,
+                          disabled: row.key === 'orders' && lv === 'operate',
                         }))}
                       />
                     )
