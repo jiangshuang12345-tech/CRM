@@ -72,7 +72,7 @@ export default function AppLayout() {
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
   ].filter((n) => visible(n.key))
 
-  // 营销中心（二期）子菜单
+  // 营销中心（三期）子菜单
   const marketingChildren = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
     { key: '/packages', icon: <AppstoreOutlined />, label: t('app.nav.packages') },
@@ -80,33 +80,34 @@ export default function AppLayout() {
     { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
   ].filter((n) => visible(n.key))
 
-  // 销售中心（三期）
-  const salesNav = [{ key: '/sales', icon: <SolutionOutlined />, label: phase3Label(t('app.nav.sales')) }].filter((n) =>
+  // 销售中心（二期）
+  const salesNav = [{ key: '/sales', icon: <SolutionOutlined />, label: phase2Label(t('app.nav.sales')) }].filter((n) =>
     visible(n.key),
   )
+  // 用户中心二期（三期）
   const usersV2Nav = [
-    { key: '/users-v2', icon: <TeamOutlined />, label: phase2Label(t('app.nav.usersV2')) },
+    { key: '/users-v2', icon: <TeamOutlined />, label: phase3Label(t('app.nav.usersV2')) },
   ].filter((n) => visible(n.key))
+  // 系统配置（二期）
   const systemNav = [
     { key: '/system', icon: <SafetyOutlined />, label: phase2Label(t('app.nav.system')) },
   ].filter((n) => visible(n.key))
 
   const NAV = [
     ...topNav,
+    ...salesNav,
+    ...systemNav,
     ...usersV2Nav,
     ...(marketingChildren.length
       ? [
           {
             key: 'marketing',
             icon: <ShopOutlined />,
-            label: phase2Label(t('app.nav.marketing')),
+            label: phase3Label(t('app.nav.marketing')),
             children: marketingChildren,
           },
         ]
       : []),
-    ...systemNav,
-    // 三期功能放到最下面
-    ...salesNav,
   ]
 
   const TITLES: Record<string, string> = {

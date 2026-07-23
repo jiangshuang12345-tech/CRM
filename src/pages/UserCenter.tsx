@@ -284,6 +284,7 @@ export default function UserCenter() {
 
   return (
     <Card className="page-card" bordered={false} title={<span className="section-title">{t('user.titleV2')}</span>}>
+      <Alert type="warning" showIcon message={t('phase3.banner')} style={{ marginBottom: 16 }} />
       <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('user.funnelTip')} />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input

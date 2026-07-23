@@ -201,6 +201,9 @@ export default function SystemConfig() {
       : []),
   ]
 
+  const PHASE3_MODULES = ['users', 'channels', 'landing', 'packages', 'coupons']
+  const isPhase3 = (m: string) => PHASE3_MODULES.some(p => m === p || m.startsWith(p + '_'))
+
   // 权限矩阵：行=模块（主模块+子模块平铺），列=角色
   const matrixData = MODULE_HIERARCHY.flatMap((m) => [m.key, ...(m.sub || [])]).map((m: ModuleKey) => ({ key: m }))
 
@@ -212,7 +215,13 @@ export default function SystemConfig() {
       width: 150,
       render: (m: ModuleKey) => {
         const isSub = m.includes('_')
-        return <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0 }}>{moduleLabel(m)}</Text>
+        const p3 = isPhase3(m)
+        return (
+          <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0, color: p3 ? '#bfbfbf' : undefined }}>
+            {moduleLabel(m)}
+            {p3 && !isSub && <Tag style={{ marginLeft: 6, transform: 'scale(0.8)' }}>{t('app.phase3')}</Tag>}
+          </Text>
+        )
       },
     },
     ...roles.map((r) => ({
@@ -524,7 +533,13 @@ export default function SystemConfig() {
               columns={[
                 { title: t('sys.module'), dataIndex: 'key', render: (m: ModuleKey) => {
                   const isSub = m.includes('_')
-                  return <span style={{ marginLeft: isSub ? 16 : 0, color: isSub ? '#8c8c8c' : 'inherit' }}>{isSub ? `└ ${moduleLabel(m)}` : moduleLabel(m)}</span>
+                  const p3 = isPhase3(m)
+                  return (
+                    <span style={{ marginLeft: isSub ? 16 : 0, color: p3 ? '#bfbfbf' : (isSub ? '#8c8c8c' : 'inherit') }}>
+                      {isSub ? `└ ${moduleLabel(m)}` : moduleLabel(m)}
+                      {p3 && !isSub && <Tag style={{ marginLeft: 6, transform: 'scale(0.8)' }}>{t('app.phase3')}</Tag>}
+                    </span>
+                  )
                 } },
                 {
                   title: t('sys.permission'),

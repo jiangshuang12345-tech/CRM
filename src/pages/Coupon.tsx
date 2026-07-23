@@ -595,7 +595,7 @@ export default function CouponPage() {
       <Alert
         type="warning"
         showIcon
-        message={t('phase2.banner')}
+        message={t('phase3.banner')}
         style={{ marginBottom: 16 }}
       />
       <Space wrap style={{ marginBottom: 16 }}>
