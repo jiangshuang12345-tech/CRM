@@ -59,7 +59,7 @@ export default function UserCenter() {
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const { can, actor } = usePerm()
-  const canEdit = can('users') === 'operate'
+  const canEdit = can('users_edit') === 'operate'
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>()

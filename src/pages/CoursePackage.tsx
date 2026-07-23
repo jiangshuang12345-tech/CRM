@@ -65,7 +65,9 @@ export default function CoursePackagePage() {
   const packages = useStore((s) => s.packages)
   const channels = useStore((s) => s.channels)
   const { can, actor } = usePerm()
-  const canEdit = can('packages') === 'operate'
+  const canEdit = can('packages_edit') === 'operate'
+  const canCreate = can('packages_create') === 'operate'
+  const canStatus = can('packages_status') === 'operate'
   const [keyword, setKeyword] = useState('')
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const [modal, setModal] = useState<{ mode: 'add' | 'edit'; record?: CoursePackage } | null>(null)
@@ -221,7 +223,7 @@ export default function CoursePackagePage() {
               {t('common.edit')}
             </Button>
           )}
-          {canEdit && (
+          {canStatus && (
             <Button type="link" danger={r.status === '上架'} onClick={() => toggleShelf(r)}>
               {r.status === '上架' ? t('pkg.offShelf') : t('pkg.onShelf')}
             </Button>
@@ -237,7 +239,7 @@ export default function CoursePackagePage() {
       bordered={false}
       title={<span className="section-title">{t('pkg.title')}</span>}
       extra={
-        canEdit ? (
+        canCreate ? (
           <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>
             {t('pkg.addBtn')}
           </Button>

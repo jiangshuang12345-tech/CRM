@@ -94,7 +94,8 @@ function copy(text: string, ok: string) {
 export default function LandingPageManagement() {
   const { t } = useI18n()
   const { can, actor } = usePerm()
-  const canEdit = can('landing') === 'operate'
+  const canCreate = can('landing_create') === 'operate'
+  const canDelete = can('landing_delete') === 'operate'
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const channels = useStore((s) => s.channels)
   const packages = useStore((s) => s.packages)
@@ -304,7 +305,7 @@ export default function LandingPageManagement() {
     },
     { title: t('lp.col.creator'), dataIndex: 'creator', width: 170 },
     { title: t('lp.col.createTime'), dataIndex: 'createdAt', width: 170 },
-    ...(canEdit
+    ...(canDelete
       ? [
           {
             title: t('common.action'),
@@ -327,7 +328,7 @@ export default function LandingPageManagement() {
       bordered={false}
       title={<span className="section-title">{t('lp.title')}</span>}
       extra={
-        canEdit ? (
+        canCreate ? (
           <Button type="primary" icon={<ThunderboltOutlined />} onClick={openModal}>
             {t('lp.genBtn')}
           </Button>

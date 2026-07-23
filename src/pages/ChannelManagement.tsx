@@ -43,7 +43,12 @@ export default function ChannelManagement() {
   const { t } = useI18n()
   const channels = useStore((s) => s.channels)
   const { can } = usePerm()
-  const canEdit = can('channels') === 'operate'
+  const canCreate = can('channels_create') === 'operate'
+  const canEditNode = can('channels_edit') === 'operate'
+  const canDeleteNode = can('channels_delete') === 'operate'
+  const canGenCode = can('channels_gen_code') === 'operate'
+  const canSetParams = can('channels_params') === 'operate'
+
   const [addCtx, setAddCtx] = useState<AddCtx | null>(null)
   const [renameNode, setRenameNode] = useState<{ id: string; name: string } | null>(null)
   const [paramCtx, setParamCtx] = useState<{ lineId: string; typeId: string; node: ChannelLevelNode } | null>(null)
@@ -266,19 +271,20 @@ export default function ChannelManagement() {
           {t('ch.param2')}: {n.params.param2}
         </Tag>
       )}
-      {canEdit && (
       <Space size={2} className="node-actions">
-        <Tooltip title={n.code ? t('ch.fillParams') : t('ch.fillParamsNeedCode')}>
-          <Button
-            type="text"
-            size="small"
-            icon={<SlidersOutlined />}
-            style={{ color: n.code ? '#2F6BFF' : undefined }}
-            disabled={!n.code}
-            onClick={() => openParams(lineId, typeId, n)}
-          />
-        </Tooltip>
-        {n.level < 3 && (
+        {canEditNode && (
+          <Tooltip title={n.code ? t('ch.fillParams') : t('ch.fillParamsNeedCode')}>
+            <Button
+              type="text"
+              size="small"
+              icon={<SlidersOutlined />}
+              style={{ color: n.code ? '#2F6BFF' : undefined }}
+              disabled={!n.code}
+              onClick={() => openParams(lineId, typeId, n)}
+            />
+          </Tooltip>
+        )}
+        {canCreate && n.level < 3 && (
           <Tooltip title={t('ch.addChild', { level: levelLabel((n.level + 1) as 1 | 2 | 3) })}>
             <Button
               type="text"
@@ -290,31 +296,36 @@ export default function ChannelManagement() {
             />
           </Tooltip>
         )}
-        <Tooltip title={n.code ? t('ch.codeView') : t('ch.codeGen')}>
-          <Button
-            type="text"
-            size="small"
-            icon={<ThunderboltOutlined />}
-            style={{ color: n.code ? '#faad14' : '#2F6BFF' }}
-            onClick={() => generateCode(lineId, typeId, n)}
-          />
-        </Tooltip>
-        <Tooltip title={t('ch.rename')}>
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setRenameNode({ id: n.id, name: n.name })
-              form.setFieldsValue({ name: n.name })
-            }}
-          />
-        </Tooltip>
-        <Tooltip title={t('common.delete')}>
-          <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLevel(lineId, typeId, n.id)} />
-        </Tooltip>
+        {canGenCode && (
+          <Tooltip title={n.code ? t('ch.codeView') : t('ch.codeGen')}>
+            <Button
+              type="text"
+              size="small"
+              icon={<ThunderboltOutlined />}
+              style={{ color: n.code ? '#faad14' : '#2F6BFF' }}
+              onClick={() => generateCode(lineId, typeId, n)}
+            />
+          </Tooltip>
+        )}
+        {canEditNode && (
+          <Tooltip title={t('ch.rename')}>
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => {
+                setRenameNode({ id: n.id, name: n.name })
+                form.setFieldsValue({ name: n.name })
+              }}
+            />
+          </Tooltip>
+        )}
+        {canDeleteNode && (
+          <Tooltip title={t('common.delete')}>
+            <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLevel(lineId, typeId, n.id)} />
+          </Tooltip>
+        )}
       </Space>
-      )}
     </span>
   )
 
@@ -330,32 +341,36 @@ export default function ChannelManagement() {
         {t('ch.type')}
       </Tag>
       <Text strong>{tp.name}</Text>
-      {canEdit && (
       <Space size={2} className="node-actions">
-        <Tooltip title={t('ch.addChild', { level: levelLabel(1) })}>
-          <Button
-            type="text"
-            size="small"
-            icon={<PlusSquareOutlined />}
-            onClick={() => openAdd({ kind: 'child', lineId, typeId: tp.id, nextLevel: 1 })}
-          />
-        </Tooltip>
-        <Tooltip title={t('ch.rename')}>
-          <Button
-            type="text"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setRenameNode({ id: tp.id, name: tp.name })
-              form.setFieldsValue({ name: tp.name })
-            }}
-          />
-        </Tooltip>
-        <Tooltip title={t('common.delete')}>
-          <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteType(lineId, tp.id)} />
-        </Tooltip>
+        {canCreate && (
+          <Tooltip title={t('ch.addChild', { level: levelLabel(1) })}>
+            <Button
+              type="text"
+              size="small"
+              icon={<PlusSquareOutlined />}
+              onClick={() => openAdd({ kind: 'child', lineId, typeId: tp.id, nextLevel: 1 })}
+            />
+          </Tooltip>
+        )}
+        {canEditNode && (
+          <Tooltip title={t('ch.rename')}>
+            <Button
+              type="text"
+              size="small"
+              icon={<EditOutlined />}
+              onClick={() => {
+                setRenameNode({ id: tp.id, name: tp.name })
+                form.setFieldsValue({ name: tp.name })
+              }}
+            />
+          </Tooltip>
+        )}
+        {canDeleteNode && (
+          <Tooltip title={t('common.delete')}>
+            <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteType(lineId, tp.id)} />
+          </Tooltip>
+        )}
       </Space>
-      )}
     </span>
   )
 
@@ -367,8 +382,8 @@ export default function ChannelManagement() {
           {t('ch.line')}
         </Tag>
         <Text strong>{line.name}</Text>
-        {canEdit && (
-        <Space size={2} className="node-actions">
+      <Space size={2} className="node-actions">
+        {canCreate && (
           <Tooltip title={t('ch.addType')}>
             <Button
               type="text"
@@ -377,6 +392,8 @@ export default function ChannelManagement() {
               onClick={() => openAdd({ kind: 'type', lineId: line.id })}
             />
           </Tooltip>
+        )}
+        {canEditNode && (
           <Tooltip title={t('ch.rename')}>
             <Button
               type="text"
@@ -388,11 +405,13 @@ export default function ChannelManagement() {
               }}
             />
           </Tooltip>
+        )}
+        {canEditNode && (
           <Tooltip title={t('common.delete')}>
             <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLine(line.id)} />
           </Tooltip>
-        </Space>
         )}
+      </Space>
       </span>
     ),
     children: line.children.map((tp) => ({
@@ -408,7 +427,7 @@ export default function ChannelManagement() {
       bordered={false}
       title={<span className="section-title">{t('ch.title')}</span>}
       extra={
-        canEdit ? (
+        canCreate ? (
           <Button type="primary" icon={<PlusOutlined />} onClick={() => openAdd({ kind: 'line' })}>
             {t('ch.addLine')}
           </Button>

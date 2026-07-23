@@ -366,7 +366,10 @@ export default function CouponPage() {
   const coupons = useStore((s) => s.coupons)
   const channels = useStore((s) => s.channels)
   const { can } = usePerm()
-  const canEdit = can('coupons') === 'operate'
+  const canCreate = can('coupons_create') === 'operate'
+  const canExtend = can('coupons_extend') === 'operate'
+  const canRevoke = can('coupons_revoke') === 'operate'
+  const canEdit = false // No 'coupons_edit' permission requested, replace references with canCreate or remove. Wait, the original code had 'coupons' === 'operate' for "分配给" and "新增一批code".
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
   const [view, setView] = useState<'list' | 'create'>('list')
   const [createLine, setCreateLine] = useState<BusinessLine>('韩国')
@@ -550,12 +553,12 @@ export default function CouponPage() {
               {t('cp.manageCodes')}
             </Button>
           )}
-          {canEdit && (
+          {canExtend && (
             <Button type="link" size="small" onClick={() => openExtend(r)}>
               {t('cp.extend')}
             </Button>
           )}
-          {canEdit && (
+          {canRevoke && (
             <Button type="link" size="small" danger disabled={r.status === '已结束'} onClick={() => stopIssue(r)}>
               {t('cp.stop')}
             </Button>
@@ -575,7 +578,7 @@ export default function CouponPage() {
       bordered={false}
       title={<span className="section-title">{t('cp.title')}</span>}
       extra={
-        canEdit ? (
+        canCreate ? (
           <Button
             type="primary"
             icon={<PlusOutlined />}

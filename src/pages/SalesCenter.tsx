@@ -73,7 +73,9 @@ export default function SalesCenter() {
   const accounts = useStore((s) => s.accounts)
   const roles = useStore((s) => s.roles)
   const { can, allowedLines, actor, account } = usePerm()
-  const canEdit = can('sales') === 'operate'
+  const canEdit = can('sales_update') === 'operate'
+  const canClaim = can('sales_claim') === 'operate'
+  const canDial = can('sales_dial') === 'operate'
   const canReassign = can('sales_reassign') === 'operate'
   const canManageSettings = can('sales_config') === 'operate'
   // 全业务线（超管）或拥有重新分配权限的主管可见范围内全部领取记录
@@ -352,7 +354,7 @@ export default function SalesCenter() {
 
   const poolColumns: ColumnsType<Student> = [
     ...userColumns,
-    ...(canEdit
+    ...(canClaim
       ? [
           {
             title: t('common.action'),
@@ -361,7 +363,7 @@ export default function SalesCenter() {
             fixed: 'right' as const,
             render: (_: unknown, r: Student) => (
               <Button type="link" icon={<CheckOutlined />} onClick={() => claim(r)}>
-                {t('sales.claim')}
+                {t('perm.sales_claim')}
               </Button>
             ),
           },
@@ -387,7 +389,7 @@ export default function SalesCenter() {
     { title: t('sales.col.nextFollow'), dataIndex: 'salesNextFollow', width: 170, render: (v) => v || <Text type="secondary">—</Text> },
     { title: t('sales.col.updatedAt'), dataIndex: 'salesUpdatedAt', width: 170, render: (v) => v || <Text type="secondary">—</Text> },
     { title: t('sales.col.owner'), dataIndex: 'salesOwner', width: 190, render: (v) => v || <Text type="secondary">—</Text> },
-    ...(canEdit
+    ...(canEdit || canDial || canReassign
       ? [
           {
             title: t('common.action'),
@@ -396,15 +398,19 @@ export default function SalesCenter() {
             fixed: 'right' as const,
             render: (_: unknown, r: Student) => (
               <Space size={0}>
-                <Button type="link" icon={<PhoneOutlined />} disabled={!r.phone} onClick={() => setDialing(r)}>
-                  {t('sales.dial')}
-                </Button>
-                <Button type="link" icon={<EditOutlined />} onClick={() => openFollow(r)}>
-                  {t('sales.update')}
-                </Button>
+                {canDial && (
+                  <Button type="link" icon={<PhoneOutlined />} disabled={!r.phone} onClick={() => setDialing(r)}>
+                    {t('perm.sales_dial')}
+                  </Button>
+                )}
+                {canEdit && (
+                  <Button type="link" icon={<EditOutlined />} onClick={() => openFollow(r)}>
+                    {t('perm.sales_update')}
+                  </Button>
+                )}
                 {canReassign && (
                   <Button type="link" icon={<SwapOutlined />} onClick={() => openReassign(r)}>
-                    {t('sales.reassign')}
+                    {t('perm.sales_reassign')}
                   </Button>
                 )}
               </Space>

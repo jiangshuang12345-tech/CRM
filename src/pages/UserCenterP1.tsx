@@ -53,7 +53,7 @@ export default function UserCenterP1() {
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const { can, allowedLines, actor } = usePerm()
-  const canEdit = can('users') === 'operate'
+  const canEdit = can('users_edit') === 'operate'
   const scope = allowedLines()
   const [keyword, setKeyword] = useState('')
   const [countryFilter, setCountryFilter] = useState<string | undefined>()

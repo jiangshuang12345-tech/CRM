@@ -38,14 +38,14 @@ const LEVEL_META: Record<PermLevel, { color: string }> = {
 }
 
 const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
-  { key: 'channels' },
-  { key: 'landing' },
-  { key: 'packages' },
-  { key: 'coupons' },
-  { key: 'users' },
-  { key: 'sales', sub: ['sales_reassign', 'sales_config'] },
+  { key: 'channels', sub: ['channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params'] },
+  { key: 'landing', sub: ['landing_create', 'landing_delete'] },
+  { key: 'packages', sub: ['packages_create', 'packages_edit', 'packages_status'] },
+  { key: 'coupons', sub: ['coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit'] },
+  { key: 'users', sub: ['users_edit'] },
+  { key: 'sales', sub: ['sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config'] },
   { key: 'orders' },
-  { key: 'system' },
+  { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
 ]
 
 const EMPTY_PERMS = (): Record<ModuleKey, PermLevel> =>
@@ -59,7 +59,12 @@ type RoleModal = { mode: 'create' } | { mode: 'edit'; role: Role } | null
 export default function SystemConfig() {
   const { t } = useI18n()
   const { can, actor } = usePerm()
-  const canEdit = can('system') === 'operate'
+  const canEditRoles = can('system') === 'operate' || can('system_role_edit') === 'operate'
+  const canAddRoles = can('system') === 'operate' || can('system_role_add') === 'operate'
+  const canDeleteRoles = can('system') === 'operate' || can('system_role_delete') === 'operate'
+
+  const canEditAcc = can('system') === 'operate' || can('system_acc_edit') === 'operate'
+  const canAddAcc = can('system') === 'operate' || can('system_acc_add') === 'operate'
   const roles = useStore((s) => s.roles)
   const accounts = useStore((s) => s.accounts)
   const channels = useStore((s) => s.channels)
@@ -171,7 +176,7 @@ export default function SystemConfig() {
       align: 'center',
       render: (_, r) => accounts.filter((a) => a.roleId === r.id).length,
     },
-    ...(canEdit
+    ...(canEditRoles || canDeleteRoles
       ? [
           {
             title: t('common.action'),
@@ -179,10 +184,12 @@ export default function SystemConfig() {
             width: 160,
             render: (_: unknown, r: Role) => (
               <Space size={0}>
-                <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openEditRole(r)}>
-                  {t('sys.editRole')}
-                </Button>
-                {!r.builtin && (
+                {canEditRoles && (
+                  <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openEditRole(r)}>
+                    {t('sys.editRole')}
+                  </Button>
+                )}
+                {canDeleteRoles && !r.builtin && (
                   <Button type="link" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteRole(r)}>
                     {t('common.delete')}
                   </Button>
@@ -316,7 +323,7 @@ export default function SystemConfig() {
       render: (v: string, r) => (
         <Switch
           size="small"
-          disabled={!canEdit}
+          disabled={!canEditAcc}
           checked={v === '启用'}
           onChange={() => toggleAcc(r)}
           checkedChildren={t('sys.status.enabled')}
@@ -330,7 +337,7 @@ export default function SystemConfig() {
       width: 170,
       render: (v) => v || <Text type="secondary">—</Text>,
     },
-    ...(canEdit
+    ...(canEditAcc
       ? [
           {
             title: t('common.action'),
@@ -383,7 +390,7 @@ export default function SystemConfig() {
             label: t('sys.tab.roles'),
             children: (
               <div>
-                {canEdit && (
+                {canEditAcc && (
                   <div style={{ marginBottom: 12, textAlign: 'right' }}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={openCreateRole}>
                       {t('sys.addRole')}
@@ -427,7 +434,7 @@ export default function SystemConfig() {
             label: t('sys.tab.accounts'),
             children: (
               <div>
-                {canEdit && (
+                {canEditAcc && (
                   <div style={{ marginBottom: 12, textAlign: 'right' }}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => openAcc()}>
                       {t('sys.acc.add')}
@@ -508,7 +515,12 @@ export default function SystemConfig() {
               size="small"
               rowKey="key"
               pagination={false}
-              dataSource={matrixData}
+              dataSource={matrixData.filter((m) => {
+                const isSub = m.key.includes('_')
+                if (!isSub) return true
+                const parentKey = MODULE_HIERARCHY.find((h) => h.sub?.includes(m.key))?.key
+                return parentKey ? draftPerms[parentKey] === 'operate' : true
+              })}
               columns={[
                 { title: t('sys.module'), dataIndex: 'key', render: (m: ModuleKey) => {
                   const isSub = m.includes('_')
@@ -524,9 +536,20 @@ export default function SystemConfig() {
                       <Radio.Group
                         size="small"
                         value={draftPerms[row.key]}
-                        onChange={(e) =>
-                          setDraftPerms((prev) => ({ ...prev, [row.key]: e.target.value }))
-                        }
+                        onChange={(e) => {
+                          const val = e.target.value
+                          setDraftPerms((prev) => {
+                            const next = { ...prev, [row.key]: val }
+                            // 当主模块切换为不可操作时，将其下所有子权限重置为 none
+                            if (!isSub && val !== 'operate') {
+                              const h = MODULE_HIERARCHY.find((x) => x.key === row.key)
+                              if (h?.sub) {
+                                h.sub.forEach((s) => (next[s] = 'none'))
+                              }
+                            }
+                            return next
+                          })
+                        }}
                         optionType="button"
                         options={(isSub ? ['none', 'operate'] : ['none', 'view', 'operate'] as PermLevel[]).map((lv) => ({
                           label: levelLabel(lv as PermLevel),

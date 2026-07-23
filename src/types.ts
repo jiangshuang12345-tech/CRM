@@ -263,28 +263,32 @@ export type DataScope = 'all' | 'line'
 
 // 受权限管控的功能模块
 export type ModuleKey =
-  | 'channels'
-  | 'landing'
-  | 'packages'
-  | 'coupons'
-  | 'users'
-  | 'sales'
-  | 'sales_config'
-  | 'sales_reassign'
-  | 'orders'
-  | 'system'
+  // 主模块
+  | 'channels' | 'landing' | 'packages' | 'coupons' | 'users' | 'sales' | 'orders' | 'system'
+  // 子权限 - channels
+  | 'channels_create' | 'channels_edit' | 'channels_delete' | 'channels_gen_code' | 'channels_params'
+  // 子权限 - landing
+  | 'landing_create' | 'landing_delete'
+  // 子权限 - packages
+  | 'packages_create' | 'packages_edit' | 'packages_status'
+  // 子权限 - coupons
+  | 'coupons_create' | 'coupons_extend' | 'coupons_revoke' | 'coupons_edit'
+  // 子权限 - users
+  | 'users_edit'
+  // 子权限 - sales
+  | 'sales_claim' | 'sales_dial' | 'sales_update' | 'sales_reassign' | 'sales_config'
+  // 子权限 - system
+  | 'system_role_add' | 'system_role_edit' | 'system_role_delete' | 'system_acc_add' | 'system_acc_edit'
 
 export const PERMISSION_MODULES: ModuleKey[] = [
-  'channels',
-  'landing',
-  'packages',
-  'coupons',
-  'users',
-  'sales',
-  'sales_config',
-  'sales_reassign',
+  'channels', 'channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params',
+  'landing', 'landing_create', 'landing_delete',
+  'packages', 'packages_create', 'packages_edit', 'packages_status',
+  'coupons', 'coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit',
+  'users', 'users_edit',
+  'sales', 'sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config',
   'orders',
-  'system',
+  'system', 'system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit',
 ]
 
 export type Role = {
