@@ -266,6 +266,8 @@ export default function SalesCenter() {
     const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
     const note = `${t('sales.dial.autoNote')}${rawNote.trim()}`
     const owner = dialing.salesOwner ?? actor
+    // 模拟外呼录音链接
+    const dummyAudio = result === '已接通' ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' : undefined
     const record: CallRecord = {
       id: genCallId(),
       studentId: dialing.studentId,
@@ -288,7 +290,7 @@ export default function SalesCenter() {
               salesLatestNote: note,
               salesUpdatedAt: now,
               salesHistory: [
-                { progress: x.salesProgress || '跟进中', note, time: now, owner },
+                { progress: x.salesProgress || '跟进中', note, time: now, owner, audioUrl: dummyAudio },
                 ...(x.salesHistory || []),
               ],
             }
@@ -767,8 +769,15 @@ function Modal_Follow({
               items={history.map((h) => ({
                 color: PROGRESS_COLOR[h.progress] === 'default' ? 'gray' : PROGRESS_COLOR[h.progress],
                 children: (
-                  <div>
-                    <Text strong>{t(`sales.progress.${h.progress}`)}</Text> · {h.note}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    <div>
+                      <Text strong>{t(`sales.progress.${h.progress}`)}</Text> · {h.note}
+                    </div>
+                    {h.audioUrl && (
+                      <div>
+                        <audio controls src={h.audioUrl} style={{ height: 32, width: '100%', maxWidth: 300 }} />
+                      </div>
+                    )}
                     <div style={{ color: '#8c8c8c', fontSize: 12 }}>
                       {h.time} · {h.owner}
                     </div>

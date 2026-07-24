@@ -143,6 +143,7 @@ export type SalesFollowLog = {
   note: string
   time: string
   owner: string
+  audioUrl?: string
 }
 
 export type SalesSettings = {
