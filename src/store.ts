@@ -20,7 +20,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v49'
+const KEY = 'dinoai_crm_state_v50'
 
 export type SalesSettings = {
   autoDropEnabled: boolean
@@ -367,7 +367,7 @@ function seed(): AppState {
       countryCode: '+60', channelCode: '', country: '马来西亚', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
       salesOwner: 'sales.my@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '已联系家长，确认体验时间', salesUpdatedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
-        { progress: '跟进中', note: '已联系家长，确认体验时间', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai' },
+        { progress: '跟进中', note: '【外呼自动记录】已联系家长，确认体验时间', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
         { progress: '跟进中', note: '销售已领取，开始跟进已注册用户', time: now.subtract(20, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai' },
       ],
     },
@@ -377,7 +377,7 @@ function seed(): AppState {
       countryCode: '+82', channelCode: '', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
       salesOwner: 'sales.kr@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '家长还在了解课程价格', salesUpdatedAt: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
-        { progress: '暂不跟进', note: '家长还在了解课程价格', time: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.kr@dinoai.ai' },
+        { progress: '暂不跟进', note: '【外呼自动记录】家长还在了解课程价格', time: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.kr@dinoai.ai', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
       ],
     },
   ]
