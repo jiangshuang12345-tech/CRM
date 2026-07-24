@@ -101,7 +101,6 @@ export default function SalesCenter() {
   const [reassignTo, setReassignTo] = useState<string | undefined>()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [form] = Form.useForm()
-  const watchProgress = Form.useWatch('progress', form) as string | undefined
 
   // 无业务线（无渠道归因）的用户不参与业务线过滤，始终展示
   const lineHit = (s: Student) => {
@@ -195,8 +194,6 @@ export default function SalesCenter() {
   const openFollow = (s: Student) => {
     setEditing(s)
     form.setFieldsValue({
-      progress: s.salesProgress || '跟进中',
-      nextFollow: s.salesNextFollow ? dayjs(s.salesNextFollow) : undefined,
       note: '',
     })
   }
@@ -205,30 +202,25 @@ export default function SalesCenter() {
     const v = await form.validateFields()
     if (!editing) return
     const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
-    const progress = v.progress as string
     const note = (v.note as string).trim()
-    const nextFollow = v.nextFollow ? v.nextFollow.format('YYYY-MM-DD HH:mm:ss') : ''
-    const converted = progress === '已付费'
     const owner = editing.salesOwner ?? actor
     setState((prev) => ({
       ...prev,
-      students: prev.students.map((x) =>
-        x.studentId === editing.studentId
-          ? {
-              ...x,
-              // 转「已付费」→ 改写用户状态为付费，离开销售中心进入用户中心
-              status: progress === '已付费' ? '付费' : x.status,
-              salesProgress: converted ? x.salesProgress : (progress as Student['salesProgress']),
-              salesLatestNote: note,
-              salesNextFollow: nextFollow,
-              salesUpdatedAt: now,
-              salesHistory: [{ progress, note, time: now, owner }, ...(x.salesHistory || [])],
-            }
-          : x,
-      ),
+      students: prev.students.map((x) => {
+        if (x.studentId === editing.studentId) {
+          const currentProgress = x.salesProgress || '跟进中'
+          return {
+            ...x,
+            salesLatestNote: note,
+            salesUpdatedAt: now,
+            salesHistory: [{ progress: currentProgress, note, time: now, owner }, ...(x.salesHistory || [])],
+          }
+        }
+        return x
+      }),
     }))
     setEditing(null)
-    message.success(converted ? t('sales.converted') : t('sales.saved'))
+    message.success(t('sales.saved'))
   }
 
   const openReassign = (s: Student) => {
@@ -386,7 +378,6 @@ export default function SalesCenter() {
       ellipsis: true,
       render: (v: string | undefined) => v || <Text type="secondary">—</Text>,
     },
-    { title: t('sales.col.nextFollow'), dataIndex: 'salesNextFollow', width: 170, render: (v) => v || <Text type="secondary">—</Text> },
     { title: t('sales.col.updatedAt'), dataIndex: 'salesUpdatedAt', width: 170, render: (v) => v || <Text type="secondary">—</Text> },
     { title: t('sales.col.owner'), dataIndex: 'salesOwner', width: 190, render: (v) => v || <Text type="secondary">—</Text> },
     ...(canEdit || canDial || canReassign
@@ -559,7 +550,6 @@ export default function SalesCenter() {
         t={t}
         editing={editing}
         form={form}
-        watchProgress={watchProgress}
         onCancel={() => setEditing(null)}
         onOk={saveFollow}
       />
@@ -744,18 +734,15 @@ function Modal_Follow({
   t,
   editing,
   form,
-  watchProgress,
   onCancel,
   onOk,
 }: {
   t: (k: string, v?: Record<string, string | number>) => string
   editing: Student | null
   form: ReturnType<typeof Form.useForm>[0]
-  watchProgress?: string
   onCancel: () => void
   onOk: () => void
 }) {
-  const converted = watchProgress === '已体验' || watchProgress === '已付费'
   const history: SalesFollowLog[] = editing?.salesHistory ?? []
   return (
     <ModalWrapper open={!!editing} title={t('sales.modal.title')} onCancel={onCancel} onOk={onOk} okText={t('sales.saveFollow')} cancelText={t('common.cancel')}>
@@ -768,19 +755,10 @@ function Modal_Follow({
             <Input value={editing?.salesOwner} disabled />
           </Form.Item>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <Form.Item name="progress" label={t('sales.col.progress')} rules={[{ required: true }]}>
-            <Select options={FOLLOW_PROGRESS.map((p) => ({ label: t(`sales.progress.${p}`), value: p }))} />
-          </Form.Item>
-          <Form.Item name="nextFollow" label={t('sales.f.nextFollow')}>
-            <DatePicker showTime style={{ width: '100%' }} format="YYYY-MM-DD HH:mm" />
-          </Form.Item>
-        </div>
         <Form.Item name="note" label={t('sales.f.note')} rules={[{ required: true, message: t('sales.f.noteRequired') }]}>
           <Input.TextArea rows={3} placeholder={t('sales.f.notePlaceholder')} />
         </Form.Item>
       </Form>
-      {converted && <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('sales.convertTip')} />}
       <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 12 }}>
         <Text strong>{t('sales.history')}</Text>
         <div style={{ marginTop: 12 }}>

@@ -131,7 +131,6 @@ export type Student = {
   salesOwner?: string // 领取人（销售）
   salesProgress?: SalesProgress // 跟进进度（仅销售中心线索）
   salesLatestNote?: string // 最新备注
-  salesNextFollow?: string // 下次跟进时间
   salesUpdatedAt?: string // 最后更新时间
   salesHistory?: SalesFollowLog[] // 跟进记录
 }
