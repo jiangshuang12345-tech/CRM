@@ -23,14 +23,15 @@ import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutl
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { genCallId, setState, useStore } from '../store'
-import type { CallRecord, CallResult, SalesFollowLog, SalesSettings, Student, UserType } from '../types'
+import type { CallRecord, CallResult, SalesFollowLog, SalesSettings, Student, UserType, UserStatus } from '../types'
 import { CALL_RESULTS } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
 import { resolveUserType } from '../userType'
+import { resolveUserStatus } from '../lessons'
 import { useLineScope } from '../useLineScope'
-import { businessLineOf, lineLabel, registerChannelText } from '../channel'
+import { businessLineOf, lineLabel, lpChannelSourceText, appChannelSourceText } from '../channel'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 
@@ -50,6 +51,14 @@ function fmtDuration(sec: number) {
 const USER_TYPE_COLOR: Record<UserType, string> = {
   正式用户: 'green',
   测试用户: 'gold',
+}
+
+const STATUS_COLOR: Record<UserStatus, string> = {
+  '未付费-未体验': 'default',
+  '未付费-已体验': 'purple',
+  '未付费-体验中': 'gold',
+  付费: 'green',
+  付费逾期: 'red',
 }
 
 // 跟进进度标签配色
@@ -310,10 +319,19 @@ export default function SalesCenter() {
       return <Tag color={USER_TYPE_COLOR[tp]}>{t(`enum.userType.${tp}`)}</Tag>
     },
   }
-  // 基于「用户中心-二期」字段（不含 用户状态 / 到期时间 / 最近修改人 / 注册方式 / 渠道 code）
+  // 基于「用户中心-二期」字段增加
   const userColumns: ColumnsType<Student> = [
     { title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left' },
     { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
+    {
+      title: t('user.col.status'),
+      dataIndex: 'status',
+      width: 130,
+      render: (_: unknown, r: Student) => {
+        const status = resolveUserStatus(r, lessons)
+        return <Tag color={STATUS_COLOR[status]}>{t(`enum.status.${status}`)}</Tag>
+      },
+    },
     typeCol,
     {
       title: t('user.col.ageGroup'),
@@ -331,16 +349,40 @@ export default function SalesCenter() {
         return bl ? <Tag>{bl}</Tag> : <Text type="secondary">-</Text>
       },
     },
-    { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
-      title: t('user.col.channel'),
-      dataIndex: 'registerChannel',
-      width: 260,
-      render: (_: string, r) => registerChannelText(channels, r),
+      title: t('user.col.channelSourceLp'),
+      dataIndex: 'adChannelLp',
+      width: 200,
+      render: (_: unknown, r: Student) => {
+        const txt = lpChannelSourceText(channels, r)
+        return txt === '—' ? <Text type="secondary">—</Text> : <span>{txt}</span>
+      },
     },
+    {
+      title: t('user.col.code'),
+      dataIndex: 'channelCode',
+      width: 160,
+      render: (v: string | undefined) => (v ? <Text code>{v}</Text> : <Text type="secondary">—</Text>),
+    },
+    {
+      title: t('user.col.channelSourceApp'),
+      dataIndex: 'adChannelApp',
+      width: 200,
+      render: (_: unknown, r: Student) => {
+        const txt = appChannelSourceText(r)
+        return txt === '—' ? <Text type="secondary">—</Text> : <span>{txt}</span>
+      },
+    },
+    { title: t('user.col.country'), dataIndex: 'country', width: 110, render: (_, r) => <Tag>{lineLabel(r)}</Tag> },
     {
       title: t('user.col.regTime'),
       dataIndex: 'registerTime',
+      width: 200,
+      render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
+    },
+    {
+      title: t('user.col.expireTime'),
+      dataIndex: 'expireTime',
       width: 200,
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
     },
@@ -367,12 +409,6 @@ export default function SalesCenter() {
 
   const followColumns: ColumnsType<Student> = [
     ...userColumns,
-    {
-      title: t('sales.col.progress'),
-      dataIndex: 'salesProgress',
-      width: 100,
-      render: (v: string | undefined) => (v ? <Tag color={PROGRESS_COLOR[v]}>{t(`sales.progress.${v}`)}</Tag> : '—'),
-    },
     {
       title: t('sales.col.latestNote'),
       dataIndex: 'salesLatestNote',
@@ -497,7 +533,7 @@ export default function SalesCenter() {
                 rowKey="studentId"
                 columns={poolColumns}
                 dataSource={poolData}
-                scroll={{ x: 1390 }}
+                scroll={{ x: 2080 }}
                 locale={{ emptyText: t('sales.emptyPool') }}
                 pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
               />
@@ -515,7 +551,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: canReassign ? 2400 : 2300 }}
+                  scroll={{ x: canReassign ? 2750 : 2650 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
