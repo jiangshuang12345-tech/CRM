@@ -85,6 +85,8 @@ const zh: Dict = {
   'common.pleaseSelect': '请选择',
   'common.noData': '暂无数据',
   'common.action': '操作',
+  'common.collapse': '收起',
+  'common.viewDetails': '查看详情',
   'common.total': '共 {n} 条',
 
   'lang.label': '语言',
@@ -687,6 +689,8 @@ const en: Dict = {
   'common.pleaseSelect': 'Please select',
   'common.noData': 'No data',
   'common.action': 'Action',
+  'common.collapse': 'Collapse',
+  'common.viewDetails': 'View Details',
   'common.total': '{n} items',
 
   'lang.label': 'Language',
@@ -1418,8 +1422,8 @@ const ko: Dict = {
   'common.confirm': '확인', 'common.cancel': '취소', 'common.enable': '켜기', 'common.disable': '끄기', 'common.search': '검색', 'common.reset': '초기화',
   'common.edit': '편집', 'common.delete': '삭제', 'common.detail': '상세', 'common.add': '추가',
   'common.back': '뒤로', 'common.save': '저장', 'common.close': '닫기', 'common.copy': '복사',
-  'common.copied': '복사됨', 'common.pleaseSelect': '선택하세요', 'common.noData': '데이터 없음',
-  'common.action': '작업', 'common.total': '총 {n}건', 'lang.label': '언어',
+  'common.copied': '복사됨',   'common.pleaseSelect': '선택하세요', 'common.noData': '데이터 없음',
+  'common.action': '작업', 'common.collapse': '접기', 'common.viewDetails': '자세히 보기', 'common.total': '총 {n}건', 'lang.label': '언어',
   'app.nav.marketing': '마케팅 센터', 'app.nav.sales': '세일즈 센터', 'perm.sales_config': '할당 및 만료', 'perm.sales_reassign': '리드 재할당', 'perm.sales_claim': '리드 클레임', 'perm.sales_dial': '전화 걸기', 'perm.sales_update': '팔로우업 업데이트', 'perm.channels_create': '채널 생성', 'perm.channels_edit': '채널 편집', 'perm.channels_gen_code': '코드 생성', 'perm.channels_params': '파라미터 입력', 'perm.channels_delete': '채널 삭제', 'perm.landing_create': '랜딩 페이지 생성', 'perm.landing_delete': '삭제', 'perm.packages_create': '패키지 생성', 'perm.packages_edit': '편집', 'perm.packages_status': '판매 개시 / 중지', 'perm.coupons_create': '쿠폰 생성', 'perm.coupons_extend': '기간 연장', 'perm.coupons_revoke': '폐기', 'perm.coupons_edit': '편집 / 코드 관리', 'perm.users_edit': '정보 수정', 'perm.system_role_add': '역할 추가', 'perm.system_role_edit': '권한 편집', 'perm.system_role_delete': '삭제', 'perm.system_acc_add': '구성원 추가', 'perm.system_acc_edit': '편집', 'app.nav.channels': '채널 관리', 'app.nav.landing': '랜딩 페이지', 'app.nav.users': '사용자 센터', 'app.nav.orders': '주문 센터',
   'lp.title': '랜딩 페이지 관리', 'lp.intro': '캠페인 랜딩 페이지 링크를 원클릭으로 생성하고 채널·상품 패키지·쿠폰을 연결합니다. 사업 라인별로 자체 템플릿을 사용합니다.', 'lp.genBtn': '랜딩 페이지 생성', 'lp.genTitle': '랜딩 페이지 링크 생성', 'lp.genConfirm': '생성 후 저장', 'lp.genOk': '랜딩 페이지 링크가 생성되었습니다', 'lp.noTemplate': '이 사업 라인에는 랜딩 페이지 템플릿이 없습니다.', 'lp.noTemplateTag': '템플릿 없음', 'lp.previewBtn': '링크 미리보기', 'lp.previewHint': '생성될 링크를 먼저 미리볼 수 있습니다', 'lp.openLink': '링크 열기', 'lp.delTitle': '랜딩 페이지 삭제', 'lp.delContent': '이 랜딩 페이지 링크를 삭제할까요?', 'lp.f.line': '사업 라인', 'lp.f.channel': '채널', 'lp.f.channelTip': '코드가 생성된 채널 중에서 선택', 'lp.f.channelPlaceholder': '채널 선택(코드 포함)', 'lp.f.pickLineFirst': '먼저 사업 라인을 선택하세요', 'lp.f.noChannel': '이 사업 라인에 코드가 생성된 채널이 없습니다', 'lp.f.name': '랜딩 페이지 이름', 'lp.f.namePlaceholder': '랜딩 페이지 이름을 입력하세요', 'lp.col.name': '랜딩 페이지 이름', 'lp.f.package': '상품 패키지', 'lp.f.packageTip': '필수, 일부 템플릿은 패키지 ID를 포함합니다', 'lp.f.strikePrice': '정가(취소선)', 'lp.f.strikePriceTip': '선택 사항, 랜딩 페이지에 표시되는 정가(취소선)', 'lp.col.strikePrice': '정가(취소선)', 'lp.f.coupon': '쿠폰', 'lp.f.couponCode': '쿠폰 코드', 'lp.f.couponCodeTip': '선택 사항, 특정 KOL 코드를 지정할 수 있습니다', 'lp.f.optional': '선택', 'lp.f.validRange': '캠페인 기간', 'lp.f.validRangeTip': '랜딩 페이지의 시작 및 종료 시간(현지 시간)', 'lp.f.validStart': '시작 시간', 'lp.f.validEnd': '종료 시간', 'lp.col.valid': '캠페인 기간', 'lp.col.line': '사업 라인', 'lp.col.channel': '채널', 'lp.col.package': '패키지', 'lp.col.coupon': '쿠폰', 'lp.col.url': '랜딩 페이지 URL', 'lp.col.creator': '생성자', 'lp.col.createTime': '생성 시간',
   'app.nav.packages': '상품 패키지', 'app.nav.coupons': '쿠폰 관리', 'app.nav.usersV2': '사용자 센터-2단계', 'app.nav.system': '시스템 설정', 'app.brand': 'Dino English 콘솔',

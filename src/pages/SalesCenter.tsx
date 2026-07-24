@@ -471,6 +471,8 @@ export default function SalesCenter() {
     { title: t('sales.call.agent'), dataIndex: 'agent', width: 190 },
   ]
 
+  const [showIntro, setShowIntro] = useState(false)
+
   const totalLeads = students.filter((s) => isSalesLead(s, lessons)).length
 
   return (
@@ -486,7 +488,20 @@ export default function SalesCenter() {
         )
       }
     >
-      <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.flow')} description={t('sales.intro')} />
+      <Alert
+        type="info"
+        showIcon
+        style={{ marginBottom: 16 }}
+        message={
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>{t('sales.flow')}</span>
+            <Button type="link" size="small" onClick={() => setShowIntro(!showIntro)} style={{ padding: 0 }}>
+              {showIntro ? t('common.collapse') : t('common.viewDetails')}
+            </Button>
+          </div>
+        }
+        description={showIntro ? t('sales.intro') : undefined}
+      />
 
       <Space wrap style={{ marginBottom: 16 }}>
         <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
