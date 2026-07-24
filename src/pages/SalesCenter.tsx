@@ -628,6 +628,7 @@ function Modal_Dial({
   const [seconds, setSeconds] = useState(0)
   const [result, setResult] = useState<CallResult>('已接通')
   const [note, setNote] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
 
   // 打开弹窗时重置状态并开始计时
   useEffect(() => {
@@ -636,6 +637,7 @@ function Modal_Dial({
       setSeconds(0)
       setResult('已接通')
       setNote('')
+      setIsGenerating(false)
     }
   }, [dialing])
 
@@ -644,6 +646,17 @@ function Modal_Dial({
     const id = setInterval(() => setSeconds((s) => s + 1), 1000)
     return () => clearInterval(id)
   }, [dialing, phase])
+
+  const handleHangup = () => {
+    setPhase('summary')
+    if (result === '已接通' && seconds > 0) {
+      setIsGenerating(true)
+      setTimeout(() => {
+        setNote(t('sales.dial.aiSummary'))
+        setIsGenerating(false)
+      }, 1500)
+    }
+  }
 
   const duration = result === '无人接听' ? '—' : fmtDuration(seconds)
 
@@ -665,15 +678,15 @@ function Modal_Dial({
       footer={
         phase === 'calling'
           ? [
-              <Button key="hangup" danger type="primary" icon={<PhoneOutlined />} onClick={() => setPhase('summary')}>
+              <Button key="hangup" danger type="primary" icon={<PhoneOutlined />} onClick={handleHangup}>
                 {t('sales.dial.hangup')}
               </Button>,
             ]
           : [
-              <Button key="cancel" onClick={onCancel}>
+              <Button key="cancel" onClick={onCancel} disabled={isGenerating}>
                 {t('common.cancel')}
               </Button>,
-              <Button key="save" type="primary" onClick={submit}>
+              <Button key="save" type="primary" onClick={submit} loading={isGenerating}>
                 {t('sales.dial.save')}
               </Button>,
             ]
@@ -703,6 +716,7 @@ function Modal_Dial({
                 value={result}
                 onChange={(v) => setResult(v)}
                 options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
+                disabled={isGenerating}
               />
             </Form.Item>
             <Form.Item label={t('sales.call.duration')}>
@@ -710,7 +724,14 @@ function Modal_Dial({
             </Form.Item>
           </div>
           <Form.Item label={t('sales.call.note')} required>
-            <Input.TextArea rows={3} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('sales.f.notePlaceholder')} />
+            <Input.TextArea
+              rows={4}
+              value={isGenerating ? t('sales.dial.aiGenerating') : note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={t('sales.f.notePlaceholder')}
+              disabled={isGenerating}
+              style={isGenerating ? { color: '#2F6BFF', backgroundColor: '#f0f5ff' } : undefined}
+            />
           </Form.Item>
         </Form>
       )}
