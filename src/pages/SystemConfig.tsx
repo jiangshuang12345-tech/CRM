@@ -388,7 +388,6 @@ export default function SystemConfig() {
         </span>
       }
     >
-      <Alert type="warning" showIcon message={t('phase2.banner')} style={{ marginBottom: 16 }} />
       <div style={{ marginBottom: 12 }}>
         <Text type="secondary">{t('sys.intro')}</Text>
       </div>

@@ -486,7 +486,6 @@ export default function SalesCenter() {
         )
       }
     >
-      <Alert type="warning" showIcon message={t('phase2.banner')} style={{ marginBottom: 16 }} />
       <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('sales.flow')} description={t('sales.intro')} />
 
       <Space wrap style={{ marginBottom: 16 }}>

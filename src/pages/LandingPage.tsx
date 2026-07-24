@@ -335,7 +335,6 @@ export default function LandingPageManagement() {
         ) : null
       }
     >
-      <Alert type="warning" showIcon message={t('phase3.banner')} style={{ marginBottom: 16 }} />
       <div style={{ marginBottom: 12 }}>
         <Text type="secondary">{t('lp.intro')}</Text>
       </div>

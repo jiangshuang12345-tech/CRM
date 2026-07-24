@@ -592,12 +592,6 @@ export default function CouponPage() {
         ) : null
       }
     >
-      <Alert
-        type="warning"
-        showIcon
-        message={t('phase3.banner')}
-        style={{ marginBottom: 16 }}
-      />
       <Space wrap style={{ marginBottom: 16 }}>
         <Input
           allowClear
