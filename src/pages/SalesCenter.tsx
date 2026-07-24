@@ -23,7 +23,7 @@ import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutl
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { genCallId, setState, useStore } from '../store'
-import type { CallRecord, CallResult, SalesFollowLog, SalesSettings, Student, UserType, UserStatus } from '../types'
+import type { Account, CallRecord, CallResult, SalesFollowLog, SalesSettings, Student, UserType, UserStatus } from '../types'
 import { CALL_RESULTS } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
@@ -625,15 +625,16 @@ export default function SalesCenter() {
         />
       </Modal>
 
-      {settingsOpen && salesSettings && (
+      {settingsOpen && (
         <Modal_Settings
           t={t}
           open={settingsOpen}
-          initialSettings={salesSettings}
+          initialSettingsMap={salesSettings || {}}
           salesAccounts={salesAccounts}
+          configurableLines={allowedLines() === null ? lineOptions : allowedLines()!}
           onCancel={() => setSettingsOpen(false)}
-          onOk={(newSettings) => {
-            setState((prev) => ({ ...prev, salesSettings: newSettings }))
+          onOk={(newSettingsMap) => {
+            setState((prev) => ({ ...prev, salesSettings: newSettingsMap }))
             setSettingsOpen(false)
             message.success(t('sales.settings.saved'))
           }}
@@ -836,20 +837,76 @@ function Modal_Follow({
 function Modal_Settings({
   t,
   open,
-  initialSettings,
+  initialSettingsMap,
   salesAccounts,
+  configurableLines,
   onCancel,
   onOk,
 }: {
   t: (k: string, v?: Record<string, string | number>) => string
   open: boolean
-  initialSettings: SalesSettings
-  salesAccounts: { email: string; name: string }[]
+  initialSettingsMap: Record<string, SalesSettings>
+  salesAccounts: Account[]
+  configurableLines: string[]
   onCancel: () => void
-  onOk: (settings: SalesSettings) => void
+  onOk: (settings: Record<string, SalesSettings>) => void
 }) {
   const [form] = Form.useForm()
   const enabled = Form.useWatch('autoDropEnabled', form)
+  
+  const [currentLine, setCurrentLine] = useState(configurableLines[0] || '')
+  const [settingsMap, setSettingsMap] = useState<Record<string, SalesSettings>>(initialSettingsMap || {})
+
+  // 根据当前选择的业务线，筛选出能接该线索的销售人员
+  const lineAccounts = useMemo(() => {
+    return salesAccounts.filter(
+      (a) => !a.businessLines || a.businessLines.length === 0 || a.businessLines.includes(currentLine)
+    )
+  }, [salesAccounts, currentLine])
+
+  // 切换业务线时，先保存当前表单，再回显新业务线的表单
+  const handleLineChange = async (newLine: string) => {
+    try {
+      const currentValues = await form.validateFields()
+      setSettingsMap((prev) => ({ ...prev, [currentLine]: currentValues as SalesSettings }))
+    } catch {
+      // 校验失败时不切换
+      return
+    }
+
+    const nextValues = settingsMap[newLine] || {
+      autoDropEnabled: true,
+      autoDropHours: 24,
+      allocations: salesAccounts
+        .filter((a) => !a.businessLines || a.businessLines.length === 0 || a.businessLines.includes(newLine))
+        .map((a) => ({ email: a.email, weight: 1 })),
+    }
+    // 补齐可能新增的成员
+    const currentAllocations = nextValues.allocations || []
+    const fullAllocations = salesAccounts
+      .filter((a) => !a.businessLines || a.businessLines.length === 0 || a.businessLines.includes(newLine))
+      .map((a) => {
+        const existing = currentAllocations.find((x) => x.email === a.email)
+        return { email: a.email, weight: existing ? existing.weight : 1 }
+      })
+
+    form.setFieldsValue({ ...nextValues, allocations: fullAllocations })
+    setCurrentLine(newLine)
+  }
+
+  // 初始化首次挂载的表单
+  useEffect(() => {
+    if (open && currentLine) {
+      const initial = settingsMap[currentLine] || { autoDropEnabled: true, autoDropHours: 24 }
+      const initialAllocations = initial.allocations || []
+      const fullAllocations = lineAccounts.map((a) => {
+        const existing = initialAllocations.find((x) => x.email === a.email)
+        return { email: a.email, weight: existing ? existing.weight : 1 }
+      })
+      form.setFieldsValue({ ...initial, allocations: fullAllocations })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open])
 
   return (
     <Modal
@@ -858,24 +915,24 @@ function Modal_Settings({
       onCancel={onCancel}
       onOk={async () => {
         const v = await form.validateFields()
-        onOk(v as SalesSettings)
+        onOk({ ...settingsMap, [currentLine]: v as SalesSettings })
       }}
       width={640}
       destroyOnClose
       okText={t('common.save')}
       cancelText={t('common.cancel')}
     >
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={{
-          ...initialSettings,
-          allocations: salesAccounts.map((a) => {
-            const existing = initialSettings.allocations?.find((x: any) => x.email === a.email)
-            return { email: a.email, weight: existing ? existing.weight : 1 }
-          }),
-        }}
-      >
+      <div style={{ marginBottom: 16 }}>
+        <Text strong style={{ marginRight: 12 }}>所属业务线</Text>
+        <Select 
+          value={currentLine} 
+          onChange={handleLineChange} 
+          style={{ width: 200 }}
+          options={configurableLines.map(l => ({ label: l, value: l }))}
+        />
+      </div>
+
+      <Form form={form} layout="vertical">
         <div style={{ marginBottom: 24 }}>
           <Text strong style={{ fontSize: 16 }}>
             {t('sales.settings.dropRule')}
@@ -902,7 +959,7 @@ function Modal_Settings({
             <Table
               size="small"
               pagination={false}
-              dataSource={salesAccounts}
+              dataSource={lineAccounts}
               rowKey="email"
               columns={[
                 { title: t('sales.col.owner'), dataIndex: 'name', width: 220, render: (v, r) => `${v} (${r.email})` },

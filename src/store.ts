@@ -17,16 +17,11 @@ import type {
   Order,
   Role,
   Student,
+  SalesSettings,
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v50'
-
-export type SalesSettings = {
-  autoDropEnabled: boolean
-  autoDropHours: number
-  allocations: { email: string; weight: number }[]
-}
+const KEY = 'dinoai_crm_state_v51' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -40,7 +35,7 @@ export type AppState = {
   logs: AuditLog[]
   callRecords: CallRecord[]
   lessons: LessonRecord[]
-  salesSettings?: SalesSettings
+  salesSettings?: Record<string, SalesSettings>
 }
 
 const listeners = new Set<() => void>()
@@ -1008,12 +1003,16 @@ function seed(): AppState {
     callRecords,
     lessons,
     salesSettings: {
-      autoDropEnabled: true,
-      autoDropHours: 24,
-      allocations: [
-        { email: 'sales.kr@dinoai.ai', weight: 1 },
-        { email: 'sales.my@dinoai.ai', weight: 1 },
-      ],
+      '韩国': {
+        autoDropEnabled: true,
+        autoDropHours: 24,
+        allocations: [{ email: 'sales.kr@dinoai.ai', weight: 1 }],
+      },
+      '马来': {
+        autoDropEnabled: true,
+        autoDropHours: 24,
+        allocations: [{ email: 'sales.my@dinoai.ai', weight: 1 }],
+      },
     },
   }
 }
