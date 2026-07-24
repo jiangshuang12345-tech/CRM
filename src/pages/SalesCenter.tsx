@@ -101,7 +101,6 @@ export default function SalesCenter() {
 
   const [tab, setTab] = useState('pool')
   const [keyword, setKeyword] = useState('')
-  const [progressFilter, setProgressFilter] = useState<string | undefined>()
   const [callResultFilter, setCallResultFilter] = useState<string | undefined>()
 
   const [editing, setEditing] = useState<Student | null>(null)
@@ -111,10 +110,10 @@ export default function SalesCenter() {
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [form] = Form.useForm()
 
-  // 无业务线（无渠道归因）的用户不参与业务线过滤，始终展示
+  // 无业务线（无渠道归因）的用户不参与业务线过滤（不再强制展示，需受筛选器控制）
   const lineHit = (s: Student) => {
     const bl = businessLineOf(channels, s)
-    return !bl || matchLine(bl)
+    return matchLine(bl)
   }
   const poolAll = useMemo(
     () => students.filter((s) => isPoolLead(s, lessons)).filter(lineHit),
@@ -156,9 +155,9 @@ export default function SalesCenter() {
     () =>
       followAll.filter((s) => {
         const kw = keyword.trim().toLowerCase()
-        return (!kw || leadText(s).includes(kw)) && (!progressFilter || s.salesProgress === progressFilter)
+        return !kw || leadText(s).includes(kw)
       }),
-    [followAll, keyword, progressFilter],
+    [followAll, keyword],
   )
 
   // 通话记录：按业务线默认勾选过滤，非超管仅看自己坐席的记录
@@ -505,16 +504,6 @@ export default function SalesCenter() {
 
       <Space wrap style={{ marginBottom: 16 }}>
         <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
-        {tab === 'follow' && (
-          <Select
-            allowClear
-            placeholder={t('sales.col.progress')}
-            style={{ width: 150 }}
-            value={progressFilter}
-            onChange={setProgressFilter}
-            options={(['跟进中', '暂不跟进'] as const).map((p) => ({ label: t(`sales.progress.${p}`), value: p }))}
-          />
-        )}
         {tab === 'calls' && (
           <Select
             allowClear

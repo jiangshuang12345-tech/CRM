@@ -98,9 +98,9 @@ export default function UserCenter() {
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
         const matchCountry = !countryFilter || lineLabel(s) === countryFilter
-        // 无业务线（无渠道归因）的用户不参与业务线过滤，始终展示
+        // 无业务线（无渠道归因）的用户不参与业务线过滤（受筛选器控制）
         const bl = businessLineOf(channels, s)
-        return matchKw && (!bl || matchLine(bl)) && matchStatus && matchType && matchCountry
+        return matchKw && matchLine(bl) && matchStatus && matchType && matchCountry
       }),
     [students, channels, lessons, keyword, lineSel, statusFilter, typeFilter, countryFilter, matchLine],
   )
