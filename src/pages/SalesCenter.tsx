@@ -93,9 +93,9 @@ export default function SalesCenter() {
   const isLeader = canManageSettings
   const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
 
-  // 可被分配的销售：启用状态、且角色具备销售模块「操作」权限
+  // 可被分配的销售：启用状态、非系统管理员、且角色具备销售模块「操作」权限
   const salesAccounts = useMemo(
-    () => accounts.filter((a) => a.status === '启用' && roles.find((r) => r.id === a.roleId)?.perms.sales === 'operate'),
+    () => accounts.filter((a) => a.status === '启用' && a.roleId !== 'role_admin' && roles.find((r) => r.id === a.roleId)?.perms.sales === 'operate'),
     [accounts, roles],
   )
 
