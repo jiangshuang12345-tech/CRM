@@ -1,6 +1,6 @@
-export type BusinessLine = '韩国' | '沙特' | '马来' | '越南' | '其他'
+export type BusinessLine = '韩国' | '沙特' | '马来' | '越南' | '印尼' | '其他'
 
-export const BUSINESS_LINES: BusinessLine[] = ['韩国', '沙特', '马来', '越南', '其他']
+export const BUSINESS_LINES: BusinessLine[] = ['韩国', '沙特', '马来', '越南', '印尼', '其他']
 
 // 业务线 -> 本地币种
 export const LINE_CURRENCY: Record<BusinessLine, { code: string; label: string }> = {
@@ -8,6 +8,7 @@ export const LINE_CURRENCY: Record<BusinessLine, { code: string; label: string }
   沙特: { code: 'SAR', label: '沙特里亚尔 (SAR)' },
   马来: { code: 'MYR', label: '马来西亚林吉特 (MYR)' },
   越南: { code: 'VND', label: '越南盾 (VND)' },
+  印尼: { code: 'IDR', label: '印尼卢比 (IDR)' },
   其他: { code: 'USD', label: '美元 (USD)' },
 }
 
@@ -16,6 +17,7 @@ export const COUNTRY_CODE: Record<BusinessLine, string> = {
   沙特: '+966',
   马来: '+60',
   越南: '+84',
+  印尼: '+62',
   其他: '+1',
 }
 

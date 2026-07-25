@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v52' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v54' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -373,6 +373,54 @@ function seed(): AppState {
       salesOwner: 'sales.kr@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '家长还在了解课程价格', salesUpdatedAt: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
         { progress: '暂不跟进', note: '【外呼自动记录】家长还在了解课程价格', time: now.subtract(5, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.kr@dinoai.ai', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+      ],
+    },
+    {
+      // SA Pool
+      studentId: '2060199610824356005', name: 'Omar', localName: 'عمر', userType: '正式用户', gender: '男',
+      birthday: '2016-08-11', ageGroup: '9-12', loginMethod: '手机号', account: '+966 50-123-4567', phone: '+966 50-123-4567', businessLine: '沙特', registerChannel: 'Meta', channelSource: 'SA_META_01', adChannel: 'Meta Ads',
+      countryCode: '+966', channelCode: '', country: '沙特', appChannel: 'App Store', registerTime: now.subtract(1, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验', salesProgress: '待领取',
+    },
+    {
+      // SA Follow
+      studentId: '2060199610824356006', name: 'Fatima', localName: 'فاطمة', userType: '正式用户', gender: '女',
+      birthday: '2015-11-22', ageGroup: '9-12', loginMethod: '手机号', account: '+966 50-987-6543', phone: '+966 50-987-6543', businessLine: '沙特', registerChannel: '自然流量', channelSource: 'SA_ASO_02', adChannel: 'App Store',
+      countryCode: '+966', channelCode: '', country: '沙特', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
+      salesOwner: 'sales.lead@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '家长询问具体上课时间，已发课表', salesUpdatedAt: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      salesHistory: [
+        { progress: '跟进中', note: '【外呼自动记录】家长询问具体上课时间，已发课表', time: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.lead@dinoai.ai' },
+      ],
+    },
+    {
+      // KR Pool
+      studentId: '2060199610824356007', name: 'Min-jun', localName: '민준', userType: '测试用户', gender: '男',
+      birthday: '2017-02-14', ageGroup: '6-8', loginMethod: '手机号', account: '+82 10-1122-3344', phone: '+82 10-1122-3344', businessLine: '韩国', registerChannel: 'KOL', channelSource: 'KR_KOL_01', adChannel: 'Instagram',
+      countryCode: '+82', channelCode: 'Ig58Kpq', country: '韩国', appChannel: 'Google Play', registerTime: now.subtract(30, 'minute').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验', salesProgress: '待领取',
+    },
+    {
+      // MY Pool
+      studentId: '2060199610824356008', name: 'Ahmad', localName: 'Ahmad', userType: '正式用户', gender: '男',
+      birthday: '2016-10-05', ageGroup: '6-8', loginMethod: '手机号', account: '+60 12-345 6789', phone: '+60 12-345 6789', businessLine: '马来', registerChannel: 'TikTok', channelSource: 'MY_TIKTOK_01', adChannel: 'TikTok Ads',
+      countryCode: '+60', channelCode: '', country: '马来西亚', appChannel: 'Google Play', registerTime: now.subtract(4, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验', salesProgress: '待领取',
+    },
+    {
+      // VN Follow
+      studentId: '2060199610824356009', name: 'Tran Van A', localName: 'Trần Văn A', userType: '正式用户', gender: '男',
+      birthday: '2015-05-20', ageGroup: '9-12', loginMethod: '手机号', account: '+84 90-123-4567', phone: '+84 90-123-4567', businessLine: '越南', registerChannel: 'Meta', channelSource: 'VN_META_02', adChannel: 'Facebook Ads',
+      countryCode: '+84', channelCode: '', country: '越南', appChannel: 'App Store', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
+      salesOwner: 'sales.lead@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '暂无预算', salesUpdatedAt: now.subtract(10, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+      salesHistory: [
+        { progress: '暂不跟进', note: '【外呼自动记录】暂无预算', time: now.subtract(10, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.lead@dinoai.ai' },
+      ],
+    },
+    {
+      // ID Follow
+      studentId: '2060199610824356010', name: 'Budi Santoso', localName: 'Budi', userType: '正式用户', gender: '男',
+      birthday: '2016-12-12', ageGroup: '6-8', loginMethod: '手机号', account: '+62 811-2233-4455', phone: '+62 811-2233-4455', businessLine: '印尼', registerChannel: 'Google', channelSource: 'ID_GOOGLE_01', adChannel: 'Google Search',
+      countryCode: '+62', channelCode: '', country: '印尼', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
+      salesOwner: 'sales.lead@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '晚上回电', salesUpdatedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+      salesHistory: [
+        { progress: '跟进中', note: '晚上回电', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.lead@dinoai.ai' },
       ],
     },
   ]
