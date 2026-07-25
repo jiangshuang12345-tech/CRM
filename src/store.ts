@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v51' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v52' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -654,50 +654,6 @@ function seed(): AppState {
         system_role_delete: 'operate',
         system_acc_add: 'operate',
         system_acc_edit: 'operate',
-      },
-    },
-    {
-      id: 'role_mentor',
-      name: '学习服务 / 班主任',
-      desc: '体验跟进、续费引导、流失挽回（后期随服务节点引入）',
-      builtin: true,
-      planned: true,
-      dataScope: 'line',
-      perms: {
-        channels: 'none',
-        channels_create: 'none',
-        channels_edit: 'none',
-        channels_delete: 'none',
-        channels_gen_code: 'none',
-        channels_params: 'none',
-        landing: 'none',
-        landing_create: 'none',
-        landing_delete: 'none',
-        packages: 'none',
-        packages_create: 'none',
-        packages_edit: 'none',
-        packages_status: 'none',
-        coupons: 'none',
-        coupons_create: 'none',
-        coupons_extend: 'none',
-        coupons_revoke: 'none',
-        coupons_edit: 'none',
-        users: 'view',
-        usersV2: 'view',
-        users_edit: 'view',
-        sales: 'operate',
-        sales_claim: 'operate',
-        sales_dial: 'operate',
-        sales_update: 'operate',
-        sales_reassign: 'none',
-        sales_config: 'none',
-        orders: 'view',
-        system: 'none',
-        system_role_add: 'none',
-        system_role_edit: 'none',
-        system_role_delete: 'none',
-        system_acc_add: 'none',
-        system_acc_edit: 'none',
       },
     },
     {
