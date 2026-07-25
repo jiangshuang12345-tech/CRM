@@ -340,15 +340,6 @@ export default function SalesCenter() {
     },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
     {
-      title: t('user.col.line'),
-      dataIndex: 'businessLine',
-      width: 110,
-      render: (_, r) => {
-        const bl = businessLineOf(channels, r)
-        return bl ? <Tag>{bl}</Tag> : <Text type="secondary">-</Text>
-      },
-    },
-    {
       title: t('user.col.channelSourceLp'),
       dataIndex: 'adChannelLp',
       width: 200,
@@ -452,7 +443,6 @@ export default function SalesCenter() {
     { title: t('sales.call.time'), dataIndex: 'time', width: 180 },
     { title: t('sales.call.customer'), dataIndex: 'customer', width: 140 },
     { title: t('user.col.phone'), dataIndex: 'phone', width: 160 },
-    { title: t('user.col.line'), dataIndex: 'businessLine', width: 100, render: (v) => <Tag>{v}</Tag> },
     {
       title: t('sales.call.result'),
       dataIndex: 'result',
@@ -536,7 +526,7 @@ export default function SalesCenter() {
                 rowKey="studentId"
                 columns={poolColumns}
                 dataSource={poolData}
-                scroll={{ x: 2080 }}
+                scroll={{ x: 1970 }}
                 locale={{ emptyText: t('sales.emptyPool') }}
                 pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
               />
@@ -554,7 +544,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: canReassign ? 2750 : 2650 }}
+                  scroll={{ x: canReassign ? 2640 : 2540 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
@@ -571,7 +561,7 @@ export default function SalesCenter() {
                   rowKey="id"
                   columns={callColumns}
                   dataSource={callData}
-                  scroll={{ x: 1310 }}
+                  scroll={{ x: 1210 }}
                   locale={{ emptyText: t('sales.emptyCalls') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
