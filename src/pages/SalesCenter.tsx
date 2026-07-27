@@ -865,7 +865,7 @@ function Modal_Settings({
     }
 
     const nextValues = settingsMap[newLine] || {
-      autoDropEnabled: true,
+      autoDropEnabled: false,
       autoDropMinutes: 1440,
       allocations: salesAccounts
         .filter((a) => !a.businessLines || a.businessLines.length === 0 || a.businessLines.includes(newLine))
@@ -887,7 +887,7 @@ function Modal_Settings({
   // 初始化首次挂载的表单
   useEffect(() => {
     if (open && currentLine) {
-      const initial = settingsMap[currentLine] || { autoDropEnabled: true, autoDropMinutes: 1440 }
+      const initial = settingsMap[currentLine] || { autoDropEnabled: false, autoDropMinutes: 1440 }
       const initialAllocations = initial.allocations || []
       const fullAllocations = lineAccounts.map((a) => {
         const existing = initialAllocations.find((x) => x.email === a.email)
