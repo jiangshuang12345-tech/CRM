@@ -10,8 +10,9 @@ import {
   Table,
   Tag,
   Typography,
+  message,
 } from 'antd'
-import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
+import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
@@ -64,7 +65,14 @@ export default function UserCenterP1() {
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
+  const [verifyCodes, setVerifyCodes] = useState<Record<string, string>>({})
   const [form] = Form.useForm()
+
+  const handleRefreshCode = (studentId: string) => {
+    const code = String(Math.floor(100000 + Math.random() * 900000))
+    setVerifyCodes((prev) => ({ ...prev, [studentId]: code }))
+    message.success('验证码已获取')
+  }
 
   // 数据权限：底层仍按业务线隔离（一期不展示业务线，仅展示国家）
   const scoped = useMemo(
@@ -231,6 +239,17 @@ export default function UserCenterP1() {
       dataIndex: 'country',
       width: 120,
       render: (v: string | undefined) => (v ? <Tag>{v}</Tag> : <Text type="secondary">—</Text>),
+    },
+    {
+      title: '验证码', // t('user.col.verifyCode') if I were to add it to i18n
+      key: 'verifyCode',
+      width: 140,
+      render: (_: unknown, r: Student) => (
+        <Space size={4}>
+          <Text code>{verifyCodes[r.studentId] || '------'}</Text>
+          <Button type="text" size="small" icon={<ReloadOutlined />} onClick={() => handleRefreshCode(r.studentId)} />
+        </Space>
+      ),
     },
     {
       title: t('user.col.regTime'),
