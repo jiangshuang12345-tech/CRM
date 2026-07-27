@@ -24,6 +24,8 @@ import { hasPhoneLogin, resolveUserType } from '../userType'
 import { latestTrialReport, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
 import { appChannelSourceText, lpChannelSourceText } from '../channel'
 import LocalTime from '../components/LocalTime'
+import { useLineScope } from '../useLineScope'
+import LineFilter from '../components/LineFilter'
 
 const { Text } = Typography
 
@@ -56,8 +58,9 @@ export default function UserCenterP1() {
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('users_edit') === 'operate'
   const scope = allowedLines()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
+  
   const [keyword, setKeyword] = useState('')
-  const [countryFilter, setCountryFilter] = useState<string | undefined>()
   const [sourceLpFilter, setSourceLpFilter] = useState<string | undefined>()
   const [sourceAppFilter, setSourceAppFilter] = useState<string | undefined>()
   const [methodFilter, setMethodFilter] = useState<string | undefined>()
@@ -80,9 +83,9 @@ export default function UserCenterP1() {
     [students, scope],
   )
 
-  const countries = useMemo(
-    () => Array.from(new Set(scoped.map((s) => s.country).filter(Boolean))) as string[],
-    [scoped],
+  const lineOptions = useMemo(
+    () => Array.from(new Set(scoped.map((s) => s.businessLine).filter(Boolean))) as string[],
+    [scoped]
   )
 
   const sourceLpOptions = useMemo(
@@ -104,7 +107,7 @@ export default function UserCenterP1() {
           s.studentId.toLowerCase().includes(kw) ||
           (s.localName ?? s.name).toLowerCase().includes(kw) ||
           s.account.toLowerCase().includes(kw)
-        const matchCountry = !countryFilter || s.country === countryFilter
+        const matchCountry = matchLine(s.businessLine)
         const matchSourceLp = !sourceLpFilter || lpChannelSourceText(channels, s) === sourceLpFilter
         const matchSourceApp = !sourceAppFilter || appChannelSourceText(s) === sourceAppFilter
         const matchMethod = !methodFilter || s.loginMethod === methodFilter
@@ -112,7 +115,7 @@ export default function UserCenterP1() {
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
         return matchKw && matchCountry && matchSourceLp && matchSourceApp && matchMethod && matchStatus && matchType
       }),
-    [scoped, channels, lessons, keyword, countryFilter, sourceLpFilter, sourceAppFilter, methodFilter, statusFilter, typeFilter],
+    [scoped, channels, lessons, keyword, lineSel, matchLine, sourceLpFilter, sourceAppFilter, methodFilter, statusFilter, typeFilter],
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
@@ -351,14 +354,7 @@ export default function UserCenterP1() {
           onChange={setSourceAppFilter}
           options={sourceAppOptions.map((c) => ({ label: c, value: c }))}
         />
-        <Select
-          allowClear
-          placeholder={t('user.col.country')}
-          style={{ width: 130 }}
-          value={countryFilter}
-          onChange={setCountryFilter}
-          options={countries.map((c) => ({ label: c, value: c }))}
-        />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} placeholder={t('user.col.country')} disabled={lineDisabled} />
         <Select
           allowClear
           placeholder={t('user.filterStatus')}
