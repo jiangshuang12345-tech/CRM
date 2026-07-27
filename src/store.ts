@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v58' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v59' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -67,19 +67,16 @@ function autoAllocate(st: AppState): AppState {
     let isDroppedToPool = false
     let isDroppedForRealloc = false
 
-    // 规则 1: 超过30天未付费，自动退回公海 (不再自动分配，必须销售手动捡起)
-    if (currentOwner && daysSinceReg >= 30) {
-      const hoursSinceUpdate = dayjs.utc().diff(dayjs.utc(s.salesUpdatedAt || s.registerTime), 'hour')
-      // 若刚手动捡起不久（24小时内），不立即踢回公海，给销售留出首日跟进时间
-      if (hoursSinceUpdate >= 24) {
-        currentOwner = undefined
-        isDroppedToPool = true
-        history = [{ progress: '待领取', note: '【系统自动】30天内未付费，自动掉回公海', time: now, owner: '系统' }, ...history]
-      }
+    // 规则 1: 超过30天未付费，自动退回公海 (仅触发一次。被重新捞取后不再自动因30天规则掉库)
+    const hasHit30DayDrop = history.some((h) => h.note.includes('30天内未付费，自动掉回公海'))
+    if (currentOwner && daysSinceReg >= 30 && !hasHit30DayDrop) {
+      currentOwner = undefined
+      isDroppedToPool = true
+      history = [{ progress: '待领取', note: '【系统自动】30天内未付费，自动掉回公海', time: now, owner: '系统' }, ...history]
     }
 
-    // 规则 2: 无跟进自动掉库并重分 (根据业务线配置)
-    if (currentOwner && !isDroppedToPool && settings?.autoDropEnabled) {
+    // 规则 2: 无跟进自动掉库并重分 (根据业务线配置。超过30天的老线索被捞取后，免疫此规则，仅支持手动退回)
+    if (currentOwner && !isDroppedToPool && settings?.autoDropEnabled && daysSinceReg < 30) {
       const minsSinceUpdate = dayjs.utc().diff(dayjs.utc(s.salesUpdatedAt || s.registerTime), 'minute')
       if (minsSinceUpdate > settings.autoDropMinutes) {
         currentOwner = undefined
