@@ -142,7 +142,7 @@ export default function SalesCenter() {
   )
 
   const leadText = (s: Student) =>
-    `${s.phone ?? ''} ${s.studentId} ${s.localName ?? s.name} ${s.country ?? ''} ${s.channelSource ?? ''} ${s.salesLatestNote ?? ''}`.toLowerCase()
+    `${s.phone ?? ''} ${s.studentId} ${s.localName ?? s.name} ${s.country ?? ''}`.toLowerCase()
 
   const poolData = useMemo(
     () =>
@@ -173,7 +173,7 @@ export default function SalesCenter() {
     () =>
       callScoped.filter((c) => {
         const kw = keyword.trim().toLowerCase()
-        const text = `${c.phone} ${c.studentId} ${c.customer} ${c.note}`.toLowerCase()
+        const text = `${c.phone} ${c.studentId} ${c.customer}`.toLowerCase()
         return (!kw || text.includes(kw)) && (!callResultFilter || c.result === callResultFilter)
       }),
     [callScoped, keyword, callResultFilter],
