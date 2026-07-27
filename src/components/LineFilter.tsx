@@ -7,11 +7,13 @@ export default function LineFilter({
   onChange,
   options,
   width = 220,
+  placeholder,
 }: {
   value: string[]
   onChange: (v: string[]) => void
   options: string[]
   width?: number
+  placeholder?: string
 }) {
   const { t } = useI18n()
   return (
@@ -19,7 +21,7 @@ export default function LineFilter({
       mode="multiple"
       allowClear
       maxTagCount="responsive"
-      placeholder={t('user.col.line')}
+      placeholder={placeholder || t('user.col.line')}
       style={{ minWidth: width }}
       value={value}
       onChange={onChange}

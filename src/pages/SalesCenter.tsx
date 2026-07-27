@@ -493,7 +493,7 @@ export default function SalesCenter() {
       />
 
       <Space wrap style={{ marginBottom: 16 }}>
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} placeholder={t('user.col.country')} />
         {tab === 'calls' && (
           <Select
             allowClear
