@@ -69,7 +69,7 @@ export default function CoursePackagePage() {
   const canCreate = can('packages_create') === 'operate'
   const canStatus = can('packages_status') === 'operate'
   const [keyword, setKeyword] = useState('')
-  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
   const [modal, setModal] = useState<{ mode: 'add' | 'edit'; record?: CoursePackage } | null>(null)
   const [form] = Form.useForm()
   const watchLine = Form.useWatch('businessLine', form) as BusinessLine | undefined
@@ -255,7 +255,7 @@ export default function CoursePackagePage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} disabled={lineDisabled} />
       </Space>
 
       <Table

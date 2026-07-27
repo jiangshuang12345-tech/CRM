@@ -370,7 +370,7 @@ export default function CouponPage() {
   const canExtend = can('coupons_extend') === 'operate'
   const canRevoke = can('coupons_revoke') === 'operate'
   const canEdit = false // No 'coupons_edit' permission requested, replace references with canCreate or remove. Wait, the original code had 'coupons' === 'operate' for "分配给" and "新增一批code".
-  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
   const [view, setView] = useState<'list' | 'create'>('list')
   const [createLine, setCreateLine] = useState<BusinessLine>('韩国')
   const [pickLineOpen, setPickLineOpen] = useState(false)
@@ -601,7 +601,7 @@ export default function CouponPage() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} disabled={lineDisabled} />
         <Select
           allowClear
           placeholder={t('cp.filterStatus')}

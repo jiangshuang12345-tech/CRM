@@ -6,16 +6,30 @@ import { usePerm } from './perm'
 // 用户可自行改选，查看其他业务线的数据。selected 为空表示不过滤（全部）。
 export function useLineScope() {
   const { account, allowedLines } = usePerm()
-  const defaultLines = allowedLines() ?? [] // [] 表示全业务线（超管），不预勾选
+  const scope = allowedLines()
+  const isRestricted = scope !== null
+  const defaultLines = scope ?? []
+  
   const [selected, setSelected] = useState<string[]>(defaultLines)
 
   // 切换身份/账号时，重置为该账号数据权限内的业务线
   useEffect(() => {
-    setSelected(allowedLines() ?? [])
+    setSelected(scope ?? [])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account?.id])
 
-  const matchLine = (line: string) => selected.length === 0 || selected.includes(line)
+  const currentSelected = isRestricted ? scope! : selected
 
-  return { selected, setSelected, defaultLines, matchLine }
+  const matchLine = (line: string) => {
+    if (isRestricted) return scope!.includes(line)
+    return selected.length === 0 || selected.includes(line)
+  }
+
+  return { 
+    selected: currentSelected, 
+    setSelected, 
+    defaultLines, 
+    matchLine,
+    disabled: isRestricted
+  }
 }

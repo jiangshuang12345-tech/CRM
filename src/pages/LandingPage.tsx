@@ -96,7 +96,7 @@ export default function LandingPageManagement() {
   const { can, actor } = usePerm()
   const canCreate = can('landing_create') === 'operate'
   const canDelete = can('landing_delete') === 'operate'
-  const { selected: lineSel, setSelected: setLineSel, matchLine } = useLineScope()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
   const channels = useStore((s) => s.channels)
   const packages = useStore((s) => s.packages)
   const coupons = useStore((s) => s.coupons)
@@ -340,7 +340,7 @@ export default function LandingPageManagement() {
       </div>
 
       <Space wrap style={{ marginBottom: 16 }}>
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} disabled={lineDisabled} />
       </Space>
 
       <Table

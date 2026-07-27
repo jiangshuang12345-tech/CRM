@@ -8,23 +8,26 @@ export default function LineFilter({
   options,
   width = 220,
   placeholder,
+  disabled,
 }: {
   value: string[]
   onChange: (v: string[]) => void
   options: string[]
   width?: number
   placeholder?: string
+  disabled?: boolean
 }) {
   const { t } = useI18n()
   return (
     <Select
       mode="multiple"
-      allowClear
+      allowClear={!disabled}
       maxTagCount="responsive"
       placeholder={placeholder || t('user.col.line')}
       style={{ minWidth: width }}
       value={value}
       onChange={onChange}
+      disabled={disabled}
       options={options.map((l) => ({ label: l, value: l }))}
     />
   )
