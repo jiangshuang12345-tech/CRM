@@ -402,12 +402,6 @@ export default function SalesCenter() {
       width: 200,
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
     },
-    {
-      title: t('user.col.expireTime'),
-      dataIndex: 'expireTime',
-      width: 200,
-      render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
-    },
   ]
 
   const poolColumns: ColumnsType<Student> = [
@@ -563,7 +557,7 @@ export default function SalesCenter() {
                 rowKey="studentId"
                 columns={poolColumns}
                 dataSource={poolData}
-                scroll={{ x: 1970 }}
+                scroll={{ x: 1770 }}
                 locale={{ emptyText: t('sales.emptyPool') }}
                 pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
               />
@@ -581,8 +575,8 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                scroll={{ x: canReassign ? 2710 : 2610 }}
-                locale={{ emptyText: t('sales.emptyFollow') }}
+                  scroll={{ x: canReassign ? 2510 : 2410 }}
+                  locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
               </>
