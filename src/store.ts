@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v57' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v58' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -74,7 +74,7 @@ function autoAllocate(st: AppState): AppState {
       if (hoursSinceUpdate >= 24) {
         currentOwner = undefined
         isDroppedToPool = true
-        history = [{ progress: '待领取', note: '【系统自动退回公海：超过30天未付费】', time: now, owner: '系统' }, ...history]
+        history = [{ progress: '待领取', note: '【系统自动】30天内未付费，自动掉回公海', time: now, owner: '系统' }, ...history]
       }
     }
 

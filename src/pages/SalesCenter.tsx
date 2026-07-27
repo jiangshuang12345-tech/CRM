@@ -9,7 +9,6 @@ import {
   Input,
   InputNumber,
   Modal,
-  Popconfirm,
   Select,
   Space,
   Switch,
@@ -107,9 +106,11 @@ export default function SalesCenter() {
   const [editing, setEditing] = useState<Student | null>(null)
   const [dialing, setDialing] = useState<Student | null>(null)
   const [reassigning, setReassigning] = useState<Student | null>(null)
+  const [dropping, setDropping] = useState<Student | null>(null)
   const [reassignTo, setReassignTo] = useState<string | undefined>()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [form] = Form.useForm()
+  const [dropForm] = Form.useForm()
 
   // 无业务线（无渠道归因）的用户不参与业务线过滤（不再强制展示，需受筛选器控制）
   const lineHit = (s: Student) => {
@@ -237,13 +238,21 @@ export default function SalesCenter() {
     setReassignTo(undefined)
   }
 
-  const dropToPool = (s: Student) => {
+  const openDrop = (s: Student) => {
+    setDropping(s)
+    dropForm.resetFields()
+  }
+
+  const doDrop = async () => {
+    if (!dropping) return
+    const v = await dropForm.validateFields()
+    const reason = v.reason?.trim()
     const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
-    const note = t('sales.manualDropNote')
+    const note = `${t('sales.manualDropNote')}${reason}`
     setState((prev) => ({
       ...prev,
       students: prev.students.map((x) =>
-        x.studentId === s.studentId
+        x.studentId === dropping.studentId
           ? {
               ...x,
               salesOwner: undefined,
@@ -255,6 +264,7 @@ export default function SalesCenter() {
           : x,
       ),
     }))
+    setDropping(null)
     message.success(t('sales.dropped'))
   }
 
@@ -455,11 +465,9 @@ export default function SalesCenter() {
                   </Button>
                 )}
                 {canEdit && (
-                  <Popconfirm title={t('sales.dropConfirm')} onConfirm={() => dropToPool(r)}>
-                    <Button type="link" danger icon={<RollbackOutlined />}>
-                      {t('sales.dropToPool')}
-                    </Button>
-                  </Popconfirm>
+                  <Button type="link" danger icon={<RollbackOutlined />} onClick={() => openDrop(r)}>
+                    {t('sales.dropToPool')}
+                  </Button>
                 )}
               </Space>
             ),
@@ -642,6 +650,26 @@ export default function SalesCenter() {
             .filter((a) => a.email !== reassigning?.salesOwner)
             .map((a) => ({ label: `${a.name}（${a.email}）`, value: a.email }))}
         />
+      </Modal>
+
+      <Modal
+        open={!!dropping}
+        title={t('sales.drop.title')}
+        onCancel={() => setDropping(null)}
+        onOk={doDrop}
+        okText={t('common.confirm')}
+        cancelText={t('common.cancel')}
+        destroyOnClose
+      >
+        <Form form={dropForm} layout="vertical" preserve={false} style={{ marginTop: 16 }}>
+          <Form.Item
+            name="reason"
+            label={t('sales.drop.reason')}
+            rules={[{ required: true, message: t('sales.drop.reasonRequired') }]}
+          >
+            <Input.TextArea rows={3} placeholder={t('sales.drop.reasonPlaceholder')} />
+          </Form.Item>
+        </Form>
       </Modal>
 
       {settingsOpen && (
