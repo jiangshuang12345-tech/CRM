@@ -22,7 +22,7 @@ import {
 import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { genCallId, setState, useStore } from '../store'
+import { genCallId, setState, updateSalesSettings, useStore } from '../store'
 import type { Account, CallRecord, CallResult, SalesFollowLog, SalesSettings, Student, UserType, UserStatus } from '../types'
 import { CALL_RESULTS } from '../types'
 import { useI18n } from '../i18n'
@@ -624,7 +624,7 @@ export default function SalesCenter() {
           configurableLines={allowedLines() === null ? lineOptions : allowedLines()!}
           onCancel={() => setSettingsOpen(false)}
           onOk={(newSettingsMap) => {
-            setState((prev) => ({ ...prev, salesSettings: newSettingsMap }))
+            updateSalesSettings(newSettingsMap)
             setSettingsOpen(false)
             message.success(t('sales.settings.saved'))
           }}

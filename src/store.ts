@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v54' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v55' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -48,19 +48,70 @@ function emit() {
   listeners.forEach((l) => l())
 }
 
+import { isSalesLead } from './funnel'
+import { businessLineOf } from './channel'
+
+// 模拟后端：加载数据或修改设置时，触发自动分配
+function autoAllocate(st: AppState): AppState {
+  let modified = false
+  const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+  const newStudents = st.students.map((s) => {
+    // 满足线索条件，且尚无负责人
+    if (isSalesLead(s, st.lessons) && !s.salesOwner) {
+      const bl = businessLineOf(st.channels, s)
+      const settings = st.salesSettings?.[bl]
+      if (settings && settings.autoDropEnabled && settings.allocations) {
+        const validAllocations = settings.allocations.filter((a) => a.weight > 0)
+        if (validAllocations.length > 0) {
+          const sum = validAllocations.reduce((acc, a) => acc + a.weight, 0)
+          const hash = s.studentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
+          let rand = hash % sum
+          let owner = validAllocations[0].email
+          for (const a of validAllocations) {
+            if (rand < a.weight) {
+              owner = a.email
+              break
+            }
+            rand -= a.weight
+          }
+          modified = true
+          return {
+            ...s,
+            salesOwner: owner,
+            salesProgress: '跟进中' as const,
+            salesLatestNote: '【系统自动分配】',
+            salesUpdatedAt: now,
+            salesHistory: [
+              { progress: '跟进中', note: '【系统自动分配】', time: now, owner: '系统' },
+              ...(s.salesHistory || []),
+            ],
+          }
+        }
+      }
+    }
+    return s
+  })
+  if (modified) {
+    return { ...st, students: newStudents }
+  }
+  return st
+}
+
 function load(): AppState {
   const seeded = seed()
   try {
     const raw = localStorage.getItem(KEY)
     if (raw) {
       // 合并种子默认值：即使旧数据缺少新增字段（如 callRecords），也不会因 undefined 而崩溃
-      return { ...seeded, ...(JSON.parse(raw) as Partial<AppState>) }
+      const merged = { ...seeded, ...(JSON.parse(raw) as Partial<AppState>) }
+      return autoAllocate(merged)
     }
   } catch {
     /* ignore */
   }
-  localStorage.setItem(KEY, JSON.stringify(seeded))
-  return seeded
+  const finalSeeded = autoAllocate(seeded)
+  localStorage.setItem(KEY, JSON.stringify(finalSeeded))
+  return finalSeeded
 }
 
 function save(s: AppState) {
@@ -75,6 +126,10 @@ export function resetState() {
 export function setState(updater: (prev: AppState) => AppState) {
   state = updater(state)
   emit()
+}
+
+export function updateSalesSettings(newSettings: Record<string, SalesSettings>) {
+  setState((prev) => autoAllocate({ ...prev, salesSettings: newSettings }))
 }
 
 export function getState() {
