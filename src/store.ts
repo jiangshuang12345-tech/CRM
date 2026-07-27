@@ -51,21 +51,56 @@ function emit() {
 import { isSalesLead } from './funnel'
 import { businessLineOf } from './channel'
 
-// 模拟后端：加载数据或修改设置时，触发自动分配
+// 模拟后端：加载数据或修改设置时，触发掉库与自动分配
 function autoAllocate(st: AppState): AppState {
   let modified = false
-  const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+  const now = dayjs.utc().format('YYYY-MM-DD HH:mm:ss')
   const newStudents = st.students.map((s) => {
-    // 满足线索条件，且尚无负责人
-    if (isSalesLead(s, st.lessons) && !s.salesOwner) {
-      const bl = businessLineOf(st.channels, s)
-      const settings = st.salesSettings?.[bl]
-      if (settings && settings.autoDropEnabled && settings.allocations) {
+    if (!isSalesLead(s, st.lessons)) return s
+
+    const bl = businessLineOf(st.channels, s)
+    const settings = st.salesSettings?.[bl]
+    const daysSinceReg = dayjs.utc().diff(dayjs.utc(s.registerTime), 'day')
+
+    let currentOwner = s.salesOwner
+    let history = s.salesHistory || []
+    let isDroppedToPool = false
+    let isDroppedForRealloc = false
+
+    // 规则 1: 超过30天未付费，自动退回公海 (不再自动分配，必须销售手动捡起)
+    if (currentOwner && daysSinceReg >= 30) {
+      const hoursSinceUpdate = dayjs.utc().diff(dayjs.utc(s.salesUpdatedAt || s.registerTime), 'hour')
+      // 若刚手动捡起不久（24小时内），不立即踢回公海，给销售留出首日跟进时间
+      if (hoursSinceUpdate >= 24) {
+        currentOwner = undefined
+        isDroppedToPool = true
+        history = [{ progress: '待领取', note: '【系统自动退回公海：超过30天未付费】', time: now, owner: '系统' }, ...history]
+      }
+    }
+
+    // 规则 2: 无跟进自动掉库并重分 (根据业务线配置)
+    if (currentOwner && !isDroppedToPool && settings?.autoDropEnabled) {
+      const minsSinceUpdate = dayjs.utc().diff(dayjs.utc(s.salesUpdatedAt || s.registerTime), 'minute')
+      if (minsSinceUpdate > settings.autoDropMinutes) {
+        currentOwner = undefined
+        isDroppedForRealloc = true
+        history = [{ progress: '待领取', note: `【系统自动掉库：超过${settings.autoDropMinutes}分钟无跟进】`, time: now, owner: '系统' }, ...history]
+      }
+    }
+
+    // 规则 3: 自动分配（针对新线索，或刚掉库需重分的线索）
+    // 注意：>30天的无效线索不再自动分配
+    let newProgress = s.salesProgress
+    let newNote = s.salesLatestNote
+    if (!currentOwner && daysSinceReg < 30) {
+      if (settings && settings.allocations) {
         const validAllocations = settings.allocations.filter((a) => a.weight > 0)
         if (validAllocations.length > 0) {
           const sum = validAllocations.reduce((acc, a) => acc + a.weight, 0)
+          const dropCount = history.filter((h) => h.note.includes('系统自动掉库')).length
           const hash = s.studentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)
-          let rand = hash % sum
+          let rand = (hash + dropCount * 17) % sum
+
           let owner = validAllocations[0].email
           for (const a of validAllocations) {
             if (rand < a.weight) {
@@ -74,23 +109,29 @@ function autoAllocate(st: AppState): AppState {
             }
             rand -= a.weight
           }
-          modified = true
-          return {
-            ...s,
-            salesOwner: owner,
-            salesProgress: '跟进中' as const,
-            salesLatestNote: '【系统自动分配】',
-            salesUpdatedAt: now,
-            salesHistory: [
-              { progress: '跟进中', note: '【系统自动分配】', time: now, owner: '系统' },
-              ...(s.salesHistory || []),
-            ],
-          }
+          currentOwner = owner
+          newProgress = '跟进中' as const
+          newNote = '【系统自动分配】'
+          history = [{ progress: '跟进中', note: '【系统自动分配】', time: now, owner: '系统' }, ...history]
         }
       }
     }
+
+    if (currentOwner !== s.salesOwner || isDroppedToPool || isDroppedForRealloc) {
+      modified = true
+      return {
+        ...s,
+        salesOwner: currentOwner,
+        salesProgress: currentOwner ? newProgress : '待领取',
+        salesLatestNote: currentOwner ? newNote : history[0].note,
+        salesUpdatedAt: now,
+        salesHistory: history,
+      }
+    }
+
     return s
   })
+
   if (modified) {
     return { ...st, students: newStudents }
   }
@@ -459,13 +500,13 @@ function seed(): AppState {
       countryCode: '+60', channelCode: '', country: '马来西亚', appChannel: 'Google Play', registerTime: now.subtract(4, 'hour').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验', salesProgress: '待领取',
     },
     {
-      // VN Follow
+      // VN Follow (用来演示超过 30 天未付费，被系统自动踢入公海，且销售更新时间已经过去两天的场景)
       studentId: '2060199610824356009', name: 'Tran Van A', localName: 'Trần Văn A', userType: '正式用户', gender: '男',
       birthday: '2015-05-20', ageGroup: '9-12', loginMethod: '手机号', account: '+84 90-123-4567', phone: '+84 90-123-4567', businessLine: '越南', registerChannel: 'Meta', channelSource: 'VN_META_02', adChannel: 'Facebook Ads',
-      countryCode: '+84', channelCode: '', country: '越南', appChannel: 'App Store', registerTime: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
-      salesOwner: 'sales.lead@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '暂无预算', salesUpdatedAt: now.subtract(10, 'hour').format('YYYY-MM-DD HH:mm:ss'),
+      countryCode: '+84', channelCode: '', country: '越南', appChannel: 'App Store', registerTime: now.subtract(35, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
+      salesOwner: 'sales.lead@dinoai.ai', salesProgress: '暂不跟进', salesLatestNote: '暂无预算', salesUpdatedAt: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
-        { progress: '暂不跟进', note: '【外呼自动记录】暂无预算', time: now.subtract(10, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.lead@dinoai.ai' },
+        { progress: '暂不跟进', note: '【外呼自动记录】暂无预算', time: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.lead@dinoai.ai' },
       ],
     },
     {

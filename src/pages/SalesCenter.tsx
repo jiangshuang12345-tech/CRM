@@ -9,6 +9,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Popconfirm,
   Select,
   Space,
   Switch,
@@ -19,7 +20,7 @@ import {
   Typography,
   message,
 } from 'antd'
-import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined } from '@ant-design/icons'
+import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined, RollbackOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { genCallId, setState, updateSalesSettings, useStore } from '../store'
@@ -99,7 +100,7 @@ export default function SalesCenter() {
     [accounts, roles],
   )
 
-  const [tab, setTab] = useState('pool')
+  const [tab, setTab] = useState('follow')
   const [keyword, setKeyword] = useState('')
   const [callResultFilter, setCallResultFilter] = useState<string | undefined>()
 
@@ -234,6 +235,27 @@ export default function SalesCenter() {
   const openReassign = (s: Student) => {
     setReassigning(s)
     setReassignTo(undefined)
+  }
+
+  const dropToPool = (s: Student) => {
+    const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
+    const note = t('sales.manualDropNote')
+    setState((prev) => ({
+      ...prev,
+      students: prev.students.map((x) =>
+        x.studentId === s.studentId
+          ? {
+              ...x,
+              salesOwner: undefined,
+              salesProgress: '待领取',
+              salesLatestNote: note,
+              salesUpdatedAt: now,
+              salesHistory: [{ progress: '待领取', note, time: now, owner: actor }, ...(x.salesHistory || [])],
+            }
+          : x,
+      ),
+    }))
+    message.success(t('sales.dropped'))
   }
 
   // 重新分配线索：改写归属销售 + 归档到跟进记录
@@ -413,7 +435,7 @@ export default function SalesCenter() {
           {
             title: t('common.action'),
             key: 'op',
-            width: canReassign ? 280 : 180,
+            width: canReassign ? 350 : 250,
             fixed: 'right' as const,
             render: (_: unknown, r: Student) => (
               <Space size={0}>
@@ -431,6 +453,13 @@ export default function SalesCenter() {
                   <Button type="link" icon={<SwapOutlined />} onClick={() => openReassign(r)}>
                     {t('perm.sales_reassign')}
                   </Button>
+                )}
+                {canEdit && (
+                  <Popconfirm title={t('sales.dropConfirm')} onConfirm={() => dropToPool(r)}>
+                    <Button type="link" danger icon={<RollbackOutlined />}>
+                      {t('sales.dropToPool')}
+                    </Button>
+                  </Popconfirm>
                 )}
               </Space>
             ),
@@ -544,8 +573,8 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: canReassign ? 2640 : 2540 }}
-                  locale={{ emptyText: t('sales.emptyFollow') }}
+                scroll={{ x: canReassign ? 2710 : 2610 }}
+                locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
               </>
