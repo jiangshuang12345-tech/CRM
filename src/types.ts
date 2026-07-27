@@ -151,7 +151,7 @@ export type SalesFollowLog = {
 // 销售设置（每条业务线独立配置）
 export type SalesSettings = {
   autoDropEnabled: boolean
-  autoDropHours: number
+  autoDropMinutes: number
   allocations: { email: string; weight: number }[]
 }
 

@@ -866,7 +866,7 @@ function Modal_Settings({
 
     const nextValues = settingsMap[newLine] || {
       autoDropEnabled: true,
-      autoDropHours: 24,
+      autoDropMinutes: 1440,
       allocations: salesAccounts
         .filter((a) => !a.businessLines || a.businessLines.length === 0 || a.businessLines.includes(newLine))
         .map((a) => ({ email: a.email, weight: 1 })),
@@ -887,7 +887,7 @@ function Modal_Settings({
   // 初始化首次挂载的表单
   useEffect(() => {
     if (open && currentLine) {
-      const initial = settingsMap[currentLine] || { autoDropEnabled: true, autoDropHours: 24 }
+      const initial = settingsMap[currentLine] || { autoDropEnabled: true, autoDropMinutes: 1440 }
       const initialAllocations = initial.allocations || []
       const fullAllocations = lineAccounts.map((a) => {
         const existing = initialAllocations.find((x) => x.email === a.email)
@@ -933,8 +933,8 @@ function Modal_Settings({
             </Form.Item>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: enabled ? 'inherit' : '#bfbfbf' }}>
               <span>{t('sales.settings.dropDesc1')}</span>
-              <Form.Item name="autoDropHours" noStyle rules={[{ required: true }]}>
-                <InputNumber min={1} max={720} disabled={!enabled} />
+              <Form.Item name="autoDropMinutes" noStyle rules={[{ required: true }]}>
+                <InputNumber min={1} max={43200} disabled={!enabled} />
               </Form.Item>
               <span>{t('sales.settings.dropDesc2')}</span>
             </div>

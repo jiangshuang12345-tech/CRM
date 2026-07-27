@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v55' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v56' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -1064,12 +1064,12 @@ function seed(): AppState {
     salesSettings: {
       '韩国': {
         autoDropEnabled: true,
-        autoDropHours: 24,
+        autoDropMinutes: 1440,
         allocations: [{ email: 'sales.kr@dinoai.ai', weight: 1 }],
       },
       '马来': {
         autoDropEnabled: true,
-        autoDropHours: 24,
+        autoDropMinutes: 1440,
         allocations: [{ email: 'sales.my@dinoai.ai', weight: 1 }],
       },
     },
