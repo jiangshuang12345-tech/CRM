@@ -456,7 +456,12 @@ export default function SystemConfig() {
                   columns={accColumns}
                   dataSource={accounts}
                   scroll={{ x: 1000 }}
-                  pagination={{ showTotal: (n) => t('common.total', { n }) }}
+                  pagination={{
+                    showTotal: (n) => t('common.total', { n }),
+                    showSizeChanger: true,
+                    defaultPageSize: 10,
+                    pageSizeOptions: ['10', '20', '50', '100']
+                  }}
                 />
               </div>
             ),
@@ -471,7 +476,12 @@ export default function SystemConfig() {
                 columns={logColumns}
                 dataSource={logs}
                 scroll={{ x: 900 }}
-                pagination={{ showTotal: (n) => t('common.total', { n }), pageSize: 15 }}
+                pagination={{
+                  showTotal: (n) => t('common.total', { n }),
+                  showSizeChanger: true,
+                  defaultPageSize: 10,
+                  pageSizeOptions: ['10', '20', '50', '100']
+                }}
               />
             ),
           },
