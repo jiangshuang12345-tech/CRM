@@ -68,6 +68,18 @@ const LANDING_TEMPLATES: Record<
     `https://ma.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
     (coupon ? `&coupon=${coupon}` : '') +
     (params ?? ''),
+  泰国: ({ channel, coupon, params }) =>
+    `https://th.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
+    (coupon ? `&coupon=${coupon}` : '') +
+    (params ?? ''),
+  新加坡: ({ channel, coupon, params }) =>
+    `https://sg.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
+    (coupon ? `&coupon=${coupon}` : '') +
+    (params ?? ''),
+  其他: ({ channel, coupon, params }) =>
+    `https://www.dinoai.ai/website/landingpage/signin/?channel=${channel}` +
+    (coupon ? `&coupon=${coupon}` : '') +
+    (params ?? ''),
 }
 
 // 收集某业务线下所有「已生成 code」的渠道（带层级路径 + 渠道参数）

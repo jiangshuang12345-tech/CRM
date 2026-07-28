@@ -1,3 +1,4 @@
+import { BUSINESS_LINES } from './types'
 import type { ChannelLevelNode, ChannelLine } from './types'
 
 // 依据渠道 code，返回其在渠道树中的完整路径（渠道类型 / 一级 / 二级…），
@@ -68,8 +69,43 @@ export function hasLandingChannel(channels: ChannelLine[], s: ChannelUser): bool
 
 // 业务线展示：如果用户数据中包含业务线，则直接展示。
 // 某些特殊 App 渠道进来的可能没有业务线，则为空。
+export function channelLineByCode(channels: ChannelLine[], code?: string): string | null {
+  if (!code) return null
+  for (const line of channels) {
+    for (const tp of line.children) {
+      const walk = (nodes: ChannelLevelNode[]): boolean => {
+        for (const n of nodes) {
+          if (n.code === code) return true
+          if (walk(n.children)) return true
+        }
+        return false
+      }
+      if (walk(tp.children)) return line.name
+    }
+  }
+  return null
+}
+
 export function businessLineOf(channels: ChannelLine[], s: ChannelUser): string {
-  return s.businessLine || ''
+  // 有渠道code的，可以关联业务线，则按照业务线关联数据
+  if (s.channelCode) {
+    const line = channelLineByCode(channels, s.channelCode)
+    if (line) return line
+  }
+  
+  // 没有渠道code，按照国家映射到业务线上
+  if (s.country) {
+    // 处理一些别名，比如 马来西亚 -> 马来
+    const normalizedCountry = s.country === '马来西亚' ? '马来' : s.country
+    
+    if (BUSINESS_LINES.includes(normalizedCountry as any) && normalizedCountry !== '其他') {
+      return normalizedCountry
+    }
+    // 国家与业务线映射不上的，则归为其他业务线
+    return '其他'
+  }
+  
+  return s.businessLine || '其他'
 }
 
 // 注册渠道/渠道来源展示：

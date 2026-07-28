@@ -15,6 +15,7 @@ export const COUNTRY_TZ: Record<string, string> = {
   泰国: 'Asia/Bangkok',
   马来: 'Asia/Kuala_Lumpur',
   马来西亚: 'Asia/Kuala_Lumpur',
+  新加坡: 'Asia/Singapore',
   其他: 'UTC',
 }
 

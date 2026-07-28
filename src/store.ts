@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v59' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v60' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
