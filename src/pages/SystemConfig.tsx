@@ -271,6 +271,7 @@ export default function SystemConfig() {
       businessLines: scope === 'all' ? [] : v.businessLines ?? [],
       status: v.status ? '启用' : '停用',
       lastLogin: accEditing?.lastLogin,
+      outboundSeatBound: accEditing?.outboundSeatBound || false,
     }
     setState((prev) => ({
       ...prev,
@@ -288,18 +289,68 @@ export default function SystemConfig() {
     setAccOpen(false)
   }
   const toggleAcc = (a: Account) => {
+    const isDisabling = a.status === '启用'
+    
+    if (isDisabling) {
+      Modal.confirm({
+        title: 'Tips',
+        content: (
+          <div>
+            <div style={{ marginBottom: 12 }}>停用员工操作的影响：</div>
+            <ul style={{ paddingLeft: 20 }}>
+              <li>该员工名下的所有 Leads 将被释放并回归公海，重新分配给其他员工。</li>
+              <li>该员工将不再接收新的 Leads 分配。</li>
+            </ul>
+            <div style={{ marginTop: 12 }}>如需修改信息，请点击「编辑」。</div>
+          </div>
+        ),
+        onOk: () => {
+          setState((prev) => ({
+            ...prev,
+            accounts: prev.accounts.map((x) =>
+              x.id === a.id ? { ...x, status: '停用' } : x,
+            ),
+          }))
+          addLog({
+            actor,
+            module: 'system',
+            action: 'sys.log.disableAcc',
+            target: a.email,
+          })
+          message.success('已停用')
+        }
+      })
+    } else {
+      setState((prev) => ({
+        ...prev,
+        accounts: prev.accounts.map((x) =>
+          x.id === a.id ? { ...x, status: '启用' } : x,
+        ),
+      }))
+      addLog({
+        actor,
+        module: 'system',
+        action: 'sys.log.enableAcc',
+        target: a.email,
+      })
+      message.success('已启用')
+    }
+  }
+
+  const toggleOutboundBound = (a: Account) => {
     setState((prev) => ({
       ...prev,
       accounts: prev.accounts.map((x) =>
-        x.id === a.id ? { ...x, status: x.status === '启用' ? '停用' : '启用' } : x,
+        x.id === a.id ? { ...x, outboundSeatBound: !x.outboundSeatBound } : x,
       ),
     }))
     addLog({
       actor,
       module: 'system',
-      action: a.status === '启用' ? 'sys.log.disableAcc' : 'sys.log.enableAcc',
+      action: a.outboundSeatBound ? 'sys.log.unbindOutbound' : 'sys.log.bindOutbound',
       target: a.email,
     })
+    message.success(a.outboundSeatBound ? '外呼坐席已解绑' : '外呼坐席已绑定')
   }
 
   const accColumns: ColumnsType<Account> = [
@@ -348,14 +399,55 @@ export default function SystemConfig() {
       width: 170,
       render: (v) => v || <Text type="secondary">—</Text>,
     },
+    {
+      title: 'WA账号',
+      dataIndex: 'waAccount',
+      width: 140,
+      render: () => <Text type="secondary">—</Text>,
+    },
+    {
+      title: 'WA状态',
+      dataIndex: 'waStatus',
+      width: 110,
+      render: () => <Text type="secondary">—</Text>,
+    },
+    {
+      title: 'WA最近在线',
+      dataIndex: 'waLastOnline',
+      width: 140,
+      render: () => <Text type="secondary">—</Text>,
+    },
+    {
+      title: 'WA最近同步',
+      dataIndex: 'waLastSync',
+      width: 140,
+      render: () => <Text type="secondary">—</Text>,
+    },
     ...(canEditAcc
       ? [
           {
             title: t('common.action'),
             key: 'op',
-            width: 90,
+            width: 200,
             fixed: 'right' as const,
             render: (_: unknown, r: Account) => (
+              <Space size="small" wrap split={<span style={{ color: '#e8e8e8' }}>|</span>}>
+                <Button type="link" size="small" style={{ padding: 0 }} onClick={() => toggleAcc(r)}>
+                  <span style={{ color: r.status === '启用' ? '#ff4d4f' : '#2F6BFF' }}>
+                    {r.status === '启用' ? '停用' : '启用'}
+                  </span>
+                </Button>
+                <Button type="link" size="small" style={{ padding: 0 }} onClick={() => openAcc(r)}>
+                  {t('common.edit')}
+                </Button>
+                <Button type="link" size="small" style={{ padding: 0, color: r.outboundSeatBound ? '#ff4d4f' : '#2F6BFF' }} onClick={() => toggleOutboundBound(r)}>
+                  {r.outboundSeatBound ? '解绑外呼' : '绑定外呼'}
+                </Button>
+                <Button type="link" size="small" style={{ padding: 0, color: '#2F6BFF' }}>
+                  WhatsApp v
+                </Button>
+              </Space>
+            ),
               <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openAcc(r)}>
                 {t('common.edit')}
               </Button>
@@ -411,7 +503,12 @@ export default function SystemConfig() {
                   rowKey="id"
                   columns={roleColumns}
                   dataSource={roles}
-                  pagination={false}
+                  pagination={{
+                    showTotal: (n) => t('common.total', { n }),
+                    showSizeChanger: true,
+                    defaultPageSize: 10,
+                    pageSizeOptions: ['10', '20', '50', '100']
+                  }}
                   style={{ marginBottom: 24 }}
                 />
                 <Paragraph strong style={{ marginBottom: 8 }}>
@@ -432,7 +529,12 @@ export default function SystemConfig() {
                   size="small"
                   columns={matrixColumns}
                   dataSource={matrixData}
-                  pagination={false}
+                  pagination={{
+                    showTotal: (n) => t('common.total', { n }),
+                    showSizeChanger: true,
+                    defaultPageSize: 20,
+                    pageSizeOptions: ['20', '50', '100']
+                  }}
                   bordered
                   scroll={{ x: 150 + roles.length * 130 }}
                 />
@@ -455,7 +557,7 @@ export default function SystemConfig() {
                   rowKey="id"
                   columns={accColumns}
                   dataSource={accounts}
-                  scroll={{ x: 1000 }}
+                  scroll={{ x: 1400 }}
                   pagination={{
                     showTotal: (n) => t('common.total', { n }),
                     showSizeChanger: true,
@@ -534,7 +636,12 @@ export default function SystemConfig() {
               style={{ marginTop: 16 }}
               size="small"
               rowKey="key"
-              pagination={false}
+              pagination={{
+                showTotal: (n) => t('common.total', { n }),
+                showSizeChanger: true,
+                defaultPageSize: 10,
+                pageSizeOptions: ['10', '20', '50']
+              }}
               dataSource={matrixData.filter((m) => {
                 const isSub = m.key.includes('_')
                 if (!isSub) return true
