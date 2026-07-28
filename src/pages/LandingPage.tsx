@@ -23,6 +23,7 @@ import { CopyOutlined, DeleteOutlined, LinkOutlined, ThunderboltOutlined } from 
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, uid, useStore } from '../store'
+import { BUSINESS_LINES } from '../types'
 import type { ChannelLevelNode, ChannelLine, ChannelParams, LandingPage } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
@@ -126,7 +127,7 @@ export default function LandingPageManagement() {
   const channelCode = Form.useWatch('channelCode', form) as string | undefined
 
   // 生成弹窗里可选业务线 + 列表筛选选项
-  const lines = useMemo(() => channels.map((c) => c.name), [channels])
+  const lines = BUSINESS_LINES
   const lineOptions = useMemo(
     () => Array.from(new Set([...lines, ...landingPagesAll.map((lp) => lp.businessLine)].filter(Boolean))),
     [lines, landingPagesAll],

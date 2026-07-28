@@ -25,6 +25,7 @@ import {
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { addLog, setState, uid, useStore } from '../store'
+import { BUSINESS_LINES } from '../types'
 import type { Account, AuditLog, DataScope, ModuleKey, PermLevel, Role } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
@@ -70,7 +71,7 @@ export default function SystemConfig() {
   const accounts = useStore((s) => s.accounts)
   const channels = useStore((s) => s.channels)
   const logs = useStore((s) => s.logs)
-  const lines = useMemo(() => channels.map((c) => c.name), [channels])
+  const lines = BUSINESS_LINES
 
   const moduleLabel = (m: ModuleKey) => (m.includes('_') ? t(`perm.${m}`) : t(`app.nav.${m}`))
   const levelLabel = (lv: PermLevel) => t(`sys.level.${lv}`)
