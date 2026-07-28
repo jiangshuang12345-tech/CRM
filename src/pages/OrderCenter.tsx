@@ -45,7 +45,7 @@ export default function OrderCenter() {
   const [payMethod, setPayMethod] = useState<string | undefined>()
   const [countryFilter, setCountryFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
-  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
 
   const lineOptions = useMemo(
     () => Array.from(new Set([...channels.map((c) => c.name), ...students.map((s) => s.businessLine)].filter(Boolean))),
@@ -170,7 +170,7 @@ export default function OrderCenter() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} disabled={lineDisabled} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={filterOptions(lineOptions)} disabled={lineDisabled} />
         <Select
           allowClear
           placeholder={t('user.col.country')}

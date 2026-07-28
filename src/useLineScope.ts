@@ -8,28 +8,33 @@ export function useLineScope() {
   const { account, allowedLines } = usePerm()
   const scope = allowedLines()
   const isRestricted = scope !== null
-  const defaultLines = scope ?? []
+  
+  // 如果受限，默认选中其权限内的第一个；如果不受限，默认全不选
+  const defaultLines = isRestricted && scope.length > 0 ? [scope[0]] : []
   
   const [selected, setSelected] = useState<string[]>(defaultLines)
 
-  // 切换身份/账号时，重置为该账号数据权限内的业务线
+  // 切换身份/账号时，重置
   useEffect(() => {
-    setSelected(scope ?? [])
+    setSelected(isRestricted && scope.length > 0 ? [scope[0]] : [])
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [account?.id])
 
-  const currentSelected = isRestricted ? scope! : selected
-
   const matchLine = (line: string) => {
-    if (isRestricted) return scope!.includes(line)
+    if (isRestricted && !scope.includes(line)) return false
     return selected.length === 0 || selected.includes(line)
   }
 
+  const filterOptions = (options: string[]) => {
+    if (isRestricted) return options.filter(o => scope.includes(o))
+    return options
+  }
+
   return { 
-    selected: currentSelected, 
+    selected, 
     setSelected, 
-    defaultLines, 
     matchLine,
-    disabled: isRestricted
+    disabled: false, // 允许修改，不再禁用
+    filterOptions
   }
 }

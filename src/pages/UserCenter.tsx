@@ -60,7 +60,7 @@ export default function UserCenter() {
   const lessons = useStore((s) => s.lessons ?? [])
   const { can, actor } = usePerm()
   const canEdit = can('users_edit') === 'operate'
-  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
@@ -294,7 +294,7 @@ export default function UserCenter() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} disabled={lineDisabled} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={filterOptions(lineOptions)} disabled={lineDisabled} />
         <Select
           allowClear
           placeholder={t('user.col.country')}

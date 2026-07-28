@@ -91,7 +91,7 @@ export default function SalesCenter() {
   const seeAllOwners = allowedLines() === null || canReassign
   // 当拥有分配与掉库设置权限时，视为 Leader 身份以显示横幅和设置入口
   const isLeader = canManageSettings
-  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
 
   // 可被分配的销售：启用状态、非系统管理员、且角色具备销售模块「操作」权限
   const salesAccounts = useMemo(
@@ -524,7 +524,7 @@ export default function SalesCenter() {
       />
 
       <Space wrap style={{ marginBottom: 16 }}>
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} placeholder={t('user.col.country')} disabled={lineDisabled} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={filterOptions(lineOptions)} placeholder={t('user.col.country')} disabled={lineDisabled} />
         {tab === 'calls' && (
           <Select
             allowClear

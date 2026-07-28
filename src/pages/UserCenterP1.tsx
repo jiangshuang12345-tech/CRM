@@ -58,7 +58,7 @@ export default function UserCenterP1() {
   const { can, allowedLines, actor } = usePerm()
   const canEdit = can('users_edit') === 'operate'
   const scope = allowedLines()
-  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled } = useLineScope()
+  const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   
   const [keyword, setKeyword] = useState('')
   const [sourceLpFilter, setSourceLpFilter] = useState<string | undefined>()
@@ -354,7 +354,7 @@ export default function UserCenterP1() {
           onChange={setSourceAppFilter}
           options={sourceAppOptions.map((c) => ({ label: c, value: c }))}
         />
-        <LineFilter value={lineSel} onChange={setLineSel} options={lineOptions} placeholder={t('user.col.country')} disabled={lineDisabled} />
+        <LineFilter value={lineSel} onChange={setLineSel} options={filterOptions(lineOptions)} placeholder={t('user.col.country')} disabled={lineDisabled} />
         <Select
           allowClear
           placeholder={t('user.filterStatus')}
