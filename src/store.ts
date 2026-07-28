@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v60' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v61' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -280,6 +280,46 @@ export function genCallId() {
 function seed(): AppState {
   const channels: ChannelLine[] = [
     {
+      id: 'bl_ma',
+      name: '马来',
+      children: [],
+    },
+    {
+      id: 'bl_id',
+      name: '印尼',
+      children: [],
+    },
+    {
+      id: 'bl_th',
+      name: '泰国',
+      children: [],
+    },
+    {
+      id: 'bl_sg',
+      name: '新加坡',
+      children: [],
+    },
+    {
+      id: 'bl_vn',
+      name: '越南',
+      children: [
+        {
+          id: 'ct_vn_kol',
+          name: 'KOL',
+          children: [
+            {
+              id: 'c_vn_tiktok',
+              name: 'TikTok 达人',
+              level: 1,
+              children: [
+                { id: 'c_vn_tiktok_1', name: '@minh_edu', level: 2, code: 'Tk88Vzq', children: [] },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
       id: 'bl_kr',
       name: '韩国',
       children: [
@@ -335,50 +375,9 @@ function seed(): AppState {
       ],
     },
     {
-      id: 'bl_th',
-      name: '泰国',
-      children: [
-        {
-          id: 'ct_th_natural',
-          name: '自然流量',
-          children: [
-            { id: 'c_th_aso', name: 'ASO', level: 1, children: [] },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'bl_vn',
-      name: '越南',
-      children: [
-        {
-          id: 'ct_vn_kol',
-          name: 'KOL',
-          children: [
-            {
-              id: 'c_vn_tiktok',
-              name: 'TikTok 达人',
-              level: 1,
-              children: [
-                { id: 'c_vn_tiktok_1', name: '@minh_edu', level: 2, code: 'Tk88Vzq', children: [] },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: 'bl_id',
-      name: '印尼',
-      children: [
-        {
-          id: 'ct_id_landing',
-          name: 'landingpage',
-          children: [
-            { id: 'c_id_meta', name: 'Meta 信息流', level: 1, children: [] },
-          ],
-        },
-      ],
+      id: 'bl_other',
+      name: '其他',
+      children: [],
     },
   ]
 

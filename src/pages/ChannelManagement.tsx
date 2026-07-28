@@ -35,7 +35,6 @@ const LEVEL_COLOR = ['', 'blue', 'cyan', 'green']
 const EXPAND_KEY = 'dinoai_crm_channel_expanded'
 
 type AddCtx =
-  | { kind: 'line' }
   | { kind: 'type'; lineId: string }
   | { kind: 'child'; lineId: string; typeId: string; parentId?: string; nextLevel: 1 | 2 | 3 }
 
@@ -110,13 +109,7 @@ export default function ChannelManagement() {
   const submitAdd = async () => {
     const { name } = await form.validateFields()
     if (!addCtx) return
-    if (addCtx.kind === 'line') {
-      setState((prev) => ({
-        ...prev,
-        channels: [...prev.channels, { id: uid('bl_'), name, children: [] }],
-      }))
-      message.success(t('ch.lineCreated'))
-    } else if (addCtx.kind === 'type') {
+    if (addCtx.kind === 'type') {
       updateLine(addCtx.lineId, (l) => ({ ...l, children: [...l.children, { id: uid('ct_'), name, children: [] }] }))
       message.success(t('ch.typeCreated'))
     } else {
@@ -198,7 +191,10 @@ export default function ChannelManagement() {
     if (!renameNode) return
     const isLine = channels.some((l) => l.id === renameNode.id)
     if (isLine) {
-      updateLine(renameNode.id, (l) => ({ ...l, name }))
+      // 禁止重命名业务线
+      message.warning('业务线名称不可修改')
+      setRenameNode(null)
+      return
     } else {
       const lineOfType = channels.find((l) => l.children.some((tp) => tp.id === renameNode.id))
       if (lineOfType) {
@@ -393,24 +389,6 @@ export default function ChannelManagement() {
             />
           </Tooltip>
         )}
-        {canEditNode && (
-          <Tooltip title={t('ch.rename')}>
-            <Button
-              type="text"
-              size="small"
-              icon={<EditOutlined />}
-              onClick={() => {
-                setRenameNode({ id: line.id, name: line.name })
-                form.setFieldsValue({ name: line.name })
-              }}
-            />
-          </Tooltip>
-        )}
-        {canEditNode && (
-          <Tooltip title={t('common.delete')}>
-            <Button type="text" size="small" danger icon={<DeleteOutlined />} onClick={() => deleteLine(line.id)} />
-          </Tooltip>
-        )}
       </Space>
       </span>
     ),
@@ -426,13 +404,6 @@ export default function ChannelManagement() {
       className="page-card"
       bordered={false}
       title={<span className="section-title">{t('ch.title')}</span>}
-      extra={
-        canCreate ? (
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => openAdd({ kind: 'line' })}>
-            {t('ch.addLine')}
-          </Button>
-        ) : null
-      }
     >
       <style>{`
         .node-actions { opacity: 0; transition: opacity .15s; }
@@ -458,11 +429,9 @@ export default function ChannelManagement() {
       <Modal
         open={!!addCtx}
         title={
-          addCtx?.kind === 'line'
-            ? t('ch.addLine')
-            : addCtx?.kind === 'type'
-              ? t('ch.addType')
-              : t('ch.addChild', { level: addCtx ? levelLabel(addCtx.nextLevel) : '' })
+          addCtx?.kind === 'type'
+            ? t('ch.addType')
+            : t('ch.addChild', { level: addCtx ? levelLabel(addCtx.nextLevel) : '' })
         }
         onCancel={() => setAddCtx(null)}
         onOk={submitAdd}
@@ -471,16 +440,7 @@ export default function ChannelManagement() {
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false}>
-          {addCtx?.kind === 'line' ? (
-            <Form.Item
-              name="name"
-              label={t('ch.lineNameLabel')}
-              rules={[{ required: true, message: t('ch.lineNamePlaceholder') }]}
-              extra={t('ch.lineNameExtra')}
-            >
-              <Input placeholder={t('ch.lineNamePlaceholder')} />
-            </Form.Item>
-          ) : addCtx?.kind === 'type' ? (
+          {addCtx?.kind === 'type' ? (
             <Form.Item
               name="name"
               label={t('ch.typeNameLabel')}
