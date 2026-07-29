@@ -231,6 +231,12 @@ export default function UserCenterP1() {
       render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
     {
+      title: t('user.col.courseLevel'),
+      dataIndex: 'courseLevel',
+      width: 120,
+      render: (v: string | undefined) => (v ? <Tag color="purple">{v}</Tag> : <Text type="secondary">—</Text>),
+    },
+    {
       title: t('user.col.method'),
       dataIndex: 'loginMethod',
       width: 120,
@@ -267,18 +273,6 @@ export default function UserCenterP1() {
       render: (v: string | undefined) => (v ? <Text code>{v}</Text> : <Text type="secondary">—</Text>),
     },
     {
-      title: t('user.col.couponCode'),
-      dataIndex: 'couponCode',
-      width: 140,
-      render: (v: string | undefined) => (v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text>),
-    },
-    {
-      title: t('user.col.cc'),
-      dataIndex: 'ccName',
-      width: 120,
-      render: (v: string | undefined) => v || <Text type="secondary">—</Text>,
-    },
-    {
       title: t('user.col.country'),
       dataIndex: 'country',
       width: 120,
@@ -306,6 +300,18 @@ export default function UserCenterP1() {
       dataIndex: 'expireTime',
       width: 200,
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country} />,
+    },
+    {
+      title: t('user.col.couponCode'),
+      dataIndex: 'couponCode',
+      width: 140,
+      render: (v: string | undefined) => (v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text>),
+    },
+    {
+      title: t('user.col.cc'),
+      dataIndex: 'ccName',
+      width: 120,
+      render: (_: unknown, r: Student) => r.salesOwner || r.ccName || <Text type="secondary">—</Text>,
     },
     {
       title: t('user.col.modifier'),
