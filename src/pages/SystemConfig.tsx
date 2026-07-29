@@ -365,6 +365,7 @@ export default function SystemConfig() {
     {
       title: t('sys.acc.col.scope'),
       dataIndex: 'businessLines',
+      width: 180,
       render: (v: string[], r) => {
         const scope = roles.find((x) => x.id === r.roleId)?.dataScope
         if (scope === 'all') return <Tag color="purple">{scopeLabel('all')}</Tag>
@@ -399,30 +400,6 @@ export default function SystemConfig() {
       width: 170,
       render: (v) => v || <Text type="secondary">—</Text>,
     },
-    {
-      title: 'WA账号',
-      dataIndex: 'waAccount',
-      width: 140,
-      render: () => <Text type="secondary">—</Text>,
-    },
-    {
-      title: 'WA状态',
-      dataIndex: 'waStatus',
-      width: 110,
-      render: () => <Text type="secondary">—</Text>,
-    },
-    {
-      title: 'WA最近在线',
-      dataIndex: 'waLastOnline',
-      width: 140,
-      render: () => <Text type="secondary">—</Text>,
-    },
-    {
-      title: 'WA最近同步',
-      dataIndex: 'waLastSync',
-      width: 140,
-      render: () => <Text type="secondary">—</Text>,
-    },
     ...(canEditAcc
       ? [
           {
@@ -442,9 +419,6 @@ export default function SystemConfig() {
                 </Button>
                 <Button type="link" size="small" style={{ padding: 0, color: r.outboundSeatBound ? '#ff4d4f' : '#2F6BFF' }} onClick={() => toggleOutboundBound(r)}>
                   {r.outboundSeatBound ? '解绑外呼' : '绑定外呼'}
-                </Button>
-                <Button type="link" size="small" style={{ padding: 0, color: '#2F6BFF' }}>
-                  WhatsApp v
                 </Button>
               </Space>
             ),
@@ -553,7 +527,7 @@ export default function SystemConfig() {
                   rowKey="id"
                   columns={accColumns}
                   dataSource={accounts}
-                  scroll={{ x: 1400 }}
+                  scroll={{ x: 1200 }}
                   pagination={{
                     showTotal: (n) => t('common.total', { n }),
                     showSizeChanger: true,
