@@ -11,6 +11,7 @@ import {
   Tag,
   Typography,
   message,
+  Cascader,
 } from 'antd'
 import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
@@ -62,7 +63,7 @@ export default function UserCenterP1() {
   
   const [keyword, setKeyword] = useState('')
   const [sourceLpFilter, setSourceLpFilter] = useState<string | undefined>()
-  const [sourceAppFilter, setSourceAppFilter] = useState<string | undefined>()
+  const [sourceAppFilter, setSourceAppFilter] = useState<string[] | undefined>()
   const [methodFilter, setMethodFilter] = useState<string | undefined>()
   const [statusFilter, setStatusFilter] = useState<string | undefined>()
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
@@ -93,10 +94,25 @@ export default function UserCenterP1() {
     [scoped, channels],
   )
 
-  const sourceAppOptions = useMemo(
-    () => Array.from(new Set(scoped.map((s) => appChannelSourceText(s)).filter((v) => v && v !== '—'))),
-    [scoped],
-  )
+  const sourceAppOptions = useMemo(() => {
+    const map = new Map<string, Set<string>>()
+    for (const s of scoped) {
+      if (s.channelCode) continue
+      const l1 = s.adChannel || s.channelSource || s.registerChannel
+      if (!l1) continue
+      if (!map.has(l1)) map.set(l1, new Set())
+      if (s.adChannel && s.subChannel) {
+        map.get(l1)!.add(s.subChannel)
+      }
+    }
+    return Array.from(map.entries()).map(([k, set]) => {
+      const opt: any = { value: k, label: k }
+      if (set.size > 0) {
+        opt.children = Array.from(set).map((c) => ({ value: c, label: c }))
+      }
+      return opt
+    })
+  }, [scoped])
 
   const data = useMemo(
     () =>
@@ -109,7 +125,20 @@ export default function UserCenterP1() {
           s.account.toLowerCase().includes(kw)
         const matchCountry = matchLine(s.businessLine)
         const matchSourceLp = !sourceLpFilter || lpChannelSourceText(channels, s) === sourceLpFilter
-        const matchSourceApp = !sourceAppFilter || appChannelSourceText(s) === sourceAppFilter
+        let matchSourceApp = true
+        if (sourceAppFilter && sourceAppFilter.length > 0) {
+          if (s.channelCode) {
+            matchSourceApp = false
+          } else {
+            const l1 = s.adChannel || s.channelSource || s.registerChannel || ''
+            const l2 = s.subChannel || ''
+            if (sourceAppFilter.length === 1) {
+              matchSourceApp = l1 === sourceAppFilter[0]
+            } else if (sourceAppFilter.length === 2) {
+              matchSourceApp = l1 === sourceAppFilter[0] && l2 === sourceAppFilter[1]
+            }
+          }
+        }
         const matchMethod = !methodFilter || s.loginMethod === methodFilter
         const matchStatus = !statusFilter || resolveUserStatus(s, lessons) === statusFilter
         const matchType = !typeFilter || resolveUserType(s) === typeFilter
@@ -357,14 +386,14 @@ export default function UserCenterP1() {
           onChange={setSourceLpFilter}
           options={sourceLpOptions.map((c) => ({ label: c, value: c }))}
         />
-        <Select
+        <Cascader
           allowClear
-          showSearch
+          changeOnSelect
           placeholder={t('user.col.channelSourceApp')}
           style={{ width: 180 }}
           value={sourceAppFilter}
-          onChange={setSourceAppFilter}
-          options={sourceAppOptions.map((c) => ({ label: c, value: c }))}
+          onChange={(v) => setSourceAppFilter(v as string[] | undefined)}
+          options={sourceAppOptions}
         />
         <LineFilter value={lineSel} onChange={setLineSel} options={filterOptions(lineOptions)} placeholder={t('user.col.country')} disabled={lineDisabled} />
         <Select
