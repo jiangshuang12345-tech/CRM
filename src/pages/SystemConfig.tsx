@@ -448,10 +448,6 @@ export default function SystemConfig() {
                 </Button>
               </Space>
             ),
-              <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openAcc(r)}>
-                {t('common.edit')}
-              </Button>
-            ),
           },
         ]
       : []),
