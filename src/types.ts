@@ -127,6 +127,8 @@ export type Student = {
   paymentPlatform?: string // 支付端 (e.g. app端支付)
   campaign?: string
   campaignId?: string
+  couponCode?: string // 优惠码
+  ccName?: string // 付费关单CC
   registerTime: string // UTC
   status: UserStatus
   expireTime?: string // 到期时间

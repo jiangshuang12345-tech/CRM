@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v61' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v63' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -133,6 +133,72 @@ function autoAllocate(st: AppState): AppState {
     return { ...st, students: newStudents }
   }
   return st
+}
+
+// 停用账号并将其名下线索按分配规则重分给其他活跃销售（不回公海）
+export function disableAccountAndReallocate(st: AppState, accountId: string): AppState {
+  const account = st.accounts.find(a => a.id === accountId)
+  if (!account) return st
+  
+  const now = dayjs.utc().format('YYYY-MM-DD HH:mm:ss')
+  
+  // 1. 停用该账号
+  const newAccounts = st.accounts.map(a => a.id === accountId ? { ...a, status: '停用' as const } : a)
+  
+  // 2. 找出其名下的线索，并按照当前业务线配置分配给其他人
+  const newStudents = st.students.map(s => {
+    if (s.salesOwner !== account.email) return s
+    if (!isSalesLead(s, st.lessons)) return s
+    
+    const bl = businessLineOf(st.channels, s)
+    const settings = st.salesSettings?.[bl]
+    
+    let newOwner: string | undefined = undefined
+    // 寻找活跃的且非该停用账号的分配规则
+    if (settings && settings.allocations) {
+      const validAllocations = settings.allocations.filter(
+        a => a.weight > 0 && a.email !== account.email && newAccounts.find(acc => acc.email === a.email)?.status === '启用'
+      )
+      if (validAllocations.length > 0) {
+        const sum = validAllocations.reduce((acc, a) => acc + a.weight, 0)
+        let rand = Math.floor(Math.random() * sum)
+        for (const a of validAllocations) {
+          if (rand < a.weight) {
+            newOwner = a.email
+            break
+          }
+          rand -= a.weight
+        }
+      }
+    }
+    
+    // 如果找不到其他可接单的销售，则迫不得已只能放回公海
+    if (newOwner) {
+      return {
+        ...s,
+        salesOwner: newOwner,
+        salesProgress: '跟进中' as const,
+        salesLatestNote: '【系统自动重分配：原销售停用】',
+        salesUpdatedAt: now,
+        salesHistory: [{ progress: '跟进中', note: '【系统自动重分配：原销售停用】', time: now, owner: '系统' }, ...(s.salesHistory || [])]
+      }
+    } else {
+      return {
+        ...s,
+        salesOwner: undefined,
+        salesProgress: '待领取' as const,
+        salesLatestNote: '【系统提示：原销售停用，无其他活跃销售可承接】',
+        salesUpdatedAt: now,
+        salesHistory: [{ progress: '待领取', note: '【系统提示：原销售停用，无其他活跃销售可承接】', time: now, owner: '系统' }, ...(s.salesHistory || [])]
+      }
+    }
+  })
+  
+  return {
+    ...st,
+    accounts: newAccounts,
+    students: newStudents
+  }
 }
 
 function load(): AppState {
@@ -387,7 +453,7 @@ function seed(): AppState {
       studentId: '2060199610824355842', name: 'Ji-woo Kim', localName: '김지우', userType: '正式用户', gender: '男',
       birthday: '2016-05-12', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO', adChannel: 'App Store',
       countryCode: '+82', channelCode: 'K2000Gh', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: 'admin@dinoai.ai',
-      courseLevel: 'Level2', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'app端支付', campaign: 'KR_ASO_01', campaignId: '1784093355547-2007413',
+      courseLevel: 'Level2', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'app端支付', campaign: 'KR_ASO_01', campaignId: '1784093355547-2007413', couponCode: 'KR_NEW_2026', ccName: 'Kim (销售组长)',
       editHistory: [
         {
           time: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
@@ -410,7 +476,7 @@ function seed(): AppState {
       studentId: '2060199610824355843', name: 'Abdullah Al-Saud', localName: 'عبدالله', userType: '正式用户', gender: '男',
       birthday: '2015-09-03', ageGroup: '9-12', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta', adChannel: 'Meta Ads',
       countryCode: '+966', channelCode: 'Fb73Mxa', country: '沙特', appChannel: 'Google Play', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
-      courseLevel: 'Level1', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'Web端支付', campaign: 'SA_Meta_C1', campaignId: '1783308177904-802041680',
+      courseLevel: 'Level1', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'Web端支付', campaign: 'SA_Meta_C1', campaignId: '1783308177904-802041680', couponCode: 'SA_SUMMER_50', ccName: 'Sara Al-Otaibi',
     },
     {
       studentId: '2060199610824355844', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', userType: '测试用户', gender: '女',

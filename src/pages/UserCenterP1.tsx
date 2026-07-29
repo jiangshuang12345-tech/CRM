@@ -238,6 +238,18 @@ export default function UserCenterP1() {
       render: (v: string | undefined) => (v ? <Text code>{v}</Text> : <Text type="secondary">—</Text>),
     },
     {
+      title: t('user.col.couponCode'),
+      dataIndex: 'couponCode',
+      width: 140,
+      render: (v: string | undefined) => (v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text>),
+    },
+    {
+      title: t('user.col.cc'),
+      dataIndex: 'ccName',
+      width: 120,
+      render: (v: string | undefined) => v || <Text type="secondary">—</Text>,
+    },
+    {
       title: t('user.col.country'),
       dataIndex: 'country',
       width: 120,
@@ -365,12 +377,12 @@ export default function UserCenterP1() {
         />
       </Space>
 
-      <Table
-        rowKey="studentId"
-        columns={columns}
-        dataSource={data}
-        scroll={{ x: 2170 }}
-        pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
+        <Table
+          rowKey="studentId"
+          columns={columns}
+          dataSource={data}
+          scroll={{ x: 2430 }}
+          pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
       <Modal

@@ -223,6 +223,18 @@ export default function UserCenter() {
       render: (v: string | undefined) => v || <Text type="secondary">-</Text>,
     },
     {
+      title: t('user.col.couponCode'),
+      dataIndex: 'couponCode',
+      width: 140,
+      render: (v: string | undefined) => v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">-</Text>,
+    },
+    {
+      title: t('user.col.cc'),
+      dataIndex: 'ccName',
+      width: 120,
+      render: (v: string | undefined) => v || <Text type="secondary">-</Text>,
+    },
+    {
       title: t('user.col.trialStatus'),
       dataIndex: 'trialStatusStr',
       width: 130,
@@ -321,12 +333,12 @@ export default function UserCenter() {
         />
       </Space>
 
-      <Table
-        rowKey="studentId"
-        columns={columns}
-        dataSource={data}
-        scroll={{ x: 2990 }}
-        pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
+        <Table
+          rowKey="studentId"
+          columns={columns}
+          dataSource={data}
+          scroll={{ x: 3250 }}
+          pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
       <Modal

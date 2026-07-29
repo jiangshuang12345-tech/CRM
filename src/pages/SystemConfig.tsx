@@ -24,7 +24,7 @@ import {
   SafetyOutlined,
 } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
-import { addLog, setState, uid, useStore } from '../store'
+import { addLog, disableAccountAndReallocate, setState, uid, useStore } from '../store'
 import { BUSINESS_LINES } from '../types'
 import type { Account, AuditLog, DataScope, ModuleKey, PermLevel, Role } from '../types'
 import { useI18n } from '../i18n'
@@ -298,19 +298,14 @@ export default function SystemConfig() {
           <div>
             <div style={{ marginBottom: 12 }}>停用员工操作的影响：</div>
             <ul style={{ paddingLeft: 20 }}>
-              <li>该员工名下的所有 Leads 将被释放并回归公海，重新分配给其他员工。</li>
+              <li>该员工名下的所有 Leads ，将根据分配规则重新分配给其他员工。</li>
               <li>该员工将不再接收新的 Leads 分配。</li>
             </ul>
             <div style={{ marginTop: 12 }}>如需修改信息，请点击「编辑」。</div>
           </div>
         ),
         onOk: () => {
-          setState((prev) => ({
-            ...prev,
-            accounts: prev.accounts.map((x) =>
-              x.id === a.id ? { ...x, status: '停用' } : x,
-            ),
-          }))
+          setState((prev) => disableAccountAndReallocate(prev, a.id))
           addLog({
             actor,
             module: 'system',
