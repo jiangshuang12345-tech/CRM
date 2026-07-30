@@ -13,14 +13,15 @@ import {
   message,
   Cascader,
 } from 'antd'
-import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons'
+import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined, ReloadOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
+import { DatePicker } from 'antd'
 import { setState, useStore } from '../store'
 import type { LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
 import { AGE_GROUPS, LOGIN_METHODS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
-import { usePerm } from '../perm'
+import { useCurrentAccount, usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
 import { latestTrialReport, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
 import { appChannelSourceText, lpChannelSourceText } from '../channel'
@@ -57,6 +58,7 @@ export default function UserCenterP1() {
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const { can, allowedLines, actor } = usePerm()
+  const { account } = useCurrentAccount()
   const canEdit = can('users_edit') === 'operate'
   const scope = allowedLines()
   const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
@@ -69,6 +71,8 @@ export default function UserCenterP1() {
   const [typeFilter, setTypeFilter] = useState<string | undefined>()
   const [editing, setEditing] = useState<Student | null>(null)
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
+  const [addingMembership, setAddingMembership] = useState<Student | null>(null)
+  const [membershipForm] = Form.useForm()
   const [verifyCodes, setVerifyCodes] = useState<Record<string, string>>({})
   const [form] = Form.useForm()
 
@@ -156,6 +160,30 @@ export default function UserCenterP1() {
       ageGroup: s.ageGroup,
       userType: resolveUserType(s),
     })
+  }
+
+  const openAddMembership = (s: Student) => {
+    setAddingMembership(s)
+    membershipForm.resetFields()
+  }
+
+  const doAddMembership = async () => {
+    if (!addingMembership) return
+    const values = await membershipForm.validateFields()
+    const [start, end] = values.timeRange || []
+    if (start && end) {
+      const expireTime = end.format('YYYY-MM-DD HH:mm:ss')
+      setState((prev) => ({
+        ...prev,
+        students: prev.students.map((x) =>
+          x.studentId === addingMembership.studentId
+            ? { ...x, expireTime, lastModifier: account!.email }
+            : x
+        ),
+      }))
+      message.success(t('sales.msg.recordSaved')) // reuse some success message
+      setAddingMembership(null)
+    }
   }
 
   const submitEdit = async () => {
@@ -350,6 +378,11 @@ export default function UserCenterP1() {
                 {t('user.editInfo')}
               </Button>
             )}
+            {canEdit && (
+              <Button type="link" icon={<PlusCircleOutlined />} onClick={() => openAddMembership(r)}>
+                {t('user.addMembership')}
+              </Button>
+            )}
           </Space>
         )
       },
@@ -495,6 +528,24 @@ export default function UserCenterP1() {
             { title: t('user.hist.col.modifier'), dataIndex: 'modifier', width: 190 },
           ]}
         />
+      </Modal>
+
+      <Modal
+        open={!!addingMembership}
+        title={t('user.addMembership.title')}
+        onCancel={() => setAddingMembership(null)}
+        onOk={doAddMembership}
+        destroyOnClose
+      >
+        <Form form={membershipForm} layout="vertical" preserve={false}>
+          <Form.Item
+            name="timeRange"
+            label={t('user.addMembership.timeRange')}
+            rules={[{ required: true }]}
+          >
+            <DatePicker.RangePicker showTime />
+          </Form.Item>
+        </Form>
       </Modal>
     </Card>
   )
