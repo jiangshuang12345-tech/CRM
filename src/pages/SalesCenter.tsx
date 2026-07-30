@@ -319,6 +319,8 @@ export default function SalesCenter() {
     const owner = dialing.salesOwner ?? actor
     // 模拟外呼录音链接
     const dummyAudio = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+    // 模拟外呼结果里携带的 AI 总结
+    const dummySummary = '【AI自动总结】用户对课程表达了兴趣，询问了试听课的时间安排，对师资情况较为关注，建议后续跟进体验课安排。'
     const record: CallRecord = {
       id: genCallId(),
       studentId: dialing.studentId,
@@ -342,7 +344,7 @@ export default function SalesCenter() {
               salesLatestNote: note,
               salesUpdatedAt: now,
               salesHistory: [
-                { progress: x.salesProgress || '跟进中', note, time: now, owner, audioUrl: dummyAudio },
+                { progress: x.salesProgress || '跟进中', note, time: now, owner, audioUrl: dummyAudio, aiSummary: dummySummary },
                 ...(x.salesHistory || []),
               ],
             }
