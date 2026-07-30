@@ -14,6 +14,7 @@ import CoursePackagePage from './pages/CoursePackage'
 import CouponPage from './pages/Coupon'
 import LandingPageManagement from './pages/LandingPage'
 import SystemConfig from './pages/SystemConfig'
+import { LeadsList } from './pages/LeadsList'
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const session = useSession()
@@ -71,6 +72,7 @@ export default function App() {
           <Route path="channels" element={<Guard module="channels"><ChannelManagement /></Guard>} />
           <Route path="landing" element={<Guard module="landing"><LandingPageManagement /></Guard>} />
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
+          <Route path="leads" element={<Guard module="leads"><LeadsList /></Guard>} />
           <Route path="sales" element={<Guard module="sales"><SalesCenter /></Guard>} />
           <Route path="users-v2" element={<Guard module="usersV2"><UserCenter /></Guard>} />
           <Route path="users-v2/:studentId" element={<Guard module="usersV2"><UserDetail /></Guard>} />

@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v63' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v64' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -520,7 +520,7 @@ function seed(): AppState {
       countryCode: '+60', channelCode: '', country: '马来西亚', appChannel: 'Google Play', registerTime: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '未付费-未体验',
       salesOwner: 'sales.my@dinoai.ai', salesProgress: '跟进中', salesLatestNote: '已联系家长，确认体验时间', salesUpdatedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'),
       salesHistory: [
-        { progress: '跟进中', note: '【外呼自动记录】已联系家长，确认体验时间', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' },
+        { progress: '跟进中', note: '【外呼自动记录】已联系家长，确认体验时间', time: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai', audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', aiSummary: '【AI自动总结】用户对课程表达了兴趣，询问了试听课的时间安排，对师资情况较为关注，建议后续跟进体验课安排。' },
         { progress: '跟进中', note: '销售已领取，开始跟进已注册用户', time: now.subtract(20, 'hour').format('YYYY-MM-DD HH:mm:ss'), owner: 'sales.my@dinoai.ai' },
       ],
     },
@@ -716,8 +716,9 @@ function seed(): AppState {
         coupons_revoke: 'view',
         coupons_edit: 'view',
         users: 'none',
-        usersV2: 'none',
         users_edit: 'none',
+        usersV2: 'none',
+        leads: 'none',
         sales: 'none',
         sales_claim: 'none',
         sales_dial: 'none',
@@ -759,8 +760,9 @@ function seed(): AppState {
         coupons_revoke: 'operate',
         coupons_edit: 'operate',
         users: 'view',
-        usersV2: 'view',
         users_edit: 'view',
+        usersV2: 'view',
+        leads: 'view',
         sales: 'view',
         sales_claim: 'view',
         sales_dial: 'view',
@@ -802,8 +804,9 @@ function seed(): AppState {
         coupons_revoke: 'none',
         coupons_edit: 'none',
         users: 'operate',
-        usersV2: 'operate',
         users_edit: 'operate',
+        usersV2: 'operate',
+        leads: 'operate',
         sales: 'operate',
         sales_claim: 'operate',
         sales_dial: 'operate',
@@ -845,8 +848,9 @@ function seed(): AppState {
         coupons_revoke: 'operate',
         coupons_edit: 'operate',
         users: 'operate',
-        usersV2: 'operate',
         users_edit: 'operate',
+        usersV2: 'operate',
+        leads: 'operate',
         sales: 'operate',
         sales_claim: 'operate',
         sales_dial: 'operate',
@@ -888,8 +892,9 @@ function seed(): AppState {
         coupons_revoke: 'none',
         coupons_edit: 'none',
         users: 'view',
-        usersV2: 'view',
         users_edit: 'view',
+        usersV2: 'view',
+        leads: 'operate',
         sales: 'operate',
         sales_claim: 'operate',
         sales_dial: 'operate',

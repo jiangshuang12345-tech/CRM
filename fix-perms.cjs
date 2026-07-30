@@ -8,7 +8,8 @@ const subPerms = {
   landing: ['landing_create', 'landing_delete'],
   packages: ['packages_create', 'packages_edit', 'packages_status'],
   coupons: ['coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit'],
-  users: ['users_edit'],
+  users: ['users_edit', 'usersV2'],
+  leads: [],
   sales: ['sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config'],
   orders: [],
   system: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit']
@@ -19,7 +20,7 @@ file = file.replace(/perms:\s*\{([^}]+)\}/g, (match, body) => {
   const lines = body.split('\n')
   const currentPerms = {}
   lines.forEach(line => {
-    const match = line.match(/\s*(\w+):\s*'([^']+)'/)
+    const match = line.match(/\s*([a-zA-Z0-9_]+):\s*'([^']+)'/)
     if (match) {
       currentPerms[match[1]] = match[2]
     }
@@ -33,6 +34,16 @@ file = file.replace(/perms:\s*\{([^}]+)\}/g, (match, body) => {
       if (!newPerms[sub]) {
         newPerms[sub] = pLevel
       }
+    }
+    // Also if parent is missing, maybe default to none or what users has for leads
+    if (!newPerms[parent]) {
+       if (parent === 'leads' && newPerms['sales']) {
+           newPerms[parent] = newPerms['sales'] // leads visibility inherits from sales initially
+       } else if (parent === 'usersV2' && newPerms['users']) {
+           newPerms[parent] = newPerms['users']
+       } else {
+           newPerms[parent] = 'none'
+       }
     }
   }
 

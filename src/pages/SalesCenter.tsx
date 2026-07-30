@@ -436,7 +436,11 @@ export default function SalesCenter() {
       title: t('user.col.cc'),
       dataIndex: 'salesOwner',
       width: 140,
-      render: (v: string | undefined) => v ? <span>{v}</span> : <Text type="secondary">—</Text>,
+      render: (v: string | undefined) => {
+        if (!v) return <Text type="secondary">—</Text>
+        const acc = accounts.find(a => a.email === v)
+        return <span>{acc?.name || v}</span>
+      },
     },
   ]
 
@@ -744,7 +748,6 @@ function Modal_Dial({
   const [seconds, setSeconds] = useState(0)
   const [result, setResult] = useState<CallResult>('已接通')
   const [note, setNote] = useState('')
-  const [isGenerating, setIsGenerating] = useState(false)
 
   // 打开弹窗时重置状态并开始计时
   useEffect(() => {
@@ -753,7 +756,6 @@ function Modal_Dial({
       setSeconds(0)
       setResult('已接通')
       setNote('')
-      setIsGenerating(false)
     }
   }, [dialing])
 
@@ -765,13 +767,6 @@ function Modal_Dial({
 
   const handleHangup = () => {
     setPhase('summary')
-    if (result === '已接通' && seconds > 0) {
-      setIsGenerating(true)
-      setTimeout(() => {
-        setNote(t('sales.dial.aiSummary'))
-        setIsGenerating(false)
-      }, 1500)
-    }
   }
 
   const duration = result === '无人接听' ? '—' : fmtDuration(seconds)
@@ -799,10 +794,10 @@ function Modal_Dial({
               </Button>,
             ]
           : [
-              <Button key="cancel" onClick={onCancel} disabled={isGenerating}>
+              <Button key="cancel" onClick={onCancel}>
                 {t('common.cancel')}
               </Button>,
-              <Button key="save" type="primary" onClick={submit} loading={isGenerating}>
+              <Button key="save" type="primary" onClick={submit}>
                 {t('sales.dial.save')}
               </Button>,
             ]
@@ -829,11 +824,9 @@ function Modal_Dial({
           <Form.Item label={t('sales.call.note')} required>
             <Input.TextArea
               rows={4}
-              value={isGenerating ? t('sales.dial.aiGenerating') : note}
+              value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder={t('sales.f.notePlaceholder')}
-              disabled={isGenerating}
-              style={isGenerating ? { color: '#2F6BFF', backgroundColor: '#f0f5ff' } : undefined}
             />
           </Form.Item>
         </Form>
@@ -885,8 +878,24 @@ function Modal_Follow({
                       <Text strong>{t(`sales.progress.${h.progress}`)}</Text> · {h.note}
                     </div>
                     {h.audioUrl && (
-                      <div>
-                        <audio controls src={h.audioUrl} style={{ height: 32, width: '100%', maxWidth: 300 }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <audio controls src={h.audioUrl} style={{ height: 32, flex: 1, maxWidth: 300 }} />
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            if (h.aiSummary) {
+                              Modal.info({
+                                title: 'AI自动总结',
+                                content: h.aiSummary,
+                                maskClosable: true,
+                              })
+                            } else {
+                              message.info('AI正在总结中，稍后再试')
+                            }
+                          }}
+                        >
+                          AI自动总结
+                        </Button>
                       </div>
                     )}
                     <div style={{ color: '#8c8c8c', fontSize: 12 }}>

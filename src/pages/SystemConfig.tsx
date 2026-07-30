@@ -40,6 +40,7 @@ const LEVEL_META: Record<PermLevel, { color: string }> = {
 
 const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
   { key: 'users', sub: ['users_edit'] },
+  { key: 'leads' },
   { key: 'sales', sub: ['sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config'] },
   { key: 'orders' },
   { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
