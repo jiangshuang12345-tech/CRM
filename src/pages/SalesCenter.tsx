@@ -102,6 +102,7 @@ export default function SalesCenter() {
   const [tab, setTab] = useState('follow')
   const [keyword, setKeyword] = useState('')
   const [callResultFilter, setCallResultFilter] = useState<string | undefined>()
+  const [callDateRange, setCallDateRange] = useState<any>(null)
 
   const [editing, setEditing] = useState<Student | null>(null)
   const [dialing, setDialing] = useState<Student | null>(null)
@@ -174,9 +175,20 @@ export default function SalesCenter() {
       callScoped.filter((c) => {
         const kw = keyword.trim().toLowerCase()
         const text = `${c.phone} ${c.studentId} ${c.customer}`.toLowerCase()
-        return (!kw || text.includes(kw)) && (!callResultFilter || c.result === callResultFilter)
+        const matchResult = !callResultFilter || c.result === callResultFilter
+        let matchDate = true
+        if (callDateRange && callDateRange.length === 2) {
+          const [start, end] = callDateRange
+          const callTime = dayjs.utc(c.time)
+          // 比较时统一转成本地时间或都在 UTC 比较。由于选择器选的是当地日期的开头和结尾，这里我们用 isAfter / isBefore。
+          // 这里简化处理，直接判断时间戳是否在范围内
+          if (start && end) {
+            matchDate = callTime.isAfter(start.startOf('day')) && callTime.isBefore(end.endOf('day'))
+          }
+        }
+        return (!kw || text.includes(kw)) && matchResult && matchDate
       }),
-    [callScoped, keyword, callResultFilter],
+    [callScoped, keyword, callResultFilter, callDateRange],
   )
 
   const claim = (s: Student) => {
@@ -370,6 +382,12 @@ export default function SalesCenter() {
       width: 100,
       render: (v: string | undefined) => (v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text>),
     },
+    {
+      title: t('user.col.courseLevel'),
+      dataIndex: 'courseLevel',
+      width: 100,
+      render: (v: string | undefined) => (v ? <Tag color="purple">{v}</Tag> : <Text type="secondary">—</Text>),
+    },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v}</Text> },
     {
       title: t('user.col.channelSourceLp'),
@@ -401,6 +419,24 @@ export default function SalesCenter() {
       dataIndex: 'registerTime',
       width: 200,
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
+    },
+    {
+      title: t('user.col.expireTime'),
+      dataIndex: 'expireTime',
+      width: 200,
+      render: (v: string | undefined, r: Student) => (v ? <LocalTime time={v} country={r.country || r.businessLine} /> : <Text type="secondary">—</Text>),
+    },
+    {
+      title: t('user.col.couponCode'),
+      dataIndex: 'couponCode',
+      width: 140,
+      render: (v: string | undefined) => (v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text>),
+    },
+    {
+      title: t('user.col.cc'),
+      dataIndex: 'salesOwner',
+      width: 140,
+      render: (v: string | undefined) => v ? <span>{v}</span> : <Text type="secondary">—</Text>,
     },
   ]
 
@@ -526,14 +562,21 @@ export default function SalesCenter() {
       <Space wrap style={{ marginBottom: 16 }}>
         <LineFilter value={lineSel} onChange={setLineSel} options={filterOptions(lineOptions)} placeholder={t('user.col.country')} disabled={lineDisabled} />
         {tab === 'calls' && (
-          <Select
-            allowClear
-            placeholder={t('sales.call.result')}
-            style={{ width: 150 }}
-            value={callResultFilter}
-            onChange={setCallResultFilter}
-            options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
-          />
+          <>
+            <Select
+              allowClear
+              placeholder={t('sales.call.result')}
+              style={{ width: 150 }}
+              value={callResultFilter}
+              onChange={setCallResultFilter}
+              options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
+            />
+            <DatePicker.RangePicker 
+              onChange={setCallDateRange} 
+              allowClear 
+              placeholder={['开始时间', '结束时间']}
+            />
+          </>
         )}
         <Input
           allowClear
@@ -557,7 +600,7 @@ export default function SalesCenter() {
                 rowKey="studentId"
                 columns={poolColumns}
                 dataSource={poolData}
-                scroll={{ x: 1770 }}
+                scroll={{ x: 2320 + 90 }}
                 locale={{ emptyText: t('sales.emptyPool') }}
                 pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
               />
@@ -575,7 +618,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: canReassign ? 2510 : 2410 }}
+                  scroll={{ x: canReassign ? 2320 + 200 + 130 + 100 : 2320 + 200 + 130 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
@@ -783,19 +826,6 @@ function Modal_Dial({
       ) : (
         <Form layout="vertical" style={{ marginTop: 4 }}>
           <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('sales.dial.summaryTip')} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-            <Form.Item label={t('sales.call.result')}>
-              <Select
-                value={result}
-                onChange={(v) => setResult(v)}
-                options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
-                disabled={isGenerating}
-              />
-            </Form.Item>
-            <Form.Item label={t('sales.call.duration')}>
-              <Input value={duration} disabled />
-            </Form.Item>
-          </div>
           <Form.Item label={t('sales.call.note')} required>
             <Input.TextArea
               rows={4}
