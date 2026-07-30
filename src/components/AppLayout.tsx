@@ -82,10 +82,9 @@ export default function AppLayout() {
 
   // 销售中心（二期）
   const salesNav = [
-    { key: '/leads', icon: <TeamOutlined />, label: phase2Label(t('app.nav.leads')) },
     { key: '/sales', icon: <SolutionOutlined />, label: phase2Label(t('app.nav.sales')) }
   ].filter((n) =>
-    visible(n.key === '/leads' ? 'leads' : 'sales'),
+    visible(n.key),
   )
   // 用户中心二期（三期）
   const usersV2Nav = [
