@@ -97,6 +97,8 @@ export type StudentEditLog = {
   modifier: string
 }
 
+export type PurchaseIntention = '未填写' | '有意向' | '无意向'
+
 export type Student = {
   studentId: string
   name: string
@@ -138,6 +140,7 @@ export type Student = {
   channelSource?: string // 渠道来源（投放/KOL 归因标识）
   salesOwner?: string // 领取人（销售）
   salesProgress?: SalesProgress // 跟进进度（仅销售中心线索）
+  purchaseIntention?: PurchaseIntention // 购买意向
   salesLatestNote?: string // 最新备注
   salesUpdatedAt?: string // 最后更新时间
   salesHistory?: SalesFollowLog[] // 跟进记录

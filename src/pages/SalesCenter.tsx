@@ -313,21 +313,20 @@ export default function SalesCenter() {
   }
 
   // 保存外呼通话小结：生成通话记录 + 归档到该线索的销售跟进记录
-  const saveCall = (result: CallResult, duration: string, rawNote: string) => {
+  const saveCall = (note: string, intention: string) => {
     if (!dialing) return
     const now = dayjs().format('YYYY-MM-DD HH:mm:ss')
-    const note = `${t('sales.dial.autoNote')}${rawNote.trim()}`
     const owner = dialing.salesOwner ?? actor
     // 模拟外呼录音链接
-    const dummyAudio = result === '已接通' ? 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3' : undefined
+    const dummyAudio = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
     const record: CallRecord = {
       id: genCallId(),
       studentId: dialing.studentId,
       customer: dialing.localName || dialing.name,
       phone: dialing.phone ?? '',
       businessLine: dialing.businessLine,
-      result,
-      duration,
+      result: '已接通',
+      duration: '01:30',
       note,
       agent: actor,
       time: now,
@@ -339,6 +338,7 @@ export default function SalesCenter() {
         x.studentId === dialing.studentId
           ? {
               ...x,
+              purchaseIntention: intention as any,
               salesLatestNote: note,
               salesUpdatedAt: now,
               salesHistory: [
@@ -366,6 +366,16 @@ export default function SalesCenter() {
   const userColumns: ColumnsType<Student> = [
     { title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left' },
     { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
+    {
+      title: t('user.col.purchaseIntention'),
+      dataIndex: 'purchaseIntention',
+      width: 100,
+      render: (v: string | undefined) => {
+        if (v === '有意向') return <Tag color="green">{t('sales.purchaseIntention.yes')}</Tag>
+        if (v === '无意向') return <Tag color="red">{t('sales.purchaseIntention.no')}</Tag>
+        return <Text type="secondary">{t('sales.purchaseIntention.none')}</Text>
+      },
+    },
     {
       title: t('user.col.status'),
       dataIndex: 'status',
@@ -419,12 +429,6 @@ export default function SalesCenter() {
       dataIndex: 'registerTime',
       width: 200,
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
-    },
-    {
-      title: t('user.col.expireTime'),
-      dataIndex: 'expireTime',
-      width: 200,
-      render: (v: string | undefined, r: Student) => (v ? <LocalTime time={v} country={r.country || r.businessLine} /> : <Text type="secondary">—</Text>),
     },
     {
       title: t('user.col.couponCode'),
@@ -742,20 +746,20 @@ function Modal_Dial({
   t: (k: string, v?: Record<string, string | number>) => string
   dialing: Student | null
   onCancel: () => void
-  onSave: (result: CallResult, duration: string, note: string) => void
+  onSave: (note: string, intention: string) => void
 }) {
   const [phase, setPhase] = useState<'calling' | 'summary'>('calling')
   const [seconds, setSeconds] = useState(0)
-  const [result, setResult] = useState<CallResult>('已接通')
   const [note, setNote] = useState('')
+  const [purchaseIntention, setPurchaseIntention] = useState('未填写')
 
   // 打开弹窗时重置状态并开始计时
   useEffect(() => {
     if (dialing) {
       setPhase('calling')
       setSeconds(0)
-      setResult('已接通')
       setNote('')
+      setPurchaseIntention(dialing.purchaseIntention || '未填写')
     }
   }, [dialing])
 
@@ -769,14 +773,12 @@ function Modal_Dial({
     setPhase('summary')
   }
 
-  const duration = result === '无人接听' ? '—' : fmtDuration(seconds)
-
   const submit = () => {
     if (!note.trim()) {
       message.warning(t('sales.dial.noteRequired'))
       return
     }
-    onSave(result, duration, note)
+    onSave(note, purchaseIntention)
   }
 
   return (
@@ -821,6 +823,13 @@ function Modal_Dial({
       ) : (
         <Form layout="vertical" style={{ marginTop: 4 }}>
           <Alert type="info" showIcon style={{ marginBottom: 12 }} message={t('sales.dial.summaryTip')} />
+          <Form.Item label={t('user.col.purchaseIntention')}>
+            <Select value={purchaseIntention} onChange={setPurchaseIntention}>
+              <Select.Option value="未填写">{t('sales.purchaseIntention.none')}</Select.Option>
+              <Select.Option value="有意向">{t('sales.purchaseIntention.yes')}</Select.Option>
+              <Select.Option value="无意向">{t('sales.purchaseIntention.no')}</Select.Option>
+            </Select>
+          </Form.Item>
           <Form.Item label={t('sales.call.note')} required>
             <Input.TextArea
               rows={4}
