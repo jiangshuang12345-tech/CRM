@@ -16,7 +16,9 @@ import {
 import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined, ReloadOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { DatePicker } from 'antd'
+import { InputNumber } from 'antd'
+import utc from 'dayjs/plugin/utc'
+dayjs.extend(utc)
 import { setState, useStore } from '../store'
 import type { LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
 import { AGE_GROUPS, LOGIN_METHODS, USER_STATUSES, USER_TYPES } from '../types'
@@ -171,16 +173,20 @@ export default function UserCenterP1() {
     if (!addingMembership) return
     try {
       const values = await membershipForm.validateFields()
-      const [start, end] = values.timeRange || []
-      if (start && end) {
-        const expireTime = end.format('YYYY-MM-DD HH:mm:ss')
+      const days = values.days
+      if (typeof days === 'number' && days > 0) {
         setState((prev) => ({
           ...prev,
-          students: prev.students.map((x) =>
-            x.studentId === addingMembership.studentId
-              ? { ...x, expireTime, lastModifier: actor }
-              : x
-          ),
+          students: prev.students.map((x) => {
+            if (x.studentId === addingMembership.studentId) {
+              const now = dayjs.utc()
+              const currentExpire = x.expireTime ? dayjs.utc(x.expireTime) : now
+              const baseTime = currentExpire.isAfter(now) ? currentExpire : now
+              const expireTime = baseTime.add(days, 'day').format('YYYY-MM-DD HH:mm:ss')
+              return { ...x, expireTime, lastModifier: actor }
+            }
+            return x
+          }),
         }))
         message.success(t('user.addMembership'))
         setAddingMembership(null)
@@ -543,11 +549,11 @@ export default function UserCenterP1() {
       >
         <Form form={membershipForm} layout="vertical" preserve={false}>
           <Form.Item
-            name="timeRange"
-            label={t('user.addMembership.timeRange')}
-            rules={[{ required: true }]}
+            name="days"
+            label={t('user.addMembership.days')}
+            rules={[{ required: true, message: '请输入增加天数' }]}
           >
-            <DatePicker.RangePicker showTime />
+            <InputNumber min={1} max={3650} addonAfter="天" style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>
