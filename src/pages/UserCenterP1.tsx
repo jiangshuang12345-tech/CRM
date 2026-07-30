@@ -169,20 +169,24 @@ export default function UserCenterP1() {
 
   const doAddMembership = async () => {
     if (!addingMembership) return
-    const values = await membershipForm.validateFields()
-    const [start, end] = values.timeRange || []
-    if (start && end) {
-      const expireTime = end.format('YYYY-MM-DD HH:mm:ss')
-      setState((prev) => ({
-        ...prev,
-        students: prev.students.map((x) =>
-          x.studentId === addingMembership.studentId
-            ? { ...x, expireTime, lastModifier: account!.email }
-            : x
-        ),
-      }))
-      message.success(t('sales.msg.recordSaved')) // reuse some success message
-      setAddingMembership(null)
+    try {
+      const values = await membershipForm.validateFields()
+      const [start, end] = values.timeRange || []
+      if (start && end) {
+        const expireTime = end.format('YYYY-MM-DD HH:mm:ss')
+        setState((prev) => ({
+          ...prev,
+          students: prev.students.map((x) =>
+            x.studentId === addingMembership.studentId
+              ? { ...x, expireTime, lastModifier: actor }
+              : x
+          ),
+        }))
+        message.success(t('user.addMembership'))
+        setAddingMembership(null)
+      }
+    } catch (e) {
+      // 校验失败
     }
   }
 
