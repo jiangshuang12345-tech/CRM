@@ -553,7 +553,7 @@ export default function UserCenterP1() {
             label={t('user.addMembership.days')}
             rules={[{ required: true, message: '请输入增加天数' }]}
           >
-            <InputNumber min={1} max={3650} addonAfter="天" style={{ width: '100%' }} />
+            <InputNumber min={1} max={365} addonAfter="天" style={{ width: '100%' }} />
           </Form.Item>
         </Form>
       </Modal>
