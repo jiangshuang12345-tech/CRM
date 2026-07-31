@@ -447,12 +447,19 @@ function seed(): AppState {
   ]
 
   const now = dayjs.utc() // 种子时间统一以 UTC 存储，展示时再按用户注册国家换算
+  // 种子数据在 state 初始化前生成；单独记录已分配的码，确保演示数据也不会重复。
+  const seedCouponCodes: string[] = []
+  const nextSeedCouponCode = () => {
+    const code = genCouponCode(seedCouponCodes)
+    seedCouponCodes.push(code)
+    return code
+  }
   const students: Student[] = [
     {
       studentId: '2060199610824355842', name: 'Ji-woo Kim', localName: '김지우', userType: '正式用户', gender: '男',
       birthday: '2016-05-12', ageGroup: '9-12', loginMethod: '谷歌邮箱', account: 'jiwoo.kim@gmail.com', businessLine: '韩国', registerChannel: '自然流量 / ASO', adChannel: 'App Store',
       countryCode: '+82', channelCode: 'K2000Gh', country: '韩国', appChannel: 'App Store', registerTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: 'admin@dinoai.ai',
-      courseLevel: 'L2', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'app端支付', campaign: 'KR_ASO_01', campaignId: '1784093355547-2007413', couponCode: 'DINO2026', ccName: 'Kim (销售组长)',
+      courseLevel: 'L2', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'app端支付', campaign: 'KR_ASO_01', campaignId: '1784093355547-2007413', couponCode: nextSeedCouponCode(), ccName: 'Kim (销售组长)',
       editHistory: [
         {
           time: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
@@ -475,7 +482,7 @@ function seed(): AppState {
       studentId: '2060199610824355843', name: 'Abdullah Al-Saud', localName: 'عبدالله', userType: '正式用户', gender: '男',
       birthday: '2015-09-03', ageGroup: '9-12', loginMethod: 'Facebook', account: 'abdullah.alsaud@outlook.com', businessLine: '沙特', registerChannel: 'landingpage / Meta', adChannel: 'Meta Ads',
       countryCode: '+966', channelCode: 'Fb73Mxa', country: '沙特', appChannel: 'Google Play', registerTime: now.subtract(5, 'day').format('YYYY-MM-DD HH:mm:ss'), status: '付费', expireTime: now.add(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
-      courseLevel: 'L1', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'Web端支付', campaign: 'SA_Meta_C1', campaignId: '1783308177904-802041680', couponCode: 'DINO0050', ccName: 'Sara Al-Otaibi',
+      courseLevel: 'L1', trialStatusStr: '已体验已完课', paymentStatusStr: '已付费', paymentPlatform: 'Web端支付', campaign: 'SA_Meta_C1', campaignId: '1783308177904-802041680', couponCode: nextSeedCouponCode(), ccName: 'Sara Al-Otaibi',
     },
     {
       studentId: '2060199610824355844', name: 'Nguyen Thi Mai', localName: 'Nguyễn Thị Mai', userType: '测试用户', gender: '女',
@@ -627,9 +634,9 @@ function seed(): AppState {
     {
       id: 'CP4017', name: '26年6月韩国新客折扣券',
       codes: [
-        { id: uid('cc_'), code: genCouponCode(), kol: '@seoyeon_edu', used: 412 },
-        { id: uid('cc_'), code: genCouponCode(), kol: '@jiwoo_mom', used: 187 },
-        { id: uid('cc_'), code: genCouponCode(), kol: '官方自投', used: 172 },
+        { id: uid('cc_'), code: nextSeedCouponCode(), kol: '@seoyeon_edu', used: 412 },
+        { id: uid('cc_'), code: nextSeedCouponCode(), kol: '@jiwoo_mom', used: 187 },
+        { id: uid('cc_'), code: nextSeedCouponCode(), kol: '官方自投', used: 172 },
       ],
       businessLine: '韩国', couponType: '折扣券',
       currency: 'KRW', creator: 'admin@dinoai.ai', total: 100000, remaining: 99229,
@@ -642,8 +649,8 @@ function seed(): AppState {
     {
       id: 'CP4016', name: '26年6月沙特拉新折扣券',
       codes: [
-        { id: uid('cc_'), code: genCouponCode(), kol: '@sara.ksa', used: 1203 },
-        { id: uid('cc_'), code: genCouponCode(), kol: '官方自投', used: 1016 },
+        { id: uid('cc_'), code: nextSeedCouponCode(), kol: '@sara.ksa', used: 1203 },
+        { id: uid('cc_'), code: nextSeedCouponCode(), kol: '官方自投', used: 1016 },
       ],
       businessLine: '沙特', couponType: '折扣券',
       currency: 'USD', creator: 'admin@dinoai.ai', total: 100000, remaining: 97781,
