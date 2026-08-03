@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v66' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v67' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -595,20 +595,36 @@ function seed(): AppState {
       orderStatus: '已支付', originalPrice: 119000, paidAmount: 99000, payMethod: 'App Store', currency: 'KRW',
       paidTime: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'),
       validUntil: now.add(88, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      transactions: [
+        { id: 'TXN-20260618-0001', time: now.subtract(3, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单创建', status: '待支付', amount: 119000, note: '等待用户支付' },
+        { id: 'TXN-20260618-0002', time: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '支付成功', status: '已支付', amount: 99000, paymentMethod: 'App Store', note: '优惠已抵扣 KRW 20,000' },
+      ],
     },
     {
       orderId: 'DN2026061800002', productName: 'Dino English 月度会员', studentId: '2060199610824355843', userStatus: '付费',
       orderStatus: '待支付', originalPrice: 39, paidAmount: 0, payMethod: 'Google Play', currency: 'USD',
+      transactions: [
+        { id: 'TXN-20260618-0003', time: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单创建', status: '待支付', amount: 39, note: '等待用户支付' },
+      ],
     },
     {
       orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '2060199610824355845', userStatus: '付费逾期',
       orderStatus: '已退款', originalPrice: 388, paidAmount: 388, payMethod: 'Stripe', currency: 'MYR',
       paidTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'),
       validUntil: now.add(357, 'day').format('YYYY-MM-DD HH:mm:ss'),
+      transactions: [
+        { id: 'TXN-20260616-0015', time: now.subtract(9, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单创建', status: '待支付', amount: 388, note: '等待用户支付' },
+        { id: 'TXN-20260617-0015', time: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '支付成功', status: '已支付', amount: 388, paymentMethod: 'Stripe' },
+        { id: 'TXN-20260618-0015', time: now.subtract(7, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '退款成功', status: '已退款', amount: -388, paymentMethod: 'Stripe', note: '原路退回' },
+      ],
     },
     {
       orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '2060199610824355846', userStatus: '付费逾期',
       orderStatus: '已取消', originalPrice: 119000, paidAmount: 0, payMethod: 'App Store', currency: 'KRW',
+      transactions: [
+        { id: 'TXN-20260616-0008', time: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单创建', status: '待支付', amount: 119000, note: '等待用户支付' },
+        { id: 'TXN-20260616-0009', time: now.subtract(14, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单取消', status: '已取消', amount: 0, note: '超时未支付，系统自动取消' },
+      ],
     },
   ]
 

@@ -10,6 +10,7 @@ import { resolveUserType } from '../userType'
 import { useLineScope } from '../useLineScope'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
+import { useNavigate } from 'react-router-dom'
 
 const { Text } = Typography
 
@@ -30,6 +31,19 @@ const ORDER_STATUS_COLOR: Record<OrderStatus, string> = {
   已退款: 'red',
   已取消: 'default',
 }
+const ORDER_STATUS_CODE: Record<OrderStatus, string> = {
+  已退款: 'REFUNDED',
+  已取消: 'CANCELED',
+  已支付: 'PAID',
+  待支付: 'PENDING',
+}
+const ORDER_STATUS_PRIORITY: Record<OrderStatus, number> = {
+  已退款: 0,
+  已取消: 1,
+  已支付: 2,
+  待支付: 3,
+}
+const ORDER_STATUS_ORDER: OrderStatus[] = ['已退款', '已取消', '已支付', '待支付']
 
 function fmtMoney(amount: number, currency: string) {
   return `${currency} ${amount.toLocaleString()}`
@@ -37,6 +51,7 @@ function fmtMoney(amount: number, currency: string) {
 
 export default function OrderCenter() {
   const { t } = useI18n()
+  const navigate = useNavigate()
   const orders = useStore((s) => s.orders)
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
@@ -88,12 +103,18 @@ export default function OrderCenter() {
           (!countryFilter || countryOf(o.studentId) === countryFilter) &&
           (!typeFilter || typeOf(o.studentId) === typeFilter)
         )
-      }),
+      }).sort((a, b) => ORDER_STATUS_PRIORITY[a.orderStatus] - ORDER_STATUS_PRIORITY[b.orderStatus]),
     [orders, keyword, orderStatus, payMethod, countryFilter, typeFilter, lineOf, countryOf, typeOf, lineSel, matchLine],
   )
 
   const columns: ColumnsType<Order> = [
-    { title: t('order.col.id'), dataIndex: 'orderId', width: 180, fixed: 'left' },
+    {
+      title: t('order.col.id'),
+      dataIndex: 'orderId',
+      width: 180,
+      fixed: 'left',
+      render: (id: string) => <a onClick={() => navigate(`/orders/${id}`)}>{id}</a>,
+    },
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
     { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },
     {
@@ -123,7 +144,7 @@ export default function OrderCenter() {
       title: t('order.col.orderStatus'),
       dataIndex: 'orderStatus',
       width: 100,
-      render: (v: OrderStatus) => <Tag color={ORDER_STATUS_COLOR[v]}>{t(`enum.order.${v}`)}</Tag>,
+      render: (v: OrderStatus) => <Tag color={ORDER_STATUS_COLOR[v]}>{ORDER_STATUS_CODE[v]}</Tag>,
     },
     {
       title: t('order.col.original'),
@@ -193,7 +214,7 @@ export default function OrderCenter() {
           style={{ width: 150 }}
           value={orderStatus}
           onChange={setOrderStatus}
-          options={(['待支付', '已支付', '已退款', '已取消'] as OrderStatus[]).map((l) => ({ label: t(`enum.order.${l}`), value: l }))}
+          options={ORDER_STATUS_ORDER.map((l) => ({ label: ORDER_STATUS_CODE[l], value: l }))}
         />
         <Select
           allowClear

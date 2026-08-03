@@ -214,6 +214,16 @@ export type CallRecord = {
 
 export type OrderStatus = '待支付' | '已支付' | '已退款' | '已取消'
 
+export type OrderTransaction = {
+  id: string
+  time: string
+  event: string
+  status: OrderStatus
+  amount: number
+  paymentMethod?: string
+  note?: string
+}
+
 export type Order = {
   orderId: string
   productName: string
@@ -226,6 +236,7 @@ export type Order = {
   currency: string
   paidTime?: string
   validUntil?: string // 有效期到期时间
+  transactions: OrderTransaction[]
 }
 
 export type PackageStatus = '上架' | '下架'

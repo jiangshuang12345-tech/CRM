@@ -10,6 +10,7 @@ import UserCenterP1 from './pages/UserCenterP1'
 import UserDetail from './pages/UserDetail'
 import SalesCenter from './pages/SalesCenter'
 import OrderCenter from './pages/OrderCenter'
+import OrderDetail from './pages/OrderDetail'
 import CoursePackagePage from './pages/CoursePackage'
 import CouponPage from './pages/Coupon'
 import LandingPageManagement from './pages/LandingPage'
@@ -77,6 +78,7 @@ export default function App() {
           <Route path="users-v2" element={<Guard module="usersV2"><UserCenter /></Guard>} />
           <Route path="users-v2/:studentId" element={<Guard module="usersV2"><UserDetail /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
+          <Route path="orders/:orderId" element={<Guard module="orders"><OrderDetail /></Guard>} />
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />
           <Route path="coupons" element={<Guard module="coupons"><CouponPage /></Guard>} />
           <Route path="system" element={<Guard module="system"><SystemConfig /></Guard>} />
