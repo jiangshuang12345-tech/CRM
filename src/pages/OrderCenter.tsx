@@ -55,7 +55,7 @@ export default function OrderCenter() {
   const { t } = useI18n()
   const navigate = useNavigate()
   const { can } = usePerm()
-  const canExport = can('orders_export') !== 'none'
+  const canExport = can('orders_export') === 'operate'
   const orders = useStore((s) => s.orders)
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
