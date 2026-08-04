@@ -652,7 +652,6 @@ export default function SystemConfig() {
                         options={(isSub ? ['none', 'operate'] : ['none', 'view', 'operate'] as PermLevel[]).map((lv) => ({
                           label: levelLabel(lv as PermLevel),
                           value: lv,
-                          disabled: row.key === 'orders' && lv === 'operate',
                         }))}
                       />
                     )
