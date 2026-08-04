@@ -44,6 +44,7 @@ const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
   { key: 'orders', sub: ['orders_export'] },
   { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
   { key: 'usersV2' },
+  { key: 'lifecycle' },
   { key: 'channels', sub: ['channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params'] },
   { key: 'landing', sub: ['landing_create', 'landing_delete'] },
   { key: 'packages', sub: ['packages_create', 'packages_edit', 'packages_status'] },
@@ -204,7 +205,9 @@ export default function SystemConfig() {
   ]
 
   const PHASE3_MODULES = ['usersV2', 'channels', 'landing', 'packages', 'coupons']
+  const PHASE4_MODULES = ['lifecycle']
   const isPhase3 = (m: string) => PHASE3_MODULES.some(p => m === p || m.startsWith(p + '_'))
+  const isPhase4 = (m: string) => PHASE4_MODULES.includes(m)
 
   // 权限矩阵：行=模块（主模块+子模块平铺），列=角色
   const matrixData = MODULE_HIERARCHY.flatMap((m) => [m.key, ...(m.sub || [])]).map((m: ModuleKey) => ({ key: m }))
@@ -218,10 +221,12 @@ export default function SystemConfig() {
       render: (m: ModuleKey) => {
         const isSub = m.includes('_')
         const p3 = isPhase3(m)
+        const p4 = isPhase4(m)
         return (
-          <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0, color: p3 ? '#bfbfbf' : undefined }}>
+          <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0, color: p3 || p4 ? '#bfbfbf' : undefined }}>
             {moduleLabel(m)}
             {p3 && !isSub && <Tag style={{ marginLeft: 6, transform: 'scale(0.8)' }}>{t('app.phase3')}</Tag>}
+            {p4 && <Tag color="cyan" style={{ marginLeft: 6, transform: 'scale(0.8)' }}>四期</Tag>}
           </Text>
         )
       },

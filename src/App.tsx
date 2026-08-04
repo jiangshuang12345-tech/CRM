@@ -15,6 +15,7 @@ import CoursePackagePage from './pages/CoursePackage'
 import CouponPage from './pages/Coupon'
 import LandingPageManagement from './pages/LandingPage'
 import SystemConfig from './pages/SystemConfig'
+import LifecycleAutomation from './pages/LifecycleAutomation'
 
 function RequireAuth({ children }: { children: JSX.Element }) {
   const session = useSession()
@@ -32,6 +33,7 @@ const MODULE_PATH: { module: ModuleKey; path: string }[] = [
   { module: 'coupons', path: '/coupons' },
   { module: 'landing', path: '/landing' },
   { module: 'system', path: '/system' },
+  { module: 'lifecycle', path: '/lifecycle' },
 ]
 
 function firstAllowedPath(can: (m: ModuleKey) => string): string {
@@ -80,6 +82,7 @@ export default function App() {
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />
           <Route path="coupons" element={<Guard module="coupons"><CouponPage /></Guard>} />
           <Route path="system" element={<Guard module="system"><SystemConfig /></Guard>} />
+          <Route path="lifecycle" element={<Guard module="lifecycle"><LifecycleAutomation /></Guard>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
