@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
-import { Card, Input, Select, Space, Table, Tag, Typography } from 'antd'
-import { SearchOutlined } from '@ant-design/icons'
+import { Button, Card, Input, Select, Space, Table, Tag, Typography, message } from 'antd'
+import { DownloadOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { useStore } from '../store'
 import type { Order, OrderStatus, UserStatus, UserType } from '../types'
@@ -11,6 +11,8 @@ import { useLineScope } from '../useLineScope'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 import { useNavigate } from 'react-router-dom'
+import { usePerm } from '../perm'
+import { downloadCsv } from '../export'
 
 const { Text } = Typography
 
@@ -52,6 +54,8 @@ function fmtMoney(amount: number, currency: string) {
 export default function OrderCenter() {
   const { t } = useI18n()
   const navigate = useNavigate()
+  const { can } = usePerm()
+  const canExport = can('orders_export') !== 'none'
   const orders = useStore((s) => s.orders)
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
@@ -106,6 +110,19 @@ export default function OrderCenter() {
       }).sort((a, b) => ORDER_STATUS_PRIORITY[a.orderStatus] - ORDER_STATUS_PRIORITY[b.orderStatus]),
     [orders, keyword, orderStatus, payMethod, countryFilter, typeFilter, lineOf, countryOf, typeOf, lineSel, matchLine],
   )
+
+  const exportOrders = () => {
+    downloadCsv(
+      `订单中心_${new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '')}.csv`,
+      ['订单ID', '商品名称', '用户ID', '用户类型', '国家', '用户状态', '订单状态', '原价', '实际付款金额', '币种', '支付方式', '成功支付时间', '有效期到期时间'],
+      data.map((order) => [
+        order.orderId, order.productName, order.studentId, typeOf(order.studentId), countryOf(order.studentId),
+        order.userStatus, ORDER_STATUS_CODE[order.orderStatus], order.originalPrice, order.paidAmount, order.currency,
+        order.payMethod, order.paidTime, order.validUntil,
+      ]),
+    )
+    message.success(`已导出 ${data.length} 条订单数据`)
+  }
 
   const columns: ColumnsType<Order> = [
     {
@@ -224,6 +241,7 @@ export default function OrderCenter() {
           onChange={setPayMethod}
           options={['App Store', 'Google Play', 'Stripe', 'PayPal'].map((l) => ({ label: l, value: l }))}
         />
+        {canExport && <Button icon={<DownloadOutlined />} onClick={exportOrders}>导出列表</Button>}
       </Space>
 
       <Table

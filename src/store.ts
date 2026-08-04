@@ -21,7 +21,7 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v67' // 改变 key 触发重新加载 seed
+const KEY = 'dinoai_crm_state_v68' // 改变 key 触发重新加载 seed
 
 export type AppState = {
   channels: ChannelLine[]
@@ -732,6 +732,8 @@ function seed(): AppState {
         coupons_edit: 'view',
         users: 'none',
         users_edit: 'none',
+        users_phone_view: 'none',
+        users_export: 'none',
         usersV2: 'none',
         leads: 'none',
         sales: 'none',
@@ -741,6 +743,7 @@ function seed(): AppState {
         sales_reassign: 'none',
         sales_config: 'none',
         orders: 'none',
+        orders_export: 'none',
         system: 'none',
         system_role_add: 'none',
         system_role_edit: 'none',
@@ -776,6 +779,8 @@ function seed(): AppState {
         coupons_edit: 'operate',
         users: 'view',
         users_edit: 'view',
+        users_phone_view: 'none',
+        users_export: 'none',
         usersV2: 'view',
         leads: 'view',
         sales: 'view',
@@ -785,6 +790,7 @@ function seed(): AppState {
         sales_reassign: 'none',
         sales_config: 'operate',
         orders: 'view',
+        orders_export: 'none',
         system: 'none',
         system_role_add: 'none',
         system_role_edit: 'none',
@@ -820,6 +826,8 @@ function seed(): AppState {
         coupons_edit: 'none',
         users: 'operate',
         users_edit: 'operate',
+        users_phone_view: 'view',
+        users_export: 'none',
         usersV2: 'operate',
         leads: 'operate',
         sales: 'operate',
@@ -829,6 +837,7 @@ function seed(): AppState {
         sales_reassign: 'none',
         sales_config: 'none',
         orders: 'view',
+        orders_export: 'none',
         system: 'none',
         system_role_add: 'none',
         system_role_edit: 'none',
@@ -864,6 +873,8 @@ function seed(): AppState {
         coupons_edit: 'operate',
         users: 'operate',
         users_edit: 'operate',
+        users_phone_view: 'operate',
+        users_export: 'operate',
         usersV2: 'operate',
         leads: 'operate',
         sales: 'operate',
@@ -873,6 +884,7 @@ function seed(): AppState {
         sales_reassign: 'operate',
         sales_config: 'operate',
         orders: 'operate',
+        orders_export: 'operate',
         system: 'operate',
         system_role_add: 'operate',
         system_role_edit: 'operate',
@@ -908,6 +920,8 @@ function seed(): AppState {
         coupons_edit: 'none',
         users: 'view',
         users_edit: 'view',
+        users_phone_view: 'none',
+        users_export: 'none',
         usersV2: 'view',
         leads: 'operate',
         sales: 'operate',
@@ -917,6 +931,7 @@ function seed(): AppState {
         sales_reassign: 'operate',
         sales_config: 'operate',
         orders: 'view',
+        orders_export: 'none',
         system: 'none',
         system_role_add: 'none',
         system_role_edit: 'none',

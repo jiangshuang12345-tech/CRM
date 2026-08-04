@@ -298,9 +298,11 @@ export type ModuleKey =
   // 子权限 - coupons
   | 'coupons_create' | 'coupons_extend' | 'coupons_revoke' | 'coupons_edit'
   // 子权限 - users
-  | 'users_edit'
+  | 'users_edit' | 'users_phone_view' | 'users_export'
   // 子权限 - sales
   | 'sales_claim' | 'sales_dial' | 'sales_update' | 'sales_reassign' | 'sales_config'
+  // 子权限 - orders
+  | 'orders_export'
   // 子权限 - system
   | 'system_role_add' | 'system_role_edit' | 'system_role_delete' | 'system_acc_add' | 'system_acc_edit'
 
@@ -309,10 +311,10 @@ export const PERMISSION_MODULES: ModuleKey[] = [
   'landing', 'landing_create', 'landing_delete',
   'packages', 'packages_create', 'packages_edit', 'packages_status',
   'coupons', 'coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit',
-  'users', 'users_edit', 'usersV2',
+  'users', 'users_edit', 'users_phone_view', 'users_export', 'usersV2',
   'leads',
   'sales', 'sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config',
-  'orders',
+  'orders', 'orders_export',
   'system', 'system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit',
 ]
 

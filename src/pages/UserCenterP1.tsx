@@ -13,7 +13,7 @@ import {
   message,
   Cascader,
 } from 'antd'
-import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined, ReloadOutlined, PlusCircleOutlined } from '@ant-design/icons'
+import { DownloadOutlined, EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined, ReloadOutlined, PlusCircleOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { InputNumber } from 'antd'
@@ -30,6 +30,7 @@ import { appChannelSourceText, lpChannelSourceText } from '../channel'
 import LocalTime from '../components/LocalTime'
 import { useLineScope } from '../useLineScope'
 import LineFilter from '../components/LineFilter'
+import { downloadCsv, maskPhone } from '../export'
 
 const { Text } = Typography
 
@@ -62,6 +63,8 @@ export default function UserCenterP1() {
   const { can, allowedLines, actor } = usePerm()
   const { account } = useCurrentAccount()
   const canEdit = can('users_edit') === 'operate'
+  const canViewPhone = can('users_phone_view') !== 'none'
+  const canExport = can('users_export') !== 'none'
   const scope = allowedLines()
   const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   
@@ -154,6 +157,19 @@ export default function UserCenterP1() {
   )
 
   const phoneLocked = editing ? hasPhoneLogin(editing) : false
+
+  const exportUsers = () => {
+    downloadCsv(
+      `用户中心_${dayjs().format('YYYYMMDD_HHmmss')}.csv`,
+      ['用户ID', '学生姓名', '用户状态', '用户类型', '年龄段', '课程等级', '注册方式', '登录账号', '手机号', '落地页渠道来源', 'App渠道来源', '渠道code', '国家', '注册时间', '到期时间', '优惠码', 'CC'],
+      data.map((s) => [
+        s.studentId, s.localName || s.name, resolveUserStatus(s, lessons), resolveUserType(s), s.ageGroup, s.courseLevel,
+        s.loginMethod, s.account, maskPhone(s.phone), lpChannelSourceText(channels, s), appChannelSourceText(s), s.channelCode,
+        s.country, s.registerTime, s.expireTime, s.couponCode, s.salesOwner || s.ccName,
+      ]),
+    )
+    message.success(`已导出 ${data.length} 条用户数据（手机号已加密）`)
+  }
 
   const openEdit = (s: Student) => {
     setEditing(s)
@@ -285,6 +301,12 @@ export default function UserCenterP1() {
       dataIndex: 'account',
       width: 220,
       render: (v) => <Text>{v}</Text>,
+    },
+    {
+      title: t('user.col.phone'),
+      dataIndex: 'phone',
+      width: 180,
+      render: (v: string | undefined) => <Text>{canViewPhone ? v || '—' : maskPhone(v)}</Text>,
     },
     {
       title: t('user.col.channelSourceLp'),
@@ -453,6 +475,7 @@ export default function UserCenterP1() {
           onChange={setStatusFilter}
           options={USER_STATUSES.map((l) => ({ label: t(`enum.status.${l}`), value: l }))}
         />
+        {canExport && <Button icon={<DownloadOutlined />} onClick={exportUsers}>导出列表</Button>}
       </Space>
 
         <Table
