@@ -55,7 +55,17 @@ export function usePerm() {
   const session = useSession()
 
   // role 为空（任意工作邮箱登录、未匹配账号）时，按超级管理员处理，保证原型可用。
-  const can = (m: ModuleKey): PermLevel => (role ? role.perms[m] : 'operate')
+  const can = (m: ModuleKey): PermLevel => {
+    if (!role) return 'operate'
+    const saved = role.perms[m]
+    if (saved) return saved
+    // 兼容四期上线前保存在 localStorage 的旧角色数据。
+    if (m === 'lifecycle') {
+      if (role.id === 'role_admin' || role.id === 'role_ops') return 'operate'
+      if (role.id === 'role_support' || role.id === 'role_sales_leader') return 'view'
+    }
+    return 'none'
+  }
   const isOperate = (m: ModuleKey) => can(m) === 'operate'
 
   // 数据范围：null 表示全部业务线；否则仅允许这些业务线。

@@ -237,7 +237,7 @@ export default function SystemConfig() {
       width: 130,
       align: 'center' as const,
       render: (_: unknown, row: { key: ModuleKey }) => {
-        const lv = r.perms[row.key]
+        const lv = r.perms[row.key] ?? 'none'
         return <Tag color={LEVEL_META[lv].color}>{levelLabel(lv)}</Tag>
       },
     })),
