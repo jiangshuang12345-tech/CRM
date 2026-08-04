@@ -86,6 +86,11 @@ export default function OrderCenter() {
     return (studentId: string) => map.get(studentId)
   }, [students])
 
+  const couponCodeOf = useMemo(() => {
+    const map = new Map(students.map((s) => [s.studentId, s.couponCode]))
+    return (studentId: string) => map.get(studentId)
+  }, [students])
+
   const countries = useMemo(() => {
     return Array.from(new Set(students.map((s) => s.country || s.businessLine).filter(Boolean))) as string[]
   }, [students])
@@ -99,7 +104,8 @@ export default function OrderCenter() {
           !kw ||
           o.orderId.toLowerCase().includes(kw) ||
           o.studentId.toLowerCase().includes(kw) ||
-          o.productName.toLowerCase().includes(kw)
+          o.productName.toLowerCase().includes(kw) ||
+          (couponCodeOf(o.studentId) ?? '').toLowerCase().includes(kw)
         return (
           matchKw &&
           (!orderStatus || o.orderStatus === orderStatus) &&
@@ -108,16 +114,16 @@ export default function OrderCenter() {
           (!typeFilter || typeOf(o.studentId) === typeFilter)
         )
       }).sort((a, b) => ORDER_STATUS_PRIORITY[a.orderStatus] - ORDER_STATUS_PRIORITY[b.orderStatus]),
-    [orders, keyword, orderStatus, payMethod, countryFilter, typeFilter, lineOf, countryOf, typeOf, lineSel, matchLine],
+    [orders, keyword, orderStatus, payMethod, countryFilter, typeFilter, lineOf, countryOf, typeOf, couponCodeOf, lineSel, matchLine],
   )
 
   const exportOrders = () => {
     downloadCsv(
       `订单中心_${new Date().toISOString().slice(0, 19).replace(/[-:T]/g, '')}.csv`,
-      ['订单ID', '商品名称', '用户ID', '用户类型', '国家', '用户状态', '订单状态', '原价', '实际付款金额', '币种', '支付方式', '成功支付时间', '有效期到期时间'],
+      ['订单ID', '商品名称', '用户ID', '用户类型', '国家', '用户状态', '订单状态', '优惠码', '原价', '实际付款金额', '币种', '支付方式', '成功支付时间', '有效期到期时间'],
       data.map((order) => [
         order.orderId, order.productName, order.studentId, typeOf(order.studentId), countryOf(order.studentId),
-        order.userStatus, ORDER_STATUS_CODE[order.orderStatus], order.originalPrice, order.paidAmount, order.currency,
+        order.userStatus, ORDER_STATUS_CODE[order.orderStatus], couponCodeOf(order.studentId), order.originalPrice, order.paidAmount, order.currency,
         order.payMethod, order.paidTime, order.validUntil,
       ]),
     )
@@ -134,6 +140,16 @@ export default function OrderCenter() {
     },
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
     { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },
+    {
+      title: t('user.col.couponCode'),
+      dataIndex: 'studentId',
+      key: 'couponCode',
+      width: 140,
+      render: (id: string) => {
+        const code = couponCodeOf(id)
+        return code ? <Tag color="blue">{code}</Tag> : <Text type="secondary">—</Text>
+      },
+    },
     {
       title: t('user.col.userType'),
       dataIndex: 'studentId',

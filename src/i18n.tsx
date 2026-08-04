@@ -514,7 +514,7 @@ const zh: Dict = {
   'user.lineRequired': '请选择业务线',
 
   'order.title': '订单中心',
-  'order.searchPlaceholder': '订单ID / 用户ID / 商品名称',
+  'order.searchPlaceholder': '订单ID / 用户ID / 商品名称 / 优惠码',
   'order.filterStatus': '订单状态',
   'order.filterPay': '支付方式',
   'order.col.id': '订单ID',
@@ -1147,7 +1147,7 @@ const en: Dict = {
   'user.lineRequired': 'Please select a business line',
 
   'order.title': 'Order Center',
-  'order.searchPlaceholder': 'Order ID / User ID / Product',
+  'order.searchPlaceholder': 'Order ID / User ID / Product / Coupon Code',
   'order.filterStatus': 'Order status',
   'order.filterPay': 'Payment method',
   'order.col.id': 'Order ID',
