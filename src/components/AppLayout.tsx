@@ -99,7 +99,7 @@ export default function AppLayout() {
   ].filter((n) => visible(n.key))
 
   const lifecycleNav = [
-    { key: '/lifecycle', icon: <ThunderboltOutlined />, label: phase4Label('生命周期运营') },
+    { key: '/lifecycle', icon: <ThunderboltOutlined />, label: phase4Label('消息中心') },
   ].filter((n) => visible(n.key))
 
   const NAV = [
@@ -130,7 +130,7 @@ export default function AppLayout() {
     '/packages': t('app.nav.packages'),
     '/coupons': t('app.nav.coupons'),
     '/system': t('app.nav.system'),
-    '/lifecycle': '生命周期运营',
+    '/lifecycle': '消息中心',
   }
 
   const onLogout = () => {
