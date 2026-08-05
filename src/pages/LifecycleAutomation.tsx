@@ -27,6 +27,7 @@ export default function LifecycleAutomation() {
   const [templateOpen, setTemplateOpen] = useState(false)
   const [editingTemplate, setEditingTemplate] = useState<Template | null>(null)
   const [tagOpen, setTagOpen] = useState(false)
+  const [editingTag, setEditingTag] = useState<UserTag | null>(null)
   const [content, setContent] = useState('')
   const [contentType, setContentType] = useState<Template['contentType']>('text')
   const [imageUploadOpen, setImageUploadOpen] = useState(false)
@@ -68,12 +69,20 @@ export default function LifecycleAutomation() {
     templateForm.resetFields()
     message.success(editingTemplate ? '消息模板已更新' : '消息模板已保存')
   }
+  const openTag = (tag?: UserTag) => {
+    setEditingTag(tag ?? null)
+    tagForm.setFieldsValue(tag ?? { businessLine: channels[0]?.name, logic: '满足全部条件', rules: [{ field: '用户类型', operator: '等于', value: '' }] })
+    setTagOpen(true)
+  }
   const saveTag = async () => {
     const value = await tagForm.validateFields()
-    setTags((items) => [{ id: `tag_${Date.now()}`, name: value.name, businessLine: value.businessLine, logic: value.logic, rules: value.rules, users: 0 }, ...items])
+    setTags((items) => editingTag
+      ? items.map((item) => item.id === editingTag.id ? { ...item, name: value.name, businessLine: value.businessLine, logic: value.logic, rules: value.rules } : item)
+      : [{ id: `tag_${Date.now()}`, name: value.name, businessLine: value.businessLine, logic: value.logic, rules: value.rules, users: 0 }, ...items])
     setTagOpen(false)
+    setEditingTag(null)
     tagForm.resetFields()
-    message.success('用户标签已保存')
+    message.success(editingTag ? '用户标签已更新' : '用户标签已保存')
   }
 
   const templateColumns = [
@@ -93,6 +102,7 @@ export default function LifecycleAutomation() {
     { title: '组合逻辑', dataIndex: 'logic', render: (value: string) => <Tag color="blue">{value}</Tag> },
     { title: '条件', dataIndex: 'rules', render: (rules: Rule[]) => <Space wrap>{rules.map((rule, index) => <Tag key={index}>{`${rule.field} ${rule.operator} ${rule.value}`}</Tag>)}</Space> },
     { title: '预计用户数', dataIndex: 'users' },
+    ...(editable ? [{ title: '操作', render: (_: unknown, row: UserTag) => <Button type="link" size="small" onClick={() => openTag(row)}>编辑</Button> }] : []),
   ]
 
   return <div>
@@ -100,7 +110,7 @@ export default function LifecycleAutomation() {
     <div className="lifecycle-hero"><div><Text className="eyebrow">MESSAGE CENTER</Text><Typography.Title level={2} style={{ margin: '6px 0' }}>消息中心 <Tag color="cyan">四期</Tag></Typography.Title><Paragraph type="secondary">用预定义变量快速配置多渠道消息，并通过用户属性组合定义目标人群。</Paragraph></div></div>
     <Tabs className="lifecycle-tabs" items={[
       { key: 'templates', label: <><MailOutlined /> 消息模板</>, children: <Card title="消息模板" extra={editable && <Button type="primary" icon={<PlusOutlined />} onClick={() => openTemplate()}>新建模板</Button>}><Table rowKey="id" pagination={false} dataSource={templates} columns={templateColumns} /></Card> },
-      { key: 'tags', label: <><TagsOutlined /> 用户标签</>, children: <Card title="组合用户标签" extra={editable && <Button type="primary" icon={<PlusOutlined />} onClick={() => setTagOpen(true)}>新建标签</Button>}><Alert type="info" showIcon message="标签由用户属性组合而成；用户属性变化后会自动进入或离开标签。" style={{ marginBottom: 16 }} /><Table rowKey="id" pagination={false} dataSource={tags} columns={tagColumns} /></Card> },
+      { key: 'tags', label: <><TagsOutlined /> 用户标签</>, children: <Card title="组合用户标签" extra={editable && <Button type="primary" icon={<PlusOutlined />} onClick={() => openTag()}>新建标签</Button>}><Alert type="info" showIcon message="标签由用户属性组合而成；用户属性变化后会自动进入或离开标签。" style={{ marginBottom: 16 }} /><Table rowKey="id" pagination={false} dataSource={tags} columns={tagColumns} /></Card> },
     ]} />
 
     <Modal open={templateOpen} title={`${editingTemplate ? '编辑' : '新建'}消息模板 · 四期`} onCancel={() => { setTemplateOpen(false); setEditingTemplate(null) }} onOk={saveTemplate} okText="保存" destroyOnClose width={760}>
@@ -125,7 +135,7 @@ export default function LifecycleAutomation() {
 
     <Modal open={imageUploadOpen} title="上传图片" width={420} destroyOnClose onCancel={() => { setPendingImage(''); setImageUploadOpen(false) }} footer={<Space><Button onClick={() => { setPendingImage(''); setImageUploadOpen(false) }}>取消</Button><Button type="primary" disabled={!pendingImage} onClick={insertLocalImage}>保存</Button></Space>}><Upload.Dragger accept="image/*" maxCount={1} multiple={false} showUploadList={false} beforeUpload={selectLocalImage} style={{ padding: '22px 12px' }}><p style={{ margin: '0 0 14px', color: '#667085' }}>将图片拖拽到此处</p><Button>浏览本地图片</Button></Upload.Dragger>{pendingImage && <img src={pendingImage} alt="上传预览" style={{ display: 'block', maxWidth: '100%', maxHeight: 180, margin: '16px auto 0' }} />}</Modal>
 
-    <Modal open={tagOpen} title="组合用户标签 · 四期" onCancel={() => setTagOpen(false)} onOk={saveTag} okText="保存" destroyOnClose width={820}>
+    <Modal open={tagOpen} title={`${editingTag ? '编辑' : '组合'}用户标签 · 四期`} onCancel={() => { setTagOpen(false); setEditingTag(null); tagForm.resetFields() }} onOk={saveTag} okText="保存" destroyOnClose width={820}>
       <Form form={tagForm} layout="vertical" initialValues={{ businessLine: channels[0]?.name, logic: '满足全部条件', rules: [{ field: '用户类型', operator: '等于', value: '' }] }}>
         <Form.Item name="name" label="标签名称" rules={[{ required: true, message: '请输入标签名称' }]}><Input placeholder="例如：韩国新注册用户" /></Form.Item>
         <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}><Select placeholder="请选择业务线" options={businessLineOptions} /></Form.Item>
