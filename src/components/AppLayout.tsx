@@ -78,9 +78,9 @@ export default function AppLayout() {
   // 营销中心（三期）子菜单
   const marketingChildren = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
+    { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
     { key: '/packages', icon: <AppstoreOutlined />, label: t('app.nav.packages') },
     { key: '/coupons', icon: <TagsOutlined />, label: t('app.nav.coupons') },
-    { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
   ].filter((n) => visible(n.key))
 
   // 销售中心（二期）

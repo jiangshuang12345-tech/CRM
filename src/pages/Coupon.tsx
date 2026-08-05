@@ -227,30 +227,36 @@ function CodePicker({
 function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void }) {
   const { t } = useI18n()
   const { actor } = usePerm()
+  const packages = useStore((s) => s.packages)
   const [form] = Form.useForm()
+  const benefitType = Form.useWatch('benefitType', form) as 'discount' | 'instant' | undefined
 
   const submit = async () => {
     const v = await form.validateFields()
-    const [useStart, useEnd] = v.useRange as [Dayjs, Dayjs]
-    const codes: CouponCode[] = (v.codes as CouponCode[]).map((c) => ({
-      ...c,
-      used: 0,
-    }))
+    const sku = packages.find((item) => item.id === v.skuId)
+    const useEnd = v.useEnd as Dayjs | undefined
+    const promoCodeQuantity = v.promoCodeQuantity as number
+    const codes: CouponCode[] = Array.from({ length: promoCodeQuantity }, () => ({ id: uid('cc_'), code: genCouponCode(), kol: '系统生成', used: 0 }))
     const coupon: Coupon = {
       id: genCouponId(),
       name: v.name,
       codes,
       businessLine: line,
       couponType: '折扣券',
-      currency: v.currency,
+      currency: sku?.currency ?? v.currency,
       creator: actor,
-      total: v.total,
-      remaining: v.total,
-      useStart: useStart.format('YYYY-MM-DD HH:mm:ss'),
-      useEnd: useEnd.format('YYYY-MM-DD HH:mm:ss'),
-      products: v.products ?? [],
-      discountRate: v.discountRate,
-      status: useEnd.isBefore(dayjs()) ? '已结束' : '已生效',
+      total: promoCodeQuantity,
+      remaining: promoCodeQuantity,
+      useStart: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      useEnd: useEnd?.format('YYYY-MM-DD HH:mm:ss') ?? '2099-12-31 23:59:59',
+      products: sku ? [{ id: sku.id, name: sku.name, price: sku.price }] : [],
+      skuId: sku?.id,
+      skuName: sku?.name,
+      discountedPrice: v.discountedPrice,
+      discountRate: v.benefitType === 'discount' ? v.discountRate : 0,
+      instantOff: v.benefitType === 'instant' ? v.instantOff : undefined,
+      perUserLimit: v.perUserLimit,
+      status: useEnd?.isBefore(dayjs()) ? '已结束' : '已生效',
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     }
     setState((prev) => ({ ...prev, coupons: [coupon, ...prev.coupons] }))
@@ -281,71 +287,25 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         initialValues={{
           businessLine: line,
           couponType: '折扣券',
+          benefitType: 'discount',
           creator: actor,
         }}
       >
-        <Title level={5}>{t('cp.basic')}</Title>
+        <Title level={5}>优惠券基础信息</Title>
         <Form.Item name="businessLine" label={t('cp.businessType')}>
           <Select disabled options={[{ label: line, value: line }]} />
         </Form.Item>
-        <Form.Item name="couponType" label={t('cp.couponType')} tooltip={t('cp.couponTypeTip')}>
-          <Select disabled options={[{ label: t('enum.couponType.折扣券'), value: '折扣券' }]} />
-        </Form.Item>
-        <Form.Item name="currency" label={t('cp.currency')} rules={[{ required: true, message: t('cp.currencyRequired') }]}>
-          <Select placeholder={t('cp.currencyPlaceholder')} options={currencyOptions(line)} style={{ maxWidth: 280 }} />
-        </Form.Item>
-        <Form.Item name="name" label={t('cp.name')} rules={[{ required: true, message: t('cp.nameRequired') }]}>
-          <Input placeholder={t('cp.namePlaceholder')} maxLength={30} showCount />
-        </Form.Item>
-        <Form.Item name="creator" label={t('cp.creator')}>
-          <Input disabled />
-        </Form.Item>
+        <Form.Item name="skuId" label="关联 SKU" rules={[{ required: true, message: '请选择 SKU' }]}><Select placeholder="选择一个 SKU" options={packages.filter((item) => item.businessLine === line).map((item) => ({ value: item.id, label: `${item.id} · ${item.name}` }))} /></Form.Item>
+        <Form.Item name="name" label="券名称" rules={[{ required: true, message: '请输入券名称' }]}><Input placeholder="例如：26年6月韩国新客折扣券" maxLength={40} showCount /></Form.Item>
+        <Form.Item name="discountedPrice" label="折扣后价格" rules={[{ required: true, message: '请输入折扣后价格' }]}><InputNumber min={0} style={{ width: 280 }} /></Form.Item>
+        <Form.Item name="benefitType" label="优惠方式" rules={[{ required: true }]}><Radio.Group options={[{ value: 'discount', label: '折扣' }, { value: 'instant', label: '立减' }]} /></Form.Item>
+        {benefitType === 'discount' ? <Form.Item name="discountRate" label="折扣" rules={[{ required: true, message: '请输入折扣' }]}><InputNumber min={0.01} max={100} precision={2} addonAfter="%" style={{ width: 220 }} /></Form.Item> : <Form.Item name="instantOff" label="立减金额" rules={[{ required: true, message: '请输入立减金额' }]}><InputNumber min={0.01} style={{ width: 220 }} /></Form.Item>}
 
         <Divider />
-        <Title level={5}>{t('cp.issueRule')}</Title>
-        <Form.Item name="total" label={t('cp.totalQty')} rules={[{ required: true, message: t('cp.totalRequired') }]}>
-          <InputNumber style={{ width: 280 }} min={1} placeholder={t('cp.totalPlaceholder')} />
-        </Form.Item>
-        <Form.Item
-          name="codes"
-          label={t('cp.codes')}
-          tooltip={t('cp.codesTip')}
-          rules={[
-            {
-              validator: (_, val: CouponCode[] | undefined) =>
-                val && val.length > 0 ? Promise.resolve() : Promise.reject(new Error(t('cp.codesRequired'))),
-            },
-          ]}
-        >
-          <CodePicker />
-        </Form.Item>
-
-        <Divider />
-        <Title level={5}>{t('cp.useRule')}</Title>
-        <Form.Item name="useRange" label={t('cp.useValid')} rules={[{ required: true, message: t('cp.useRequired') }]}>
-          <RangePicker showTime style={{ width: 400 }} placeholder={[t('pkg.startTime'), t('pkg.endTime')]} />
-        </Form.Item>
-        <Form.Item name="products" label={t('cp.products')} rules={[{ required: true, message: t('cp.productsRequired') }]}>
-          <ProductPicker />
-        </Form.Item>
-
-        <Divider />
-        <Title level={5}>{t('cp.benefitRule')}</Title>
-        <Form.Item
-          name="discountRate"
-          label={t('cp.discountRate')}
-          tooltip={t('cp.discountRateTip')}
-          rules={[{ required: true, message: t('cp.discountRateRequired') }]}
-        >
-          <InputNumber
-            min={0.01}
-            max={100}
-            precision={2}
-            addonAfter="%"
-            placeholder={t('cp.discountRatePlaceholder')}
-            style={{ width: 220 }}
-          />
-        </Form.Item>
+        <Title level={5}>PromoCode 发放规则</Title>
+        <Form.Item name="promoCodeQuantity" label="优惠码数量" rules={[{ required: true, message: '请输入优惠码数量' }]}><InputNumber style={{ width: 280 }} min={1} max={1000} placeholder="保存后自动生成 DINO+四位数字" /></Form.Item>
+        <Form.Item name="perUserLimit" label="每用户使用次数" rules={[{ required: true, message: '请输入使用次数' }]}><InputNumber style={{ width: 280 }} min={1} /></Form.Item>
+        <Form.Item name="useEnd" label="优惠券结束时间（选填）"><DatePicker showTime style={{ width: 280 }} /></Form.Item>
 
         <Divider />
         <div style={{ textAlign: 'center' }}>
@@ -498,8 +458,9 @@ export default function CouponPage() {
   const columns: ColumnsType<Coupon> = [
     { title: t('cp.col.id'), dataIndex: 'id', width: 90, fixed: 'left' },
     { title: t('cp.col.name'), dataIndex: 'name', width: 200 },
+    { title: '关联 SKU', dataIndex: 'skuName', width: 180, render: (value: string | undefined, record: Coupon) => <span>{value ?? record.products[0]?.name ?? '—'}<br /><Text code>{record.skuId ?? record.products[0]?.id ?? ''}</Text></span> },
     {
-      title: t('cp.col.codes'),
+      title: 'PromoCode',
       dataIndex: 'codes',
       width: 130,
       render: (codes: CouponCode[], r) => (
@@ -519,12 +480,11 @@ export default function CouponPage() {
       render: (v) => v.toLocaleString(),
     },
     {
-      title: t('cp.discountRate'),
+      title: '优惠方式',
       dataIndex: 'discountRate',
       width: 100,
       align: 'right',
-      render: (v: number | undefined) =>
-        v != null ? <Tag color="volcano">{t('cp.discountValue', { rate: v })}</Tag> : <Text type="secondary">—</Text>,
+      render: (v: number | undefined, record: Coupon) => record.instantOff != null ? <Tag color="volcano">立减 {record.instantOff}</Tag> : v ? <Tag color="volcano">{t('cp.discountValue', { rate: v })}</Tag> : <Text type="secondary">—</Text>,
     },
     { title: t('cp.col.creator'), dataIndex: 'creator', width: 170 },
     {

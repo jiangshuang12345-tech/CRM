@@ -152,7 +152,7 @@ export default function LandingPageManagement() {
   const hasTemplate = !!line && !!LANDING_TEMPLATES[line]
 
   const onLineChange = () => {
-    form.setFieldsValue({ channelCode: undefined, packageIds: undefined, couponId: undefined, couponCode: undefined })
+    form.setFieldsValue({ channelCode: undefined, skuIds: undefined })
     setPreview(null)
   }
 
@@ -161,11 +161,10 @@ export default function LandingPageManagement() {
     if (!v.businessLine || !LANDING_TEMPLATES[v.businessLine]) return null
     if (!v.channelCode) return null
     const ch = codeOptions.find((c) => c.code === v.channelCode)
-    const pkgIds: string[] = v.packageIds ?? []
+    const skuIds: string[] = v.skuIds ?? []
     return LANDING_TEMPLATES[v.businessLine]({
       channel: v.channelCode,
-      packageId: pkgIds.join(','),
-      coupon: v.couponCode,
+      packageId: skuIds.join(','),
       params: paramSuffix(ch?.params),
     })
   }
@@ -184,15 +183,18 @@ export default function LandingPageManagement() {
 
   const submit = async () => {
     const v = await form.validateFields()
+    if (landingPagesAll.some((item) => item.channelCode === v.channelCode)) {
+      message.error('该渠道码已关联落地页；每个渠道只能配置一个落地页。')
+      return
+    }
     const url = buildUrl()
     if (!url) {
       message.error(t('lp.noTemplate'))
       return
     }
     const ch = codeOptions.find((c) => c.code === v.channelCode)
-    const pkgIds: string[] = v.packageIds ?? []
-    const pkgNames = pkgIds.map((id) => packages.find((p) => p.id === id)?.name ?? id)
-    const range = v.validRange as [dayjs.Dayjs, dayjs.Dayjs] | undefined
+    const skuIds: string[] = v.skuIds ?? []
+    const skuNames = skuIds.map((id) => packages.find((item) => item.id === id)?.name ?? id)
     const lp: LandingPage = {
       id: uid('lp_'),
       name: v.name?.trim(),
@@ -201,15 +203,12 @@ export default function LandingPageManagement() {
       channelName: ch?.path,
       param1: ch?.params?.param1 || undefined,
       param2: ch?.params?.param2 || undefined,
-      packageIds: pkgIds,
-      packageNames: pkgNames,
-      packageId: pkgIds[0],
-      packageName: pkgNames[0],
-      originalPrice: v.originalPrice != null && v.originalPrice !== '' ? String(v.originalPrice) : undefined,
-      couponId: v.couponId,
-      couponCode: v.couponCode,
-      validFrom: range?.[0]?.format('YYYY-MM-DD HH:mm:ss'),
-      validUntil: range?.[1]?.format('YYYY-MM-DD HH:mm:ss'),
+      skuIds,
+      skuNames,
+      packageIds: skuIds,
+      packageNames: skuNames,
+      packageId: skuIds[0],
+      packageName: skuNames[0],
       url,
       creator: actor,
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
@@ -258,48 +257,13 @@ export default function LandingPageManagement() {
       ),
     },
     {
-      title: t('lp.col.package'),
-      dataIndex: 'packageName',
-      width: 220,
-      render: (_, r) => {
-        const names = r.packageNames?.length ? r.packageNames : r.packageName ? [r.packageName] : []
-        return names.length ? (
-          <Space direction="vertical" size={2}>
-            {names.map((n, i) => (
-              <Tag key={i} color="geekblue" style={{ marginInlineEnd: 0 }}>{n}</Tag>
-            ))}
-          </Space>
-        ) : (
-          <Text type="secondary">—</Text>
-        )
-      },
-    },
-    {
-      title: t('lp.col.strikePrice'),
-      dataIndex: 'originalPrice',
-      width: 110,
-      render: (v: string | undefined) =>
-        v ? <Text delete type="secondary">{v}</Text> : <Text type="secondary">—</Text>,
-    },
-    {
-      title: t('lp.col.coupon'),
-      dataIndex: 'couponId',
-      width: 130,
-      render: (v, r) => (v ? <span>{v}{r.couponCode ? <Text code style={{ marginLeft: 4 }}>{r.couponCode}</Text> : null}</span> : <Text type="secondary">—</Text>),
-    },
-    {
-      title: t('lp.col.valid'),
-      dataIndex: 'validFrom',
+      title: '关联 SKU',
+      dataIndex: 'skuNames',
       width: 200,
-      render: (_, r) =>
-        r.validFrom && r.validUntil ? (
-          <Text style={{ fontSize: 12 }}>
-            {r.validFrom}
-            <br />~ {r.validUntil}
-          </Text>
-        ) : (
-          <Text type="secondary">—</Text>
-        ),
+      render: (_: unknown, record: LandingPage) => {
+        const names = record.skuNames?.length ? record.skuNames : record.packageNames ?? []
+        return names.length ? <Space wrap>{names.map((name) => <Tag color="geekblue" key={name}>{name}</Tag>)}</Space> : <Text type="secondary">—</Text>
+      },
     },
     {
       title: t('lp.col.url'),
@@ -437,72 +401,8 @@ export default function LandingPageManagement() {
             </div>
           )}
 
-          <Form.Item
-            name="packageIds"
-            label={t('lp.f.package')}
-            tooltip={t('lp.f.packageTip')}
-            rules={[{ required: true, message: t('common.pleaseSelect') }]}
-          >
-            <Select
-              mode="multiple"
-              showSearch
-              allowClear
-              placeholder={line ? t('common.pleaseSelect') : t('lp.f.pickLineFirst')}
-              disabled={!line}
-              optionFilterProp="label"
-              onChange={() => setPreview(null)}
-              options={pkgOptions.map((p) => ({ label: `${p.id} · ${p.name}`, value: p.id }))}
-            />
-          </Form.Item>
-
-          <Form.Item name="originalPrice" label={t('lp.f.strikePrice')} tooltip={t('lp.f.strikePriceTip')}>
-            <InputNumber
-              min={0}
-              precision={2}
-              style={{ width: '100%' }}
-              placeholder={t('lp.f.optional')}
-              onChange={() => setPreview(null)}
-            />
-          </Form.Item>
-
-          <Form.Item name="couponId" label={t('lp.f.coupon')}>
-            <Select
-              allowClear
-              showSearch
-              placeholder={t('lp.f.optional')}
-              disabled={!line}
-              optionFilterProp="label"
-              onChange={() => {
-                form.setFieldsValue({ couponCode: undefined })
-                setPreview(null)
-              }}
-              options={couponOptions.map((c) => ({ label: `${c.id} · ${c.name}`, value: c.id }))}
-            />
-          </Form.Item>
-
-          {couponId && (
-            <Form.Item name="couponCode" label={t('lp.f.couponCode')} tooltip={t('lp.f.couponCodeTip')}>
-              <Select
-                allowClear
-                placeholder={t('lp.f.optional')}
-                onChange={() => setPreview(null)}
-                options={codeOfCoupon.map((c) => ({ label: `${c.kol} · ${c.code}`, value: c.code }))}
-              />
-            </Form.Item>
-          )}
-
-          <Form.Item
-            name="validRange"
-            label={t('lp.f.validRange')}
-            tooltip={t('lp.f.validRangeTip')}
-            rules={[{ required: true, message: t('common.pleaseSelect') }]}
-          >
-            <RangePicker
-              showTime={{ format: 'HH:mm:ss' }}
-              format="YYYY-MM-DD HH:mm:ss"
-              style={{ width: '100%' }}
-              placeholder={[t('lp.f.validStart'), t('lp.f.validEnd')]}
-            />
+          <Form.Item name="skuIds" label="关联 SKU" rules={[{ required: true, message: '请选择至少一个 SKU' }]}>
+            <Select mode="multiple" showSearch allowClear placeholder={line ? '请选择 SKU' : t('lp.f.pickLineFirst')} disabled={!line} optionFilterProp="label" onChange={() => setPreview(null)} options={pkgOptions.map((item) => ({ label: `${item.id} · ${item.name}`, value: item.id }))} />
           </Form.Item>
 
           <Divider style={{ margin: '8px 0 16px' }} />

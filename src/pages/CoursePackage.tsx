@@ -8,6 +8,7 @@ import {
   Input,
   InputNumber,
   Modal,
+  Radio,
   Select,
   Space,
   Switch,
@@ -73,6 +74,7 @@ export default function CoursePackagePage() {
   const [modal, setModal] = useState<{ mode: 'add' | 'edit'; record?: CoursePackage } | null>(null)
   const [form] = Form.useForm()
   const watchLine = Form.useWatch('businessLine', form) as BusinessLine | undefined
+  const watchValidityMode = Form.useWatch('validityMode', form) as 'absolute' | 'relative' | undefined
 
   // 业务线筛选项：渠道业务线 + 列表实际包含的业务线
   const lineOptions = useMemo(
@@ -93,6 +95,7 @@ export default function CoursePackagePage() {
   const openAdd = () => {
     setModal({ mode: 'add' })
     form.resetFields()
+    form.setFieldsValue({ validityMode: 'absolute' })
   }
   const openEdit = (record: CoursePackage) => {
     setModal({ mode: 'edit', record })
@@ -102,13 +105,19 @@ export default function CoursePackagePage() {
       currency: record.currency,
       price: record.price,
       bestValue: record.bestValue ?? false,
+      validityMode: record.validityMode ?? 'absolute',
+      validDays: record.validDays,
       validRange: [dayjs(record.validStart), dayjs(record.validEnd)],
     })
   }
 
   const submit = async () => {
     const v = await form.validateFields()
-    const [validStart, validEnd] = v.validRange as [Dayjs, Dayjs]
+    const validityMode = v.validityMode as 'absolute' | 'relative'
+    const [rangeStart, rangeEnd] = (v.validRange ?? []) as [Dayjs, Dayjs]
+    const validDays = v.validDays as number | undefined
+    const validStart = validityMode === 'relative' ? dayjs() : rangeStart
+    const validEnd = validityMode === 'relative' ? dayjs().add(validDays ?? 0, 'day') : rangeEnd
     if (modal?.mode === 'add') {
       const pkg: CoursePackage = {
         id: genPackageId(),
@@ -117,6 +126,8 @@ export default function CoursePackagePage() {
         currency: v.currency,
         price: v.price,
         bestValue: !!v.bestValue,
+        validityMode,
+        validDays: validityMode === 'relative' ? validDays : undefined,
         validStart: validStart.format('YYYY-MM-DD HH:mm:ss'),
         validEnd: validEnd.format('YYYY-MM-DD HH:mm:ss'),
         creator: actor,
@@ -137,6 +148,8 @@ export default function CoursePackagePage() {
                 currency: v.currency,
                 price: v.price,
                 bestValue: !!v.bestValue,
+                validityMode,
+                validDays: validityMode === 'relative' ? validDays : undefined,
                 validStart: validStart.format('YYYY-MM-DD HH:mm:ss'),
                 validEnd: validEnd.format('YYYY-MM-DD HH:mm:ss'),
               }
@@ -165,10 +178,10 @@ export default function CoursePackagePage() {
   }
 
   const columns: ColumnsType<CoursePackage> = [
-    { title: t('pkg.col.id'), dataIndex: 'id', width: 120 },
-    { title: t('pkg.col.line'), dataIndex: 'businessLine', width: 100, render: (v) => <Tag color="geekblue">{v}</Tag> },
+    { title: 'SKU ID', dataIndex: 'id', width: 120 },
+    { title: '国家 / 业务线', dataIndex: 'businessLine', width: 120, render: (v) => <Tag color="geekblue">{v}</Tag> },
     {
-      title: t('pkg.col.name'),
+      title: 'SKU 名称',
       dataIndex: 'name',
       width: 240,
       render: (v: string, r) => (
@@ -179,7 +192,7 @@ export default function CoursePackagePage() {
       ),
     },
     {
-      title: t('pkg.col.price'),
+      title: '原价',
       dataIndex: 'price',
       width: 150,
       render: (v, r) => (
@@ -189,43 +202,23 @@ export default function CoursePackagePage() {
       ),
     },
     {
-      title: t('pkg.col.valid'),
+      title: '有效期',
       key: 'valid',
       width: 340,
       render: (_, r) => (
-        <Text type="secondary">
-          {r.validStart} ~ {r.validEnd}
-        </Text>
+        <Text type="secondary">{r.validityMode === 'relative' ? `相对时间：${r.validDays} 天` : `${r.validStart} ~ ${r.validEnd}`}</Text>
       ),
-    },
-    { title: t('pkg.col.creator'), dataIndex: 'creator', width: 180 },
-    {
-      title: t('pkg.col.status'),
-      dataIndex: 'status',
-      width: 100,
-      render: (v) => <Tag color={v === '上架' ? 'green' : 'default'}>{t(`enum.pkg.${v}`)}</Tag>,
-    },
-    {
-      title: t('pkg.createTime'),
-      dataIndex: 'createdAt',
-      width: 200,
-      render: (v: string | undefined) => <Text type="secondary">{v || '—'}</Text>,
     },
     {
       title: t('common.action'),
       key: 'action',
-      width: 160,
+      width: 100,
       fixed: 'right',
       render: (_, r) => (
         <Space size={0}>
           {canEdit && (
             <Button type="link" onClick={() => openEdit(r)}>
               {t('common.edit')}
-            </Button>
-          )}
-          {canStatus && (
-            <Button type="link" danger={r.status === '上架'} onClick={() => toggleShelf(r)}>
-              {r.status === '上架' ? t('pkg.offShelf') : t('pkg.onShelf')}
             </Button>
           )}
         </Space>
@@ -237,11 +230,11 @@ export default function CoursePackagePage() {
     <Card
       className="page-card"
       bordered={false}
-      title={<span className="section-title">{t('pkg.title')}</span>}
+      title={<span className="section-title">SKU 管理</span>}
       extra={
         canCreate ? (
           <Button type="primary" icon={<PlusOutlined />} onClick={openAdd}>
-            {t('pkg.addBtn')}
+            新增 SKU
           </Button>
         ) : null
       }
@@ -268,7 +261,7 @@ export default function CoursePackagePage() {
 
       <Modal
         open={!!modal}
-        title={modal?.mode === 'add' ? t('pkg.addTitle') : t('pkg.editTitle')}
+        title={modal?.mode === 'add' ? '新增 SKU' : '编辑 SKU'}
         onCancel={() => setModal(null)}
         onOk={submit}
         okText={t('common.confirm')}
@@ -276,21 +269,21 @@ export default function CoursePackagePage() {
         destroyOnClose
       >
         <Form form={form} layout="vertical" preserve={false} style={{ marginTop: 12 }}>
-          <Form.Item name="businessLine" label={t('pkg.label.line')} rules={[{ required: true, message: t('pkg.lineRequired') }]}>
+          <Form.Item name="businessLine" label="国家 / 业务线" rules={[{ required: true, message: '请选择国家 / 业务线' }]}>
             <Select
               placeholder={t('pkg.linePlaceholder')}
               options={BUSINESS_LINES.map((l) => ({ label: l, value: l }))}
               onChange={() => form.setFieldValue('currency', undefined)}
             />
           </Form.Item>
-          <Form.Item name="name" label={t('pkg.label.name')} rules={[{ required: true, message: t('pkg.nameRequired') }]}>
-            <Input autoComplete="off" placeholder={t('pkg.namePlaceholder')} />
+          <Form.Item name="name" label="SKU 名称" rules={[{ required: true, message: '请输入 SKU 名称' }]}>
+            <Input autoComplete="off" placeholder="例如：1-year-KOL" />
           </Form.Item>
           <Form.Item name="currency" label={t('pkg.label.currency')} rules={[{ required: true, message: t('pkg.currencyRequired') }]}>
             <Select placeholder={t('pkg.currencyPlaceholder')} options={currencyOptions(watchLine)} />
           </Form.Item>
-          <Form.Item name="price" label={t('pkg.label.price')} rules={[{ required: true, message: t('pkg.priceRequired') }]}>
-            <InputNumber style={{ width: '100%' }} min={0} placeholder={t('pkg.pricePlaceholder')} />
+          <Form.Item name="price" label="原价" rules={[{ required: true, message: '请输入原价' }]}>
+            <InputNumber style={{ width: '100%' }} min={0} placeholder="请输入原价" />
           </Form.Item>
           <Form.Item
             name="bestValue"
@@ -300,14 +293,8 @@ export default function CoursePackagePage() {
           >
             <Switch checkedChildren="Best Value" unCheckedChildren={t('pkg.bestValueOff')} />
           </Form.Item>
-          <Form.Item name="validRange" label={t('pkg.label.valid')} rules={[{ required: true, message: t('pkg.validRequired') }]}>
-            <RangePicker
-              showTime
-              format="YYYY-MM-DD HH:mm:ss"
-              style={{ width: '100%' }}
-              placeholder={[t('pkg.startTime'), t('pkg.endTime')]}
-            />
-          </Form.Item>
+          <Form.Item name="validityMode" label="有效期" rules={[{ required: true }]}><Radio.Group options={[{ label: '绝对时间', value: 'absolute' }, { label: '相对时间', value: 'relative' }]} /></Form.Item>
+          {watchValidityMode === 'relative' ? <Form.Item name="validDays" label="有效期天数" rules={[{ required: true, message: '请输入有效期天数' }]}><InputNumber style={{ width: '100%' }} min={1} addonAfter="天" /></Form.Item> : <Form.Item name="validRange" label="起止时间" rules={[{ required: true, message: '请选择起止时间' }]}><RangePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: '100%' }} placeholder={[t('pkg.startTime'), t('pkg.endTime')]} /></Form.Item>}
         </Form>
       </Modal>
 

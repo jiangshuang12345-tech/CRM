@@ -249,6 +249,8 @@ export type CoursePackage = {
   price: number
   validStart: string // 有效期开始时间 YYYY-MM-DD HH:mm:ss
   validEnd: string // 有效期结束时间 YYYY-MM-DD HH:mm:ss
+  validityMode?: 'absolute' | 'relative'
+  validDays?: number
   creator: string
   status: PackageStatus
   createdAt: string
@@ -268,6 +270,8 @@ export type LandingPage = {
   packageName?: string
   packageIds?: string[] // 商品包（支持多选）
   packageNames?: string[]
+  skuIds?: string[]
+  skuNames?: string[]
   originalPrice?: string // 划线价（非必填，仅展示用）
   couponId?: string
   couponCode?: string
@@ -385,6 +389,11 @@ export type Coupon = {
   useStart: string
   useEnd: string
   products: CouponProduct[]
+  skuId?: string
+  skuName?: string
+  discountedPrice?: number
+  instantOff?: number
+  perUserLimit?: number
   // 权益规则（折扣率：百分比，如 10 表示立减 10%）
   discountRate: number
   status: CouponStatus
