@@ -230,17 +230,16 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
   const packages = useStore((s) => s.packages)
   const [form] = Form.useForm()
   const benefitType = Form.useWatch('benefitType', form) as 'discount' | 'instant' | undefined
-  const skuId = Form.useWatch('skuId', form) as string | undefined
+  const skuIds = Form.useWatch('skuIds', form) as string[] | undefined
   const discountRate = Form.useWatch('discountRate', form) as number | undefined
   const instantOff = Form.useWatch('instantOff', form) as number | undefined
-  const selectedSku = packages.find((item) => item.id === skuId)
-  const discountedPrice = selectedSku
-    ? Math.max(0, benefitType === 'instant' ? selectedSku.price - (instantOff ?? 0) : selectedSku.price * (1 - (discountRate ?? 0) / 100))
-    : undefined
+  const selectedSkus = packages.filter((item) => skuIds?.includes(item.id))
+  const discountedPrices = selectedSkus.map((sku) => ({ id: sku.id, name: sku.name, price: Math.max(0, benefitType === 'instant' ? sku.price - (instantOff ?? 0) : sku.price * (1 - (discountRate ?? 0) / 100)) }))
 
   const submit = async () => {
     const v = await form.validateFields()
-    const sku = packages.find((item) => item.id === v.skuId)
+    const selected = packages.filter((item) => (v.skuIds as string[]).includes(item.id))
+    const sku = selected[0]
     const [useStart, useEnd] = v.useRange as [Dayjs, Dayjs]
     const promoCodeQuantity = v.promoCodeQuantity as number
     const codes: CouponCode[] = Array.from({ length: promoCodeQuantity }, () => ({ id: uid('cc_'), code: genCouponCode(), kol: '系统生成', used: 0 }))
@@ -256,10 +255,13 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       remaining: promoCodeQuantity,
       useStart: useStart.format('YYYY-MM-DD HH:mm:ss'),
       useEnd: useEnd.format('YYYY-MM-DD HH:mm:ss'),
-      products: sku ? [{ id: sku.id, name: sku.name, price: sku.price }] : [],
+      products: selected.map((item) => ({ id: item.id, name: item.name, price: item.price })),
       skuId: sku?.id,
       skuName: sku?.name,
-      discountedPrice,
+      skuIds: selected.map((item) => item.id),
+      skuNames: selected.map((item) => item.name),
+      discountedPrice: discountedPrices[0]?.price,
+      discountedPrices,
       discountRate: v.benefitType === 'discount' ? v.discountRate : 0,
       instantOff: v.benefitType === 'instant' ? v.instantOff : undefined,
       perUserLimit: v.perUserLimit,
@@ -302,11 +304,11 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         <Form.Item name="businessLine" label={t('cp.businessType')}>
           <Select disabled options={[{ label: line, value: line }]} />
         </Form.Item>
-        <Form.Item name="skuId" label="关联 SKU" rules={[{ required: true, message: '请选择 SKU' }]}><Select placeholder="选择一个 SKU" options={packages.filter((item) => item.businessLine === line).map((item) => ({ value: item.id, label: `${item.id} · ${item.name}` }))} /></Form.Item>
+        <Form.Item name="skuIds" label="关联 SKU" rules={[{ required: true, message: '请选择至少一个 SKU' }]}><Select mode="multiple" placeholder="选择一个或多个 SKU" options={packages.filter((item) => item.businessLine === line).map((item) => ({ value: item.id, label: `${item.id} · ${item.name}` }))} /></Form.Item>
         <Form.Item name="name" label="券名称" rules={[{ required: true, message: '请输入券名称' }]}><Input placeholder="例如：26年6月韩国新客折扣券" maxLength={40} showCount /></Form.Item>
         <Form.Item name="benefitType" label="优惠方式" rules={[{ required: true }]}><Radio.Group options={[{ value: 'discount', label: '折扣' }, { value: 'instant', label: '立减' }]} /></Form.Item>
         {benefitType === 'discount' ? <Form.Item name="discountRate" label="折扣" rules={[{ required: true, message: '请输入折扣' }]}><InputNumber min={0.01} max={100} precision={2} addonAfter="%" style={{ width: 220 }} /></Form.Item> : <Form.Item name="instantOff" label="立减金额" rules={[{ required: true, message: '请输入立减金额' }]}><InputNumber min={0.01} style={{ width: 220 }} /></Form.Item>}
-        <Form.Item label="折扣后价格"><InputNumber value={discountedPrice} precision={2} disabled style={{ width: 280 }} addonAfter={selectedSku?.currency} placeholder="选择 SKU 并填写优惠方式后自动计算" /></Form.Item>
+        <Form.Item label="折扣后价格">{discountedPrices.length ? <Space wrap>{discountedPrices.map((item) => <Tag color="blue" key={item.id}>{item.name}：{item.price.toFixed(2)} {selectedSkus.find((sku) => sku.id === item.id)?.currency}</Tag>)}</Space> : <Input disabled placeholder="选择 SKU 并填写优惠方式后自动计算" style={{ width: 360 }} />}</Form.Item>
 
         <Divider />
         <Title level={5}>PromoCode 发放规则</Title>
@@ -465,7 +467,7 @@ export default function CouponPage() {
   const columns: ColumnsType<Coupon> = [
     { title: t('cp.col.id'), dataIndex: 'id', width: 90, fixed: 'left' },
     { title: t('cp.col.name'), dataIndex: 'name', width: 200 },
-    { title: '关联 SKU', dataIndex: 'skuName', width: 180, render: (value: string | undefined, record: Coupon) => <span>{value ?? record.products[0]?.name ?? '—'}<br /><Text code>{record.skuId ?? record.products[0]?.id ?? ''}</Text></span> },
+    { title: '关联 SKU', dataIndex: 'products', width: 220, render: (products: CouponProduct[]) => products.length ? <Space wrap>{products.map((item) => <Tag color="geekblue" key={item.id}>{item.id} · {item.name}</Tag>)}</Space> : <Text type="secondary">—</Text> },
     {
       title: 'PromoCode',
       dataIndex: 'codes',

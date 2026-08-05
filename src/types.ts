@@ -402,7 +402,10 @@ export type Coupon = {
   products: CouponProduct[]
   skuId?: string
   skuName?: string
+  skuIds?: string[]
+  skuNames?: string[]
   discountedPrice?: number
+  discountedPrices?: { id: string; name: string; price: number }[]
   instantOff?: number
   perUserLimit?: number
   // 权益规则（折扣率：百分比，如 10 表示立减 10%）
