@@ -7,7 +7,7 @@ import { useStore } from '../store'
 const { Text, Paragraph } = Typography
 type Rule = { field: string; operator: string; value: string; timeMode?: 'absolute' | 'relative' }
 type UserTag = { id: string; name: string; businessLine: string[]; logic: '满足全部条件' | '满足任一条件'; rules: Rule[]; users: number }
-type Template = { id: string; code: string; name: string; businessLine: string; channel: string; language: string; content: string; contentType: 'text' | 'rich'; tags: string[]; enabled: boolean; pushTarget?: string; pushUrl?: string }
+type Template = { id: string; code: string; name: string; businessLine: string[]; channel: string; language: string; content: string; contentType: 'text' | 'rich'; tags: string[]; enabled: boolean; pushTarget?: string; pushUrl?: string }
 
 const variables = ['用户名称']
 const seedTags: UserTag[] = [
@@ -15,7 +15,7 @@ const seedTags: UserTag[] = [
   { id: 'tag_trial', name: '体验未完课用户', businessLine: ['Dino English'], logic: '满足全部条件', rules: [{ field: '用户状态', operator: '等于', value: '未付费-体验中' }], users: 146 },
 ]
 const seedTemplates: Template[] = [
-  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: 'Dino English', channel: 'Push', language: '简体中文', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: '首页' },
+  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: ['Dino English'], channel: 'Push', language: '简体中文', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: '首页' },
 ]
 
 export default function LifecycleAutomation() {
@@ -55,7 +55,7 @@ export default function LifecycleAutomation() {
     setEditingTemplate(template ?? null)
     setContent(template?.content ?? '')
     setContentType(template?.contentType ?? 'text')
-    templateForm.setFieldsValue(template ?? { businessLine: channels[0]?.name, channel: 'Push', language: '简体中文', enabled: true, tags: [], pushTarget: '不跳转' })
+    templateForm.setFieldsValue(template ?? { businessLine: channels[0]?.name ? [channels[0].name] : [], channel: 'Push', language: '简体中文', enabled: true, tags: [], pushTarget: '不跳转' })
     setTemplateOpen(true)
   }
   const saveTemplate = async () => {
@@ -88,7 +88,7 @@ export default function LifecycleAutomation() {
   const templateColumns = [
     { title: '模板ID', dataIndex: 'code', render: (value: string) => <Text code>{value}</Text> },
     { title: '模板名称', dataIndex: 'name', render: (value: string) => <b>{value}</b> },
-    { title: '业务线', dataIndex: 'businessLine', render: (value: string) => <Tag color="blue">{value}</Tag> },
+    { title: '业务线', dataIndex: 'businessLine', render: (value: string[]) => <Space wrap>{value.map((item) => <Tag color="blue" key={item}>{item}</Tag>)}</Space> },
     { title: '发送通道', dataIndex: 'channel', render: (value: string) => <Tag icon={value === 'Email' ? <MailOutlined /> : <BellOutlined />}>{value}</Tag> },
     { title: '语言', dataIndex: 'language', render: (value: string) => <Tag>{value}</Tag> },
     { title: '消息内容', dataIndex: 'content', width: 360, render: (value: string) => <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{value}</div> },
@@ -116,7 +116,7 @@ export default function LifecycleAutomation() {
     <Modal open={templateOpen} title={`${editingTemplate ? '编辑' : '新建'}消息模板 · 四期`} onCancel={() => { setTemplateOpen(false); setEditingTemplate(null) }} onOk={saveTemplate} okText="保存" destroyOnClose width={760}>
       <Form form={templateForm} layout="vertical">
         <Form.Item name="name" label="模板名称" rules={[{ required: true, message: '请输入模板名称' }]}><Input /></Form.Item>
-        <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}><Select placeholder="请选择业务线" options={businessLineOptions} /></Form.Item>
+        <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}><Select mode="multiple" placeholder="请选择业务线" options={businessLineOptions} /></Form.Item>
         <Form.Item name="channel" label="发送通道" rules={[{ required: true }]}><Select disabled={!!editingTemplate} options={['Push', 'Email', '短信'].map((value) => ({ value }))} /></Form.Item>
         <Form.Item noStyle shouldUpdate={(previous, current) => previous.channel !== current.channel || previous.pushTarget !== current.pushTarget}>{({ getFieldValue }) => getFieldValue('channel') === 'Push' && <>
           <Form.Item name="pushTarget" label="点击 Push 后跳转" rules={[{ required: true, message: '请选择跳转页面' }]}><Select placeholder="请选择" options={['不跳转', '首页', '课表', '约课', '完课', '我的', 'H5页面'].map((value) => ({ value, label: value === 'H5页面' ? 'H5页面（需要填跳转地址）' : value }))} /></Form.Item>
