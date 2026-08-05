@@ -9,7 +9,7 @@ type Rule = { field: string; operator: string; value: string; timeMode?: 'absolu
 type UserTag = { id: string; name: string; businessLine: string; logic: '满足全部条件' | '满足任一条件'; rules: Rule[]; users: number }
 type Template = { id: string; code: string; name: string; businessLine: string; channel: string; language: string; content: string; contentType: 'text' | 'rich'; tags: string[]; enabled: boolean; pushTarget?: string; pushUrl?: string }
 
-const variables = ['用户姓名', '用户ID', '国家', '优惠码', '课程名称', '试用到期时间']
+const variables = ['用户名称']
 const seedTags: UserTag[] = [
   { id: 'tag_new', name: '韩国新注册用户', businessLine: 'Dino English', logic: '满足全部条件', rules: [{ field: '国家', operator: '等于', value: '韩国' }, { field: '注册时间', operator: '近', value: '7天' }], users: 328 },
   { id: 'tag_trial', name: '体验未完课用户', businessLine: 'Dino English', logic: '满足全部条件', rules: [{ field: '用户状态', operator: '等于', value: '未付费-体验中' }], users: 146 },
