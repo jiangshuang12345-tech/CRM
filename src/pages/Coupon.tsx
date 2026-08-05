@@ -454,7 +454,7 @@ export default function CouponPage() {
   const columns: ColumnsType<Coupon> = [
     { title: t('cp.col.id'), dataIndex: 'id', width: 90, fixed: 'left' },
     { title: t('cp.col.name'), dataIndex: 'name', width: 200 },
-    { title: '关联 SKU', dataIndex: 'products', width: 220, render: (products: CouponProduct[]) => products.length ? <Space wrap>{products.map((item) => <Tag color="geekblue" key={item.id}>{item.id} · {item.name}</Tag>)}</Space> : <Text type="secondary">—</Text> },
+    { title: '关联 SKU', dataIndex: 'products', width: 320, render: (products: CouponProduct[]) => products.length ? <Space direction="vertical" size={4}>{products.map((item) => <div key={item.id} style={{ whiteSpace: 'normal', lineHeight: 1.5 }}><Text code>{item.id}</Text><span style={{ marginLeft: 6 }}>{item.name}</span></div>)}</Space> : <Text type="secondary">—</Text> },
     {
       title: 'PromoCode',
       dataIndex: 'codes',
@@ -572,7 +572,7 @@ export default function CouponPage() {
         rowKey="id"
         columns={columns}
         dataSource={data}
-        scroll={{ x: 1680 }}
+        scroll={{ x: 1780 }}
         pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
