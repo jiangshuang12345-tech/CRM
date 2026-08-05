@@ -230,6 +230,13 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
   const packages = useStore((s) => s.packages)
   const [form] = Form.useForm()
   const benefitType = Form.useWatch('benefitType', form) as 'discount' | 'instant' | undefined
+  const skuId = Form.useWatch('skuId', form) as string | undefined
+  const discountRate = Form.useWatch('discountRate', form) as number | undefined
+  const instantOff = Form.useWatch('instantOff', form) as number | undefined
+  const selectedSku = packages.find((item) => item.id === skuId)
+  const discountedPrice = selectedSku
+    ? Math.max(0, benefitType === 'instant' ? selectedSku.price - (instantOff ?? 0) : selectedSku.price * (1 - (discountRate ?? 0) / 100))
+    : undefined
 
   const submit = async () => {
     const v = await form.validateFields()
@@ -252,7 +259,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       products: sku ? [{ id: sku.id, name: sku.name, price: sku.price }] : [],
       skuId: sku?.id,
       skuName: sku?.name,
-      discountedPrice: v.discountedPrice,
+      discountedPrice,
       discountRate: v.benefitType === 'discount' ? v.discountRate : 0,
       instantOff: v.benefitType === 'instant' ? v.instantOff : undefined,
       perUserLimit: v.perUserLimit,
@@ -297,9 +304,9 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         </Form.Item>
         <Form.Item name="skuId" label="关联 SKU" rules={[{ required: true, message: '请选择 SKU' }]}><Select placeholder="选择一个 SKU" options={packages.filter((item) => item.businessLine === line).map((item) => ({ value: item.id, label: `${item.id} · ${item.name}` }))} /></Form.Item>
         <Form.Item name="name" label="券名称" rules={[{ required: true, message: '请输入券名称' }]}><Input placeholder="例如：26年6月韩国新客折扣券" maxLength={40} showCount /></Form.Item>
-        <Form.Item name="discountedPrice" label="折扣后价格" rules={[{ required: true, message: '请输入折扣后价格' }]}><InputNumber min={0} style={{ width: 280 }} /></Form.Item>
         <Form.Item name="benefitType" label="优惠方式" rules={[{ required: true }]}><Radio.Group options={[{ value: 'discount', label: '折扣' }, { value: 'instant', label: '立减' }]} /></Form.Item>
         {benefitType === 'discount' ? <Form.Item name="discountRate" label="折扣" rules={[{ required: true, message: '请输入折扣' }]}><InputNumber min={0.01} max={100} precision={2} addonAfter="%" style={{ width: 220 }} /></Form.Item> : <Form.Item name="instantOff" label="立减金额" rules={[{ required: true, message: '请输入立减金额' }]}><InputNumber min={0.01} style={{ width: 220 }} /></Form.Item>}
+        <Form.Item label="折扣后价格"><InputNumber value={discountedPrice} precision={2} disabled style={{ width: 280 }} addonAfter={selectedSku?.currency} placeholder="选择 SKU 并填写优惠方式后自动计算" /></Form.Item>
 
         <Divider />
         <Title level={5}>PromoCode 发放规则</Title>
