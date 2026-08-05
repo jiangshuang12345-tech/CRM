@@ -166,6 +166,12 @@ export default function ChannelManagement() {
     })
   }
 
+  const generateTypeCode = (lineId: string, type: ChannelType) => {
+    const code = type.code ?? genChannelCode()
+    updateType(lineId, type.id, (item) => ({ ...item, code }))
+    Modal.success({ title: type.code ? t('ch.codeTitleView') : t('ch.codeTitleGen'), content: <Space><Text code>{code}</Text><Button size="small" icon={<CopyOutlined />} onClick={() => { navigator.clipboard?.writeText(code); message.success(t('common.copied')) }}>{t('common.copy')}</Button></Space> })
+  }
+
   const openParams = (lineId: string, typeId: string, node: ChannelLevelNode) => {
     setParamCtx({ lineId, typeId, node })
     paramForm.setFieldsValue({
@@ -337,6 +343,7 @@ export default function ChannelManagement() {
         {t('ch.type')}
       </Tag>
       <Text strong>{tp.name}</Text>
+      {tp.code && <Tag color="gold" style={{ margin: 0, fontFamily: 'monospace' }}>code: {tp.code}</Tag>}
       <Space size={2} className="node-actions">
         {canCreate && (
           <Tooltip title={t('ch.addChild', { level: levelLabel(1) })}>
@@ -346,6 +353,11 @@ export default function ChannelManagement() {
               icon={<PlusSquareOutlined />}
               onClick={() => openAdd({ kind: 'child', lineId, typeId: tp.id, nextLevel: 1 })}
             />
+          </Tooltip>
+        )}
+        {canGenCode && (
+          <Tooltip title={tp.code ? t('ch.codeView') : t('ch.codeGen')}>
+            <Button type="text" size="small" icon={<ThunderboltOutlined />} style={{ color: tp.code ? '#faad14' : '#2F6BFF' }} onClick={() => generateTypeCode(lineId, tp)} />
           </Tooltip>
         )}
         {canEditNode && (

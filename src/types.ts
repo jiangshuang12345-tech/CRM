@@ -43,6 +43,7 @@ export type ChannelLevelNode = {
 export type ChannelType = {
   id: string
   name: string // 自然流量 / landingpage / KOL ...
+  code?: string // 一级渠道可直接生成渠道 code
   children: ChannelLevelNode[]
 }
 

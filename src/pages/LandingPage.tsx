@@ -87,6 +87,7 @@ const LANDING_TEMPLATES: Record<
 function collectCodes(line: ChannelLine): { code: string; path: string; params?: ChannelParams }[] {
   const res: { code: string; path: string; params?: ChannelParams }[] = []
   for (const tp of line.children) {
+    if (tp.code) res.push({ code: tp.code, path: tp.name })
     const walk = (nodes: ChannelLevelNode[], names: string[]) => {
       for (const n of nodes) {
         const path = [tp.name, ...names, n.name].join(' / ')
