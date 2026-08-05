@@ -19,7 +19,7 @@ import {
 } from 'antd'
 
 const { RangePicker } = DatePicker
-import { CopyOutlined, DeleteOutlined, EditOutlined, LinkOutlined, ThunderboltOutlined } from '@ant-design/icons'
+import { CopyOutlined, EditOutlined, LinkOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, uid, useStore } from '../store'
@@ -114,7 +114,6 @@ export default function LandingPageManagement() {
   const { can, actor } = usePerm()
   const canCreate = can('landing_create') === 'operate'
   const canEdit = canCreate
-  const canDelete = can('landing_delete') === 'operate'
   const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   const channels = useStore((s) => s.channels)
   const packages = useStore((s) => s.packages)
@@ -254,17 +253,6 @@ export default function LandingPageManagement() {
     setEditing(null)
   }
 
-  const remove = (lp: LandingPage) =>
-    Modal.confirm({
-      title: t('lp.delTitle'),
-      content: t('lp.delContent'),
-      okText: t('common.confirm'),
-      cancelText: t('common.cancel'),
-      okButtonProps: { danger: true },
-      onOk: () =>
-        setState((prev) => ({ ...prev, landingPages: prev.landingPages.filter((x) => x.id !== lp.id) })),
-    })
-
   const columns: ColumnsType<LandingPage> = [
     {
       title: t('lp.col.name'),
@@ -320,7 +308,7 @@ export default function LandingPageManagement() {
     },
     { title: t('lp.col.creator'), dataIndex: 'creator', width: 170 },
     { title: t('lp.col.createTime'), dataIndex: 'createdAt', width: 170 },
-    ...(canEdit || canDelete
+    ...(canEdit
       ? [
           {
             title: t('common.action'),
@@ -330,7 +318,6 @@ export default function LandingPageManagement() {
             render: (_: unknown, r: LandingPage) => (
               <Space size={0}>
                 {canEdit && <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openEdit(r)}>{t('common.edit')}</Button>}
-                {canDelete && <Button type="link" danger size="small" icon={<DeleteOutlined />} onClick={() => remove(r)}>{t('common.delete')}</Button>}
               </Space>
             ),
           },
