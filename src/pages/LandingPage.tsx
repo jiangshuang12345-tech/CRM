@@ -410,7 +410,7 @@ export default function LandingPageManagement() {
             </div>
           )}
 
-          <Form.Item name="skuIds" label="关联 SKU" rules={[{ required: true, message: '请选择至少一个 SKU' }]}>
+          <Form.Item name="skuIds" label="关联 SKU（选填）">
             <Select mode="multiple" showSearch allowClear placeholder={line ? '请选择 SKU' : t('lp.f.pickLineFirst')} disabled={!line} optionFilterProp="label" onChange={() => setPreview(null)} options={pkgOptions.map((item) => ({ label: `${item.id} · ${item.name}`, value: item.id }))} />
           </Form.Item>
 
