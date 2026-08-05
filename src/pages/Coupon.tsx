@@ -241,7 +241,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
   const submit = async () => {
     const v = await form.validateFields()
     const sku = packages.find((item) => item.id === v.skuId)
-    const useEnd = v.useEnd as Dayjs | undefined
+    const [useStart, useEnd] = v.useRange as [Dayjs, Dayjs]
     const promoCodeQuantity = v.promoCodeQuantity as number
     const codes: CouponCode[] = Array.from({ length: promoCodeQuantity }, () => ({ id: uid('cc_'), code: genCouponCode(), kol: '系统生成', used: 0 }))
     const coupon: Coupon = {
@@ -254,8 +254,8 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       creator: actor,
       total: promoCodeQuantity,
       remaining: promoCodeQuantity,
-      useStart: dayjs().format('YYYY-MM-DD HH:mm:ss'),
-      useEnd: useEnd?.format('YYYY-MM-DD HH:mm:ss') ?? '2099-12-31 23:59:59',
+      useStart: useStart.format('YYYY-MM-DD HH:mm:ss'),
+      useEnd: useEnd.format('YYYY-MM-DD HH:mm:ss'),
       products: sku ? [{ id: sku.id, name: sku.name, price: sku.price }] : [],
       skuId: sku?.id,
       skuName: sku?.name,
@@ -263,7 +263,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
       discountRate: v.benefitType === 'discount' ? v.discountRate : 0,
       instantOff: v.benefitType === 'instant' ? v.instantOff : undefined,
       perUserLimit: v.perUserLimit,
-      status: useEnd?.isBefore(dayjs()) ? '已结束' : '已生效',
+      status: useEnd.isBefore(dayjs()) ? '已结束' : '已生效',
       createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     }
     setState((prev) => ({ ...prev, coupons: [coupon, ...prev.coupons] }))
@@ -312,7 +312,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         <Title level={5}>PromoCode 发放规则</Title>
         <Form.Item name="promoCodeQuantity" label="优惠码数量" rules={[{ required: true, message: '请输入优惠码数量' }]}><InputNumber style={{ width: 280 }} min={1} max={1000} placeholder="保存后自动生成 DINO+四位数字" /></Form.Item>
         <Form.Item name="perUserLimit" label="每用户使用次数" rules={[{ required: true, message: '请输入使用次数' }]}><InputNumber style={{ width: 280 }} min={1} /></Form.Item>
-        <Form.Item name="useEnd" label="优惠券结束时间（选填）"><DatePicker showTime style={{ width: 280 }} /></Form.Item>
+        <Form.Item name="useRange" label="优惠券有效期" rules={[{ required: true, message: '请选择开始时间和结束时间' }]}><RangePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: 400 }} placeholder={['开始时间', '结束时间']} /></Form.Item>
 
         <Divider />
         <div style={{ textAlign: 'center' }}>
