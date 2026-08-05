@@ -143,6 +143,7 @@ function CodePicker({
   }
 
   const remove = (id: string) => onChange?.(value.filter((c) => c.id !== id))
+  const updateOwner = (id: string, owner: string) => onChange?.(value.map((code) => code.id === id ? { ...code, kol: owner } : code))
 
   const copyAll = () => {
     if (value.length === 0) return
@@ -154,7 +155,7 @@ function CodePicker({
   }
 
   const columns: ColumnsType<CouponCode> = [
-    { title: t('cp.code.kol'), dataIndex: 'kol' },
+    { title: '使用者 / KOL', dataIndex: 'kol', width: 190, render: (value: string, record: CouponCode) => <Input value={value} allowClear placeholder="填写使用者名称" onChange={(event) => updateOwner(record.id, event.target.value)} /> },
     {
       title: t('cp.code.code'),
       dataIndex: 'code',
