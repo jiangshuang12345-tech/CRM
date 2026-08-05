@@ -19,7 +19,7 @@ import {
 } from 'antd'
 
 const { RangePicker } = DatePicker
-import { CopyOutlined, DeleteOutlined, LinkOutlined, ThunderboltOutlined } from '@ant-design/icons'
+import { CopyOutlined, DeleteOutlined, EditOutlined, LinkOutlined, ThunderboltOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { setState, uid, useStore } from '../store'
@@ -113,6 +113,7 @@ export default function LandingPageManagement() {
   const { t } = useI18n()
   const { can, actor } = usePerm()
   const canCreate = can('landing_create') === 'operate'
+  const canEdit = canCreate
   const canDelete = can('landing_delete') === 'operate'
   const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   const channels = useStore((s) => s.channels)
@@ -125,6 +126,7 @@ export default function LandingPageManagement() {
   )
 
   const [open, setOpen] = useState(false)
+  const [editing, setEditing] = useState<LandingPage | null>(null)
   const [form] = Form.useForm()
   const [preview, setPreview] = useState<string | null>(null)
   const line = Form.useWatch('businessLine', form) as string | undefined
@@ -183,12 +185,25 @@ export default function LandingPageManagement() {
   const openModal = () => {
     form.resetFields()
     setPreview(null)
+    setEditing(null)
+    setOpen(true)
+  }
+
+  const openEdit = (lp: LandingPage) => {
+    form.setFieldsValue({
+      name: lp.name,
+      businessLine: lp.businessLine,
+      channelCode: lp.channelCode,
+      skuIds: lp.skuIds?.length ? lp.skuIds : lp.packageIds ?? [],
+    })
+    setPreview(lp.url)
+    setEditing(lp)
     setOpen(true)
   }
 
   const submit = async () => {
     const v = await form.validateFields()
-    if (landingPagesAll.some((item) => item.channelCode === v.channelCode)) {
+    if (landingPagesAll.some((item) => item.channelCode === v.channelCode && item.id !== editing?.id)) {
       message.error('该渠道码已关联落地页；每个渠道只能配置一个落地页。')
       return
     }
@@ -200,8 +215,7 @@ export default function LandingPageManagement() {
     const ch = codeOptions.find((c) => c.code === v.channelCode)
     const skuIds: string[] = v.skuIds ?? []
     const skuNames = skuIds.map((id) => packages.find((item) => item.id === id)?.name ?? id)
-    const lp: LandingPage = {
-      id: uid('lp_'),
+    const values = {
       name: v.name?.trim(),
       businessLine: v.businessLine,
       channelCode: v.channelCode,
@@ -219,12 +233,25 @@ export default function LandingPageManagement() {
       packageId: skuIds[0],
       packageName: skuNames[0],
       url,
-      creator: actor,
-      createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     }
-    setState((prev) => ({ ...prev, landingPages: [lp, ...prev.landingPages] }))
-    message.success(t('lp.genOk'))
+    if (editing) {
+      setState((prev) => ({
+        ...prev,
+        landingPages: prev.landingPages.map((item) => item.id === editing.id ? { ...item, ...values } : item),
+      }))
+      message.success('落地页已更新')
+    } else {
+      const lp: LandingPage = {
+        id: uid('lp_'),
+        ...values,
+        creator: actor,
+        createdAt: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      }
+      setState((prev) => ({ ...prev, landingPages: [lp, ...prev.landingPages] }))
+      message.success(t('lp.genOk'))
+    }
     setOpen(false)
+    setEditing(null)
   }
 
   const remove = (lp: LandingPage) =>
@@ -293,17 +320,18 @@ export default function LandingPageManagement() {
     },
     { title: t('lp.col.creator'), dataIndex: 'creator', width: 170 },
     { title: t('lp.col.createTime'), dataIndex: 'createdAt', width: 170 },
-    ...(canDelete
+    ...(canEdit || canDelete
       ? [
           {
             title: t('common.action'),
             key: 'op',
-            width: 90,
+            width: 150,
             fixed: 'right' as const,
             render: (_: unknown, r: LandingPage) => (
-              <Button type="link" danger size="small" icon={<DeleteOutlined />} onClick={() => remove(r)}>
-                {t('common.delete')}
-              </Button>
+              <Space size={0}>
+                {canEdit && <Button type="link" size="small" icon={<EditOutlined />} onClick={() => openEdit(r)}>{t('common.edit')}</Button>}
+                {canDelete && <Button type="link" danger size="small" icon={<DeleteOutlined />} onClick={() => remove(r)}>{t('common.delete')}</Button>}
+              </Space>
             ),
           },
         ]
@@ -341,10 +369,10 @@ export default function LandingPageManagement() {
 
       <Modal
         open={open}
-        title={t('lp.genTitle')}
-        onCancel={() => setOpen(false)}
+        title={editing ? '编辑落地页' : t('lp.genTitle')}
+        onCancel={() => { setOpen(false); setEditing(null) }}
         onOk={submit}
-        okText={t('lp.genConfirm')}
+        okText={editing ? t('common.save') : t('lp.genConfirm')}
         cancelText={t('common.cancel')}
         okButtonProps={{ disabled: !hasTemplate }}
         width={640}
