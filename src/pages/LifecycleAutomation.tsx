@@ -7,7 +7,7 @@ import { useStore } from '../store'
 const { Text, Paragraph } = Typography
 type Rule = { field: string; operator: string; value: string; timeMode?: 'absolute' | 'relative' }
 type UserTag = { id: string; name: string; businessLine: string; logic: '满足全部条件' | '满足任一条件'; rules: Rule[]; users: number }
-type Template = { id: string; code: string; name: string; businessLine: string; channel: string; content: string; contentType: 'text' | 'rich'; tags: string[]; enabled: boolean; pushTarget?: string; pushUrl?: string }
+type Template = { id: string; code: string; name: string; businessLine: string; channel: string; language: string; content: string; contentType: 'text' | 'rich'; tags: string[]; enabled: boolean; pushTarget?: string; pushUrl?: string }
 
 const variables = ['用户姓名', '用户ID', '国家', '优惠码', '课程名称', '试用到期时间']
 const seedTags: UserTag[] = [
@@ -15,7 +15,7 @@ const seedTags: UserTag[] = [
   { id: 'tag_trial', name: '体验未完课用户', businessLine: 'Dino English', logic: '满足全部条件', rules: [{ field: '用户状态', operator: '等于', value: '未付费-体验中' }], users: 146 },
 ]
 const seedTemplates: Template[] = [
-  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: 'Dino English', channel: 'Push', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: '首页' },
+  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: 'Dino English', channel: 'Push', language: '简体中文', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: '首页' },
 ]
 
 export default function LifecycleAutomation() {
@@ -54,14 +54,14 @@ export default function LifecycleAutomation() {
     setEditingTemplate(template ?? null)
     setContent(template?.content ?? '')
     setContentType(template?.contentType ?? 'text')
-    templateForm.setFieldsValue(template ?? { businessLine: channels[0]?.name, channel: 'Push', enabled: true, tags: [], pushTarget: '不跳转' })
+    templateForm.setFieldsValue(template ?? { businessLine: channels[0]?.name, channel: 'Push', language: '简体中文', enabled: true, tags: [], pushTarget: '不跳转' })
     setTemplateOpen(true)
   }
   const saveTemplate = async () => {
     const value = await templateForm.validateFields()
     setTemplates((items) => editingTemplate
-      ? items.map((item) => item.id === editingTemplate.id ? { ...item, name: value.name, businessLine: value.businessLine, channel: value.channel, content, contentType, tags: value.tags || [], enabled: value.enabled ?? true, pushTarget: value.channel === 'Push' ? value.pushTarget : undefined, pushUrl: value.channel === 'Push' && value.pushTarget === 'H5页面' ? value.pushUrl : undefined } : item)
-      : [{ id: `tpl_${Date.now()}`, code: `MSG${String(items.length + 1).padStart(4, '0')}`, name: value.name, businessLine: value.businessLine, channel: value.channel, content, contentType, tags: value.tags || [], enabled: value.enabled ?? true, pushTarget: value.channel === 'Push' ? value.pushTarget : undefined, pushUrl: value.channel === 'Push' && value.pushTarget === 'H5页面' ? value.pushUrl : undefined }, ...items])
+      ? items.map((item) => item.id === editingTemplate.id ? { ...item, name: value.name, businessLine: value.businessLine, channel: value.channel, language: value.language, content, contentType, tags: value.tags || [], enabled: value.enabled ?? true, pushTarget: value.channel === 'Push' ? value.pushTarget : undefined, pushUrl: value.channel === 'Push' && value.pushTarget === 'H5页面' ? value.pushUrl : undefined } : item)
+      : [{ id: `tpl_${Date.now()}`, code: `MSG${String(items.length + 1).padStart(4, '0')}`, name: value.name, businessLine: value.businessLine, channel: value.channel, language: value.language, content, contentType, tags: value.tags || [], enabled: value.enabled ?? true, pushTarget: value.channel === 'Push' ? value.pushTarget : undefined, pushUrl: value.channel === 'Push' && value.pushTarget === 'H5页面' ? value.pushUrl : undefined }, ...items])
     setTemplateOpen(false)
     setEditingTemplate(null)
     setContent('')
@@ -81,6 +81,7 @@ export default function LifecycleAutomation() {
     { title: '模板名称', dataIndex: 'name', render: (value: string) => <b>{value}</b> },
     { title: '业务线', dataIndex: 'businessLine', render: (value: string) => <Tag color="blue">{value}</Tag> },
     { title: '发送通道', dataIndex: 'channel', render: (value: string) => <Tag icon={value === 'Email' ? <MailOutlined /> : <BellOutlined />}>{value}</Tag> },
+    { title: '语言', dataIndex: 'language', render: (value: string) => <Tag>{value}</Tag> },
     { title: '消息内容', dataIndex: 'content', width: 360, render: (value: string) => <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{value}</div> },
     { title: '用户标签', dataIndex: 'tags', render: (value: string[]) => <Space wrap>{value.map((item) => <Tag color="cyan" key={item}>{item}</Tag>)}</Space> },
     { title: '状态', dataIndex: 'enabled', render: (value: boolean) => <Tag color={value ? 'green' : 'default'}>{value ? '已启用' : '未启用'}</Tag> },
@@ -111,6 +112,7 @@ export default function LifecycleAutomation() {
           <Form.Item name="pushTarget" label="点击 Push 后跳转" rules={[{ required: true, message: '请选择跳转页面' }]}><Select placeholder="请选择" options={['不跳转', '首页', '课表', '约课', '完课', '我的', 'H5页面'].map((value) => ({ value, label: value === 'H5页面' ? 'H5页面（需要填跳转地址）' : value }))} /></Form.Item>
           {getFieldValue('pushTarget') === 'H5页面' && <Form.Item name="pushUrl" label="H5 跳转地址" rules={[{ required: true, type: 'url', message: '请输入有效的 H5 链接' }]}><Input placeholder="https://example.com/page" /></Form.Item>}
         </>}</Form.Item>
+        <Form.Item name="language" label="消息语言" rules={[{ required: true, message: '请选择消息语言' }]}><Select options={['简体中文', 'English', '한국어', 'العربية'].map((value) => ({ value }))} /></Form.Item>
         <Form.Item label="消息内容" required>
           <Radio.Group value={contentType} onChange={(event) => setContentType(event.target.value)} optionType="button" options={[{ value: 'text', label: '纯文本' }, { value: 'rich', label: '富文本' }]} style={{ marginBottom: 10 }} />
           {contentType === 'text' ? <Input.TextArea value={content} onChange={(event) => setContent(event.target.value)} rows={5} maxLength={1000} placeholder="填写消息内容" /> : <div style={{ border: '1px solid #d9d9d9', borderRadius: 6 }}><div style={{ padding: '7px 8px', borderBottom: '1px solid #d9d9d9', background: '#fafafa' }}><Space size={2} wrap><Select size="small" defaultValue="3" style={{ width: 82 }} onChange={(value) => formatRichText('fontSize', value)} options={[['2', '12px'], ['3', '16px'], ['4', '18px'], ['5', '22px']].map(([value, label]) => ({ value, label }))} />{[['bold', 'B'], ['italic', 'I'], ['underline', 'U'], ['strikeThrough', 'S'], ['justifyLeft', '≡'], ['justifyCenter', '≣'], ['justifyRight', '☰'], ['insertUnorderedList', '• 列表'], ['insertOrderedList', '1. 列表']].map(([command, label]) => <Button key={command} size="small" type="text" onMouseDown={(event) => event.preventDefault()} onClick={() => formatRichText(command)} style={{ fontWeight: command === 'bold' ? 700 : undefined, fontStyle: command === 'italic' ? 'italic' : undefined }}>{label}</Button>)}<ColorPicker size="small" onChangeComplete={(color) => formatRichText('foreColor', color.toHexString())}><Button size="small" type="text" style={{ color: '#1677ff', textDecoration: 'underline' }}>A</Button></ColorPicker><Button size="small" onMouseDown={(event) => event.preventDefault()} onClick={() => formatRichText('createLink', window.prompt('输入链接地址') || '')}>链接</Button><Button size="small" onClick={() => { setPendingImage(''); setImageUploadOpen(true) }}>图片</Button></Space></div><div contentEditable suppressContentEditableWarning onInput={(event) => setContent(event.currentTarget.innerHTML)} dangerouslySetInnerHTML={{ __html: content }} style={{ minHeight: 220, padding: 12, outline: 'none' }} /></div>}
