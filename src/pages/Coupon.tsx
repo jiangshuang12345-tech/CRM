@@ -134,17 +134,12 @@ function CodePicker({
   showUsed?: boolean
 }) {
   const { t } = useI18n()
-  const [kol, setKol] = useState('')
+  const [quantity, setQuantity] = useState(1)
 
   const add = () => {
-    const name = kol.trim()
-    if (!name) return
-    if (value.some((c) => c.kol.toLowerCase() === name.toLowerCase())) {
-      message.warning(t('cp.kolExists'))
-      return
-    }
-    onChange?.([...value, { id: uid('cc_'), code: genCouponCode(value.map((c) => c.code)), kol: name, used: 0 }])
-    setKol('')
+    const existing = value.map((code) => code.code)
+    const created = Array.from({ length: quantity }, (_, index) => ({ id: uid('cc_'), code: genCouponCode([...existing, ...Array.from({ length: index }, (_, i) => `DINO${i}`)]), kol: '系统生成', used: 0 }))
+    onChange?.([...value, ...created])
   }
 
   const remove = (id: string) => onChange?.(value.filter((c) => c.id !== id))
@@ -190,18 +185,7 @@ function CodePicker({
 
   return (
     <div>
-      <Input
-        placeholder={t('cp.kolPlaceholder')}
-        prefix={<PlusOutlined />}
-        value={kol}
-        onChange={(e) => setKol(e.target.value)}
-        onPressEnter={add}
-        suffix={
-          <Button type="link" size="small" onClick={add} style={{ padding: 0 }}>
-            {t('cp.addCode')}
-          </Button>
-        }
-      />
+      <Space><InputNumber min={1} max={1000} value={quantity} onChange={(value) => setQuantity(value ?? 1)} addonAfter="个" /><Button type="primary" icon={<PlusOutlined />} onClick={add}>新增优惠码</Button></Space>
       <Space style={{ marginTop: 12 }}>
         <Button size="small" icon={<CopyOutlined />} disabled={value.length === 0} onClick={copyAll}>
           {t('cp.copyAllCodes')}
@@ -340,7 +324,7 @@ export default function CouponPage() {
   const canCreate = can('coupons_create') === 'operate'
   const canExtend = can('coupons_extend') === 'operate'
   const canRevoke = can('coupons_revoke') === 'operate'
-  const canEdit = false // No 'coupons_edit' permission requested, replace references with canCreate or remove. Wait, the original code had 'coupons' === 'operate' for "分配给" and "新增一批code".
+  const canEdit = can('coupons_edit') === 'operate' || canCreate
   const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   const [view, setView] = useState<'list' | 'create'>('list')
   const [createLine, setCreateLine] = useState<BusinessLine>('韩国')
@@ -421,7 +405,7 @@ export default function CouponPage() {
     }
     setState((prev) => ({
       ...prev,
-      coupons: prev.coupons.map((c) => (c.id === codesCoupon.id ? { ...c, codes: codesList } : c)),
+      coupons: prev.coupons.map((c) => c.id === codesCoupon.id ? { ...c, codes: codesList, total: c.total + Math.max(0, codesList.length - c.codes.length), remaining: c.remaining + Math.max(0, codesList.length - c.codes.length) } : c),
     }))
     message.success(t('cp.saveCodesOk'))
     setCodesCoupon(null)
@@ -521,7 +505,7 @@ export default function CouponPage() {
           )}
           {canEdit && (
             <Button type="link" size="small" onClick={() => openCodes(r)}>
-              {t('cp.manageCodes')}
+              新增优惠码
             </Button>
           )}
           {canExtend && (
