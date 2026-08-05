@@ -15,7 +15,7 @@ const seedTags: UserTag[] = [
   { id: 'tag_trial', name: '体验未完课用户', businessLine: ['Dino English'], logic: '满足全部条件', rules: [{ field: '用户状态', operator: '等于', value: '未付费-体验中' }], users: 146 },
 ]
 const seedTemplates: Template[] = [
-  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: ['Dino English'], channel: 'Push', language: '简体中文', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: '首页' },
+  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: ['Dino English'], channel: 'Push', language: '简体中文', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: 'Dino' },
 ]
 
 export default function LifecycleAutomation() {
@@ -119,7 +119,7 @@ export default function LifecycleAutomation() {
         <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}><Select mode="multiple" placeholder="请选择业务线" options={businessLineOptions} /></Form.Item>
         <Form.Item name="channel" label="发送通道" rules={[{ required: true }]}><Select disabled={!!editingTemplate} options={['Push', 'Email', '短信'].map((value) => ({ value }))} /></Form.Item>
         <Form.Item noStyle shouldUpdate={(previous, current) => previous.channel !== current.channel || previous.pushTarget !== current.pushTarget}>{({ getFieldValue }) => getFieldValue('channel') === 'Push' && <>
-          <Form.Item name="pushTarget" label="点击 Push 后跳转" rules={[{ required: true, message: '请选择跳转页面' }]}><Select placeholder="请选择" options={['不跳转', '首页', '课表', '约课', '完课', '我的', 'H5页面'].map((value) => ({ value, label: value === 'H5页面' ? 'H5页面（需要填跳转地址）' : value }))} /></Form.Item>
+          <Form.Item name="pushTarget" label="点击 Push 后跳转" rules={[{ required: true, message: '请选择跳转页面' }]}><Select placeholder="请选择" options={['不跳转', 'Dino', 'Class', 'Explore', 'Play', 'H5页面'].map((value) => ({ value, label: value === 'H5页面' ? 'H5页面（需要填跳转地址）' : value }))} /></Form.Item>
           {getFieldValue('pushTarget') === 'H5页面' && <Form.Item name="pushUrl" label="H5 跳转地址" rules={[{ required: true, type: 'url', message: '请输入有效的 H5 链接' }]}><Input placeholder="https://example.com/page" /></Form.Item>}
         </>}</Form.Item>
         <Form.Item name="language" label="消息语言" rules={[{ required: true, message: '请选择消息语言' }]}><Select options={['English', '한국어', 'العربية', '简体中文'].map((value) => ({ value }))} /></Form.Item>
