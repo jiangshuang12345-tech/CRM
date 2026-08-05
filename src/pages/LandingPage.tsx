@@ -36,6 +36,10 @@ const { Text, Paragraph } = Typography
 function paramSuffix(params?: ChannelParams): string {
   if (!params) return ''
   let s = ''
+  if (params.mediaSource) s += `&media_source=${encodeURIComponent(params.mediaSource)}`
+  if (params.afChannel) s += `&af_channel=${encodeURIComponent(params.afChannel)}`
+  if (params.campaign) s += `&campaign=${encodeURIComponent(params.campaign)}`
+  if (params.campaignId) s += `&campaign_id=${encodeURIComponent(params.campaignId)}`
   if (params.param1) s += `&p1=${encodeURIComponent(params.param1)}`
   if (params.param2) s += `&p2=${encodeURIComponent(params.param2)}`
   return s
@@ -87,7 +91,7 @@ const LANDING_TEMPLATES: Record<
 function collectCodes(line: ChannelLine): { code: string; path: string; params?: ChannelParams }[] {
   const res: { code: string; path: string; params?: ChannelParams }[] = []
   for (const tp of line.children) {
-    if (tp.code) res.push({ code: tp.code, path: tp.name })
+    if (tp.code) res.push({ code: tp.code, path: tp.name, params: tp.params })
     const walk = (nodes: ChannelLevelNode[], names: string[]) => {
       for (const n of nodes) {
         const path = [tp.name, ...names, n.name].join(' / ')
@@ -148,7 +152,7 @@ export default function LandingPageManagement() {
     [codeOptions, channelCode],
   )
   const channelParams = selectedChannel?.params
-  const hasChannelParams = !!(channelParams?.param1 || channelParams?.param2)
+  const hasChannelParams = !!(channelParams?.mediaSource || channelParams?.afChannel || channelParams?.campaign || channelParams?.campaignId || channelParams?.param1 || channelParams?.param2)
 
   const hasTemplate = !!line && !!LANDING_TEMPLATES[line]
 
@@ -202,6 +206,10 @@ export default function LandingPageManagement() {
       businessLine: v.businessLine,
       channelCode: v.channelCode,
       channelName: ch?.path,
+      mediaSource: ch?.params?.mediaSource,
+      afChannel: ch?.params?.afChannel,
+      campaign: ch?.params?.campaign,
+      campaignId: ch?.params?.campaignId,
       param1: ch?.params?.param1 || undefined,
       param2: ch?.params?.param2 || undefined,
       skuIds,
@@ -248,10 +256,12 @@ export default function LandingPageManagement() {
           {v || '—'}
           <br />
           <Text code style={{ fontSize: 12 }}>{r.channelCode}</Text>
-          {(r.param1 || r.param2) && (
+          {(r.mediaSource || r.afChannel || r.campaign || r.campaignId || r.param1 || r.param2) && (
             <div style={{ marginTop: 4 }}>
-              {r.param1 && <Tag color="blue" style={{ marginInlineEnd: 4 }}>{t('ch.param1')}: {r.param1}</Tag>}
-              {r.param2 && <Tag color="cyan">{t('ch.param2')}: {r.param2}</Tag>}
+              {r.mediaSource && <Tag color="blue" style={{ marginInlineEnd: 4 }}>media_source: {r.mediaSource}</Tag>}
+              {r.afChannel && <Tag color="cyan">af_channel: {r.afChannel}</Tag>}
+              {r.campaign && <Tag color="purple">campaign: {r.campaign}</Tag>}
+              {r.campaignId && <Tag color="gold">campaign_id: {r.campaignId}</Tag>}
             </div>
           )}
         </span>
@@ -389,12 +399,10 @@ export default function LandingPageManagement() {
               {hasChannelParams ? (
                 <Space size={6} wrap>
                   <Text type="secondary" style={{ fontSize: 12 }}>{t('lp.f.channelParams')}</Text>
-                  {channelParams?.param1 && (
-                    <Tag color="blue">{t('ch.param1')}: {channelParams.param1}</Tag>
-                  )}
-                  {channelParams?.param2 && (
-                    <Tag color="cyan">{t('ch.param2')}: {channelParams.param2}</Tag>
-                  )}
+                  {channelParams?.mediaSource && <Tag color="blue">media_source: {channelParams.mediaSource}</Tag>}
+                  {channelParams?.afChannel && <Tag color="cyan">af_channel: {channelParams.afChannel}</Tag>}
+                  {channelParams?.campaign && <Tag color="purple">campaign: {channelParams.campaign}</Tag>}
+                  {channelParams?.campaignId && <Tag color="gold">campaign_id: {channelParams.campaignId}</Tag>}
                 </Space>
               ) : (
                 <Text type="secondary" style={{ fontSize: 12 }}>{t('lp.f.noChannelParams')}</Text>

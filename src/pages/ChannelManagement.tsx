@@ -50,7 +50,7 @@ export default function ChannelManagement() {
 
   const [addCtx, setAddCtx] = useState<AddCtx | null>(null)
   const [renameNode, setRenameNode] = useState<{ id: string; name: string } | null>(null)
-  const [paramCtx, setParamCtx] = useState<{ lineId: string; typeId: string; node: ChannelLevelNode } | null>(null)
+  const [paramCtx, setParamCtx] = useState<{ lineId: string; typeId: string; node: ChannelLevelNode | ChannelType } | null>(null)
   const [form] = Form.useForm()
   const [paramForm] = Form.useForm()
   // 默认各业务线收起；展开/收起状态记忆到 localStorage
@@ -172,22 +172,23 @@ export default function ChannelManagement() {
     Modal.success({ title: type.code ? t('ch.codeTitleView') : t('ch.codeTitleGen'), content: <Space><Text code>{code}</Text><Button size="small" icon={<CopyOutlined />} onClick={() => { navigator.clipboard?.writeText(code); message.success(t('common.copied')) }}>{t('common.copy')}</Button></Space> })
   }
 
-  const openParams = (lineId: string, typeId: string, node: ChannelLevelNode) => {
+  const openParams = (lineId: string, typeId: string, node: ChannelLevelNode | ChannelType) => {
     setParamCtx({ lineId, typeId, node })
     paramForm.setFieldsValue({
-      param1: node.params?.param1 ?? '',
-      param2: node.params?.param2 ?? '',
+      mediaSource: node.params?.mediaSource ?? '',
+      afChannel: node.params?.afChannel ?? '',
+      campaign: node.params?.campaign ?? '',
+      campaignId: node.params?.campaignId ?? '',
     })
   }
 
   const submitParams = async () => {
     if (!paramCtx) return
-    const { param1, param2 } = await paramForm.validateFields()
-    const params = { param1: (param1 ?? '').trim(), param2: (param2 ?? '').trim() }
-    updateType(paramCtx.lineId, paramCtx.typeId, (tp) => ({
-      ...tp,
-      children: walk(tp.children, paramCtx.node.id, (n) => ({ ...n, params })),
-    }))
+    const { mediaSource, afChannel, campaign, campaignId } = await paramForm.validateFields()
+    const params = { mediaSource: (mediaSource ?? '').trim(), afChannel: (afChannel ?? '').trim(), campaign: (campaign ?? '').trim(), campaignId: (campaignId ?? '').trim() }
+    updateType(paramCtx.lineId, paramCtx.typeId, (tp) =>
+      paramCtx.node.id === tp.id ? { ...tp, params } : { ...tp, children: walk(tp.children, paramCtx.node.id, (n) => ({ ...n, params })) },
+    )
     message.success(t('ch.paramsSaved'))
     setParamCtx(null)
   }
@@ -263,16 +264,18 @@ export default function ChannelManagement() {
           code: {n.code}
         </Tag>
       )}
-      {n.params?.param1 && (
+      {n.params?.mediaSource && (
         <Tag color="blue" style={{ margin: 0 }}>
-          {t('ch.param1')}: {n.params.param1}
+          media_source: {n.params.mediaSource}
         </Tag>
       )}
-      {n.params?.param2 && (
+      {n.params?.afChannel && (
         <Tag color="cyan" style={{ margin: 0 }}>
-          {t('ch.param2')}: {n.params.param2}
+          af_channel: {n.params.afChannel}
         </Tag>
       )}
+      {n.params?.campaign && <Tag color="purple" style={{ margin: 0 }}>campaign: {n.params.campaign}</Tag>}
+      {n.params?.campaignId && <Tag color="gold" style={{ margin: 0 }}>campaign_id: {n.params.campaignId}</Tag>}
       <Space size={2} className="node-actions">
         {canEditNode && (
           <Tooltip title={n.code ? t('ch.fillParams') : t('ch.fillParamsNeedCode')}>
@@ -358,6 +361,11 @@ export default function ChannelManagement() {
         {canGenCode && (
           <Tooltip title={tp.code ? t('ch.codeView') : t('ch.codeGen')}>
             <Button type="text" size="small" icon={<ThunderboltOutlined />} style={{ color: tp.code ? '#faad14' : '#2F6BFF' }} onClick={() => generateTypeCode(lineId, tp)} />
+          </Tooltip>
+        )}
+        {canEditNode && (
+          <Tooltip title={tp.code ? t('ch.fillParams') : t('ch.fillParamsNeedCode')}>
+            <Button type="text" size="small" icon={<SlidersOutlined />} style={{ color: tp.code ? '#2F6BFF' : undefined }} disabled={!tp.code} onClick={() => openParams(lineId, tp.id, tp)} />
           </Tooltip>
         )}
         {canEditNode && (
@@ -499,14 +507,20 @@ export default function ChannelManagement() {
         destroyOnClose
       >
         <div style={{ marginBottom: 12 }}>
-          <Text type="secondary">{t('ch.paramsDesc')}</Text>
+          <Text type="secondary">为该渠道填写自定义归因参数，会自动拼接到落地页链接中。</Text>
         </div>
         <Form form={paramForm} layout="vertical" preserve={false}>
-          <Form.Item name="param1" label={t('ch.param1')}>
-            <Input placeholder={t('ch.paramPlaceholder')} allowClear />
+          <Form.Item name="mediaSource" label="media_source">
+            <Input placeholder="例如：LandingPage" allowClear />
           </Form.Item>
-          <Form.Item name="param2" label={t('ch.param2')}>
-            <Input placeholder={t('ch.paramPlaceholder')} allowClear />
+          <Form.Item name="afChannel" label="af_channel">
+            <Input placeholder="例如：LP_lead_snap" allowClear />
+          </Form.Item>
+          <Form.Item name="campaign" label="campaign">
+            <Input placeholder="例如：lead_snap" allowClear />
+          </Form.Item>
+          <Form.Item name="campaignId" label="campaign_id">
+            <Input placeholder="例如：Jx3Sb7n" allowClear />
           </Form.Item>
         </Form>
       </Modal>

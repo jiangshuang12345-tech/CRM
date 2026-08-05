@@ -27,6 +27,11 @@ export const COUNTRY_CODE: Record<BusinessLine, string> = {
 
 // 渠道自定义参数（暂支持两个）
 export type ChannelParams = {
+  mediaSource?: string
+  afChannel?: string
+  campaign?: string
+  campaignId?: string
+  // 旧版两参数数据兼容
   param1?: string
   param2?: string
 }
@@ -44,6 +49,7 @@ export type ChannelType = {
   id: string
   name: string // 自然流量 / landingpage / KOL ...
   code?: string // 一级渠道可直接生成渠道 code
+  params?: ChannelParams
   children: ChannelLevelNode[]
 }
 
@@ -265,6 +271,10 @@ export type LandingPage = {
   businessLine: string
   channelCode: string
   channelName?: string
+  mediaSource?: string
+  afChannel?: string
+  campaign?: string
+  campaignId?: string
   param1?: string // 渠道参数1（生成时带入链接）
   param2?: string // 渠道参数2
   packageId?: string // 兼容旧数据：单个商品包
