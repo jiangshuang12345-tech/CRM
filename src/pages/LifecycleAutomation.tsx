@@ -15,7 +15,7 @@ const seedTags: UserTag[] = [
   { id: 'tag_trial', name: '体验未完课用户', businessLine: ['Dino English'], logic: '满足全部条件', rules: [{ field: '用户状态', operator: '等于', value: '未付费-体验中' }], users: 146 },
 ]
 const seedTemplates: Template[] = [
-  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: ['Dino English'], channel: 'Push', language: '简体中文', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: 'Dino' },
+  { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: ['Dino English'], channel: 'Push', language: 'English', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: 'Dino' },
 ]
 
 export default function LifecycleAutomation() {
@@ -55,7 +55,7 @@ export default function LifecycleAutomation() {
     setEditingTemplate(template ?? null)
     setContent(template?.content ?? '')
     setContentType(template?.contentType ?? 'text')
-    templateForm.setFieldsValue(template ?? { businessLine: channels[0]?.name ? [channels[0].name] : [], channel: 'Push', language: '简体中文', enabled: true, tags: [], pushTarget: '不跳转' })
+    templateForm.setFieldsValue(template ?? { businessLine: channels[0]?.name ? [channels[0].name] : [], channel: 'Push', language: 'English', enabled: true, tags: [], pushTarget: '不跳转' })
     setTemplateOpen(true)
   }
   const saveTemplate = async () => {
