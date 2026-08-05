@@ -6,13 +6,13 @@ import { useStore } from '../store'
 
 const { Text, Paragraph } = Typography
 type Rule = { field: string; operator: string; value: string; timeMode?: 'absolute' | 'relative' }
-type UserTag = { id: string; name: string; businessLine: string; logic: '满足全部条件' | '满足任一条件'; rules: Rule[]; users: number }
+type UserTag = { id: string; name: string; businessLine: string[]; logic: '满足全部条件' | '满足任一条件'; rules: Rule[]; users: number }
 type Template = { id: string; code: string; name: string; businessLine: string; channel: string; language: string; content: string; contentType: 'text' | 'rich'; tags: string[]; enabled: boolean; pushTarget?: string; pushUrl?: string }
 
 const variables = ['用户名称']
 const seedTags: UserTag[] = [
-  { id: 'tag_new', name: '韩国新注册用户', businessLine: 'Dino English', logic: '满足全部条件', rules: [{ field: '国家', operator: '等于', value: '韩国' }, { field: '注册时间', operator: '近', value: '7天' }], users: 328 },
-  { id: 'tag_trial', name: '体验未完课用户', businessLine: 'Dino English', logic: '满足全部条件', rules: [{ field: '用户状态', operator: '等于', value: '未付费-体验中' }], users: 146 },
+  { id: 'tag_new', name: '韩国新注册用户', businessLine: ['Dino English'], logic: '满足全部条件', rules: [{ field: '国家', operator: '等于', value: '韩国' }, { field: '注册时间', operator: '近', value: '7天' }], users: 328 },
+  { id: 'tag_trial', name: '体验未完课用户', businessLine: ['Dino English'], logic: '满足全部条件', rules: [{ field: '用户状态', operator: '等于', value: '未付费-体验中' }], users: 146 },
 ]
 const seedTemplates: Template[] = [
   { id: 'tpl_1', code: 'MSG0001', name: '体验课提醒', businessLine: 'Dino English', channel: 'Push', language: '简体中文', content: 'Hi {{用户姓名}}，你的体验课已为你准备好，点击即可开始学习。', contentType: 'text', tags: ['体验未完课用户'], enabled: true, pushTarget: '首页' },
@@ -71,7 +71,7 @@ export default function LifecycleAutomation() {
   }
   const openTag = (tag?: UserTag) => {
     setEditingTag(tag ?? null)
-    tagForm.setFieldsValue(tag ?? { businessLine: channels[0]?.name, logic: '满足全部条件', rules: [{ field: '用户类型', operator: '等于', value: '' }] })
+    tagForm.setFieldsValue(tag ?? { businessLine: channels[0]?.name ? [channels[0].name] : [], logic: '满足全部条件', rules: [{ field: '用户类型', operator: '等于', value: '' }] })
     setTagOpen(true)
   }
   const saveTag = async () => {
@@ -98,7 +98,7 @@ export default function LifecycleAutomation() {
   ]
   const tagColumns = [
     { title: '标签名称', dataIndex: 'name', render: (value: string) => <b>{value}</b> },
-    { title: '业务线', dataIndex: 'businessLine', render: (value: string) => <Tag color="blue">{value}</Tag> },
+    { title: '业务线', dataIndex: 'businessLine', render: (value: string[]) => <Space wrap>{value.map((item) => <Tag color="blue" key={item}>{item}</Tag>)}</Space> },
     { title: '组合逻辑', dataIndex: 'logic', render: (value: string) => <Tag color="blue">{value}</Tag> },
     { title: '条件', dataIndex: 'rules', render: (rules: Rule[]) => <Space wrap>{rules.map((rule, index) => <Tag key={index}>{`${rule.field} ${rule.operator} ${rule.value}`}</Tag>)}</Space> },
     { title: '预计用户数', dataIndex: 'users' },
@@ -136,9 +136,9 @@ export default function LifecycleAutomation() {
     <Modal open={imageUploadOpen} title="上传图片" width={420} destroyOnClose onCancel={() => { setPendingImage(''); setImageUploadOpen(false) }} footer={<Space><Button onClick={() => { setPendingImage(''); setImageUploadOpen(false) }}>取消</Button><Button type="primary" disabled={!pendingImage} onClick={insertLocalImage}>保存</Button></Space>}><Upload.Dragger accept="image/*" maxCount={1} multiple={false} showUploadList={false} beforeUpload={selectLocalImage} style={{ padding: '22px 12px' }}><p style={{ margin: '0 0 14px', color: '#667085' }}>将图片拖拽到此处</p><Button>浏览本地图片</Button></Upload.Dragger>{pendingImage && <img src={pendingImage} alt="上传预览" style={{ display: 'block', maxWidth: '100%', maxHeight: 180, margin: '16px auto 0' }} />}</Modal>
 
     <Modal open={tagOpen} title={`${editingTag ? '编辑' : '组合'}用户标签 · 四期`} onCancel={() => { setTagOpen(false); setEditingTag(null); tagForm.resetFields() }} onOk={saveTag} okText="保存" destroyOnClose width={820}>
-      <Form form={tagForm} layout="vertical" initialValues={{ businessLine: channels[0]?.name, logic: '满足全部条件', rules: [{ field: '用户类型', operator: '等于', value: '' }] }}>
+      <Form form={tagForm} layout="vertical" initialValues={{ businessLine: channels[0]?.name ? [channels[0].name] : [], logic: '满足全部条件', rules: [{ field: '用户类型', operator: '等于', value: '' }] }}>
         <Form.Item name="name" label="标签名称" rules={[{ required: true, message: '请输入标签名称' }]}><Input placeholder="例如：韩国新注册用户" /></Form.Item>
-        <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}><Select placeholder="请选择业务线" options={businessLineOptions} /></Form.Item>
+        <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}><Select mode="multiple" placeholder="请选择业务线" options={businessLineOptions} /></Form.Item>
         <Form.Item name="logic" label="条件组合"><Radio.Group options={['满足全部条件', '满足任一条件'].map((value) => ({ label: value, value }))} optionType="button" /></Form.Item>
         <Form.List name="rules">{(fields, { add, remove }) => <>{fields.map((field) => <Form.Item noStyle shouldUpdate key={field.key}>{() => {
           const kind = tagForm.getFieldValue(['rules', field.name, 'field'])
