@@ -240,7 +240,9 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
     const v = await form.validateFields()
     const selected = packages.filter((item) => (v.skuIds as string[]).includes(item.id))
     const sku = selected[0]
-    const [useStart, useEnd] = v.useRange as [Dayjs, Dayjs]
+    const [rangeStart, rangeEnd] = (v.useRange ?? []) as [Dayjs, Dayjs]
+    const useStart = rangeStart ?? dayjs()
+    const useEnd = rangeEnd ?? dayjs('2099-12-31 23:59:59')
     const promoCodeQuantity = v.promoCodeQuantity as number
     const codes: CouponCode[] = Array.from({ length: promoCodeQuantity }, () => ({ id: uid('cc_'), code: genCouponCode(), kol: '系统生成', used: 0 }))
     const coupon: Coupon = {
@@ -314,7 +316,7 @@ function CreateCoupon({ line, onBack }: { line: BusinessLine; onBack: () => void
         <Title level={5}>PromoCode 发放规则</Title>
         <Form.Item name="promoCodeQuantity" label="优惠码数量" rules={[{ required: true, message: '请输入优惠码数量' }]}><InputNumber style={{ width: 280 }} min={1} max={1000} placeholder="保存后自动生成 DINO+四位数字" /></Form.Item>
         <Form.Item name="perUserLimit" label="每用户使用次数" rules={[{ required: true, message: '请输入使用次数' }]}><InputNumber style={{ width: 280 }} min={1} /></Form.Item>
-        <Form.Item name="useRange" label="优惠券有效期" rules={[{ required: true, message: '请选择开始时间和结束时间' }]}><RangePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: 400 }} placeholder={['开始时间', '结束时间']} /></Form.Item>
+        <Form.Item name="useRange" label="优惠券有效期（选填）"><RangePicker showTime format="YYYY-MM-DD HH:mm:ss" style={{ width: 400 }} placeholder={['开始时间', '结束时间']} /></Form.Item>
 
         <Divider />
         <div style={{ textAlign: 'center' }}>
