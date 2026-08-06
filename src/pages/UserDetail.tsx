@@ -138,7 +138,11 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
           {variant === 'user' ? <>
             <Descriptions.Item label={t('user.col.expireTime')}><LocalTime time={student.expireTime} country={student.country || student.businessLine} /></Descriptions.Item>
             <Descriptions.Item label="优惠码">{student.couponCode ? <Tag color="blue">{student.couponCode}</Tag> : <Text type="secondary">—</Text>}</Descriptions.Item>
-          </> : <Descriptions.Item label="最新备注">{student.salesLatestNote || <Text type="secondary">—</Text>}</Descriptions.Item>}
+          </> : <>
+            <Descriptions.Item label="最新备注">{student.salesLatestNote || <Text type="secondary">—</Text>}</Descriptions.Item>
+            <Descriptions.Item label="最后更新"><LocalTime time={student.salesUpdatedAt} country={student.country || student.businessLine} /></Descriptions.Item>
+            <Descriptions.Item label="领取人">{student.salesOwner || <Text type="secondary">—</Text>}</Descriptions.Item>
+          </>}
           <Descriptions.Item label="CC">{student.ccName || <Text type="secondary">—</Text>}</Descriptions.Item>
         </Descriptions>
       </Card>
