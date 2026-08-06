@@ -72,7 +72,7 @@ const PROGRESS_COLOR: Record<string, string> = {
 // 更新跟进弹窗里可选的进度
 const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 
-export default function SalesCenter() {
+export default function SalesCenter({ importAction }: { importAction?: ReactNode }) {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
@@ -590,6 +590,7 @@ export default function SalesCenter() {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
+        {importAction}
       </Space>
 
       <Tabs
@@ -1106,4 +1107,3 @@ function ModalWrapper(props: {
     </Modal>
   )
 }
-

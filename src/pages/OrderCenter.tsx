@@ -88,7 +88,8 @@ export default function OrderCenter({ detailsPath }: { detailsPath?: string }) {
 
   const couponCodeOf = useMemo(() => {
     const map = new Map(students.map((s) => [s.studentId, s.couponCode]))
-    return (studentId: string) => map.get(studentId)
+    return (studentId: string, method: Order['payMethod']) =>
+      method.startsWith('Airwallex') ? map.get(studentId) : undefined
   }, [students])
 
   const countries = useMemo(() => {
@@ -105,7 +106,7 @@ export default function OrderCenter({ detailsPath }: { detailsPath?: string }) {
           o.orderId.toLowerCase().includes(kw) ||
           o.studentId.toLowerCase().includes(kw) ||
           o.productName.toLowerCase().includes(kw) ||
-          (couponCodeOf(o.studentId) ?? '').toLowerCase().includes(kw)
+          (couponCodeOf(o.studentId, o.payMethod) ?? '').toLowerCase().includes(kw)
         return (
           matchKw &&
           (!orderStatus || o.orderStatus === orderStatus) &&
@@ -123,7 +124,7 @@ export default function OrderCenter({ detailsPath }: { detailsPath?: string }) {
       ['订单ID', '商品名称', '用户ID', '用户类型', '国家', '用户状态', '订单状态', '优惠码', '原价', '实际付款金额', '币种', '支付方式', '成功支付时间', '有效期到期时间'],
       data.map((order) => [
         order.orderId, order.productName, order.studentId, typeOf(order.studentId), countryOf(order.studentId),
-        order.userStatus, ORDER_STATUS_CODE[order.orderStatus], couponCodeOf(order.studentId), order.originalPrice, order.paidAmount, order.currency,
+        order.userStatus, ORDER_STATUS_CODE[order.orderStatus], couponCodeOf(order.studentId, order.payMethod), order.originalPrice, order.paidAmount, order.currency,
         order.payMethod, order.paidTime, order.validUntil,
       ]),
     )
@@ -145,8 +146,8 @@ export default function OrderCenter({ detailsPath }: { detailsPath?: string }) {
       dataIndex: 'studentId',
       key: 'couponCode',
       width: 140,
-      render: (id: string) => {
-        const code = couponCodeOf(id)
+      render: (id: string, order: Order) => {
+        const code = couponCodeOf(id, order.payMethod)
         return code ? <Tag color="blue">{code}</Tag> : <Text type="secondary">—</Text>
       },
     },
