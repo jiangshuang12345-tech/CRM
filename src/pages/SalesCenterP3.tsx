@@ -193,5 +193,5 @@ function LeadImportButton() {
 }
 
 export default function SalesCenterP3() {
-  return <SalesCenter importAction={<LeadImportButton />} />
+  return <SalesCenter detailPath="/sales-v3" importAction={<LeadImportButton />} />
 }

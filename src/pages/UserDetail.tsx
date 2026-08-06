@@ -23,7 +23,7 @@ const STATUS_COLOR: Record<UserStatus, string> = {
 }
 const USER_TYPE_COLOR: Record<UserType, string> = { 正式用户: 'green', 测试用户: 'gold' }
 
-export default function UserDetail() {
+export default function UserDetail({ backPath = '/users-v2', backText }: { backPath?: string; backText?: string }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const { studentId = '' } = useParams()
@@ -38,8 +38,8 @@ export default function UserDetail() {
   const courseData = useMemo(() => completedLessons(lessons, studentId), [lessons, studentId])
 
   const back = (
-    <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/users-v2')}>
-      {t('user.back')}
+    <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(backPath)}>
+      {backText ?? t('user.back')}
     </Button>
   )
 

@@ -26,6 +26,7 @@ import { genCallId, setState, updateSalesSettings, useStore } from '../store'
 import type { Account, CallRecord, CallResult, SalesFollowLog, SalesSettings, Student, UserType, UserStatus } from '../types'
 import { CALL_RESULTS } from '../types'
 import { useI18n } from '../i18n'
+import { useNavigate } from 'react-router-dom'
 import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
 import { resolveUserType } from '../userType'
@@ -72,8 +73,9 @@ const PROGRESS_COLOR: Record<string, string> = {
 // 更新跟进弹窗里可选的进度
 const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 
-export default function SalesCenter({ importAction }: { importAction?: ReactNode }) {
+export default function SalesCenter({ importAction, detailPath = '/sales' }: { importAction?: ReactNode; detailPath?: string }) {
   const { t } = useI18n()
+  const navigate = useNavigate()
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
@@ -366,7 +368,13 @@ export default function SalesCenter({ importAction }: { importAction?: ReactNode
   }
   // 基于「用户中心-二期」字段增加
   const userColumns: ColumnsType<Student> = [
-    { title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left' },
+    {
+      title: t('user.col.id'),
+      dataIndex: 'studentId',
+      width: 190,
+      fixed: 'left',
+      render: (id: string) => <Button type="link" style={{ padding: 0 }} onClick={() => navigate(detailPath + '/' + id)}>{id}</Button>,
+    },
     { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
     {
       title: t('user.col.purchaseIntention'),
