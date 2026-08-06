@@ -30,11 +30,13 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
-  const { allowedLines } = usePerm()
+  const { allowedLines, can } = usePerm()
   const scope = allowedLines()
 
   const student = useMemo(() => students.find((s) => s.studentId === studentId), [students, studentId])
   const inScope = student && (!scope || scope.includes(student.businessLine))
+  const canViewReport = can(variant === 'sales' ? 'salesV3_view_report' : 'usersV2_view_report') === 'operate'
+  const canViewReplay = can(variant === 'sales' ? 'salesV3_view_replay' : 'usersV2_view_replay') === 'operate'
   const courseData = useMemo(
     () => studentLessons(lessons, studentId)
       .filter((lesson) => lesson.status === '进行中' || lesson.status === '已完课')
@@ -89,7 +91,7 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
       key: 'report',
       width: 150,
       render: (_: unknown, r: LessonRecord) =>
-        r.status === '已完课' && r.report ? (
+        canViewReport && r.status === '已完课' && r.report ? (
           <Button
             type="link"
             style={{ padding: 0 }}
@@ -105,7 +107,7 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
       key: 'replay',
       width: 110,
       render: (_: unknown, r: LessonRecord) =>
-        r.status === '已完课' && r.replayUrl ? (
+        canViewReplay && r.status === '已完课' && r.replayUrl ? (
           <Button type="link" style={{ padding: 0 }} icon={<PlayCircleOutlined />} onClick={() => openReplayVideo(r.replayUrl)}>
             {t('lesson.viewReplay')}
           </Button>

@@ -71,6 +71,8 @@ export function usePerm() {
       usersV2_edit: 'users_edit',
       usersV2_phone_view: 'users_phone_view',
       usersV2_export: 'users_export',
+      usersV2_view_report: 'usersV2',
+      usersV2_view_replay: 'usersV2',
       ordersV3_export: 'orders_export',
       ordersV3_detail: 'orders',
       salesV3_claim: 'sales_claim',
@@ -80,6 +82,8 @@ export function usePerm() {
       salesV3_config: 'sales_config',
       salesV3_import_leads: 'sales',
       salesV3_user_detail: 'sales',
+      salesV3_view_report: 'sales',
+      salesV3_view_replay: 'sales',
     }
     const copiedFrom = phase3Copy[m]
     if (copiedFrom) return role.perms[copiedFrom]
