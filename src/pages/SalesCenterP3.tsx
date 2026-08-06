@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react'
-import type { ChangeEvent } from 'react'
-import { Alert, Button, Form, Input, Modal, Select, message } from 'antd'
-import { ImportOutlined } from '@ant-design/icons'
+import { Button, Form, Modal, Select, Upload, message } from 'antd'
+import { ImportOutlined, InboxOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import SalesCenter from './SalesCenter'
 import { setState, uid, useStore } from '../store'
 import type { BusinessLine, Student } from '../types'
 import { BUSINESS_LINES } from '../types'
 import { usePerm } from '../perm'
+import { downloadCsv } from '../export'
 
 type LeadRow = { phone: string; name?: string }
 
@@ -37,12 +37,12 @@ function LeadImportButton() {
   const scope = allowedLines()
   const lines = useMemo(() => BUSINESS_LINES.filter((line) => !scope || scope.includes(line)), [scope])
 
-  const readFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (!file) return
+  const readFile = async (file: File) => {
     form.setFieldValue('content', await file.text())
     setFileName(file.name)
   }
+
+  const downloadTemplate = () => downloadCsv('Leads导入模板.csv', ['手机号', '姓名'], [])
 
   const submit = async () => {
     const value = await form.validateFields()
@@ -94,18 +94,32 @@ function LeadImportButton() {
   return (
     <>
       <Button icon={<ImportOutlined />} onClick={() => { form.resetFields(); setFileName(''); setOpen(true) }}>导入 Leads</Button>
-      <Modal open={open} title="导入 Leads · 静默注册" onCancel={() => setOpen(false)} onOk={submit} okText="确认导入" width={660} destroyOnClose>
-        <Alert type="warning" showIcon style={{ marginBottom: 16 }} message="仅导入手机号与姓名；手机号已存在时将自动跳过，不覆盖已有 CRM 用户。" />
+      <Modal
+        open={open}
+        title={<span>上传 Leads <Button type="link" size="small" style={{ padding: 0, marginLeft: 6, color: '#ff4d4f' }} onClick={downloadTemplate}>下载模板</Button></span>}
+        onCancel={() => setOpen(false)}
+        footer={<><Button onClick={() => setOpen(false)}>取消</Button><Button type="primary" onClick={submit}>上传</Button></>}
+        width={720}
+        destroyOnClose
+      >
         <Form form={form} layout="vertical">
           <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}>
             <Select placeholder="请选择业务线" options={lines.map((line) => ({ label: line, value: line }))} />
           </Form.Item>
-          <Form.Item label="用户附件（可选）">
-            <Input type="file" accept=".csv,.txt,text/csv,text/plain" onChange={readFile} />
-            <span style={{ color: '#8c8c8c', fontSize: 12 }}>支持 CSV 或 TXT，每行格式：手机号,姓名{fileName ? '；已读取：' + fileName : ''}</span>
-          </Form.Item>
-          <Form.Item name="content" label="Leads 数据" rules={[{ required: true, message: '请粘贴或上传 Leads 数据' }]}>
-            <Input.TextArea rows={9} placeholder={'手机号,姓名\n+60123456789,张三\n+821012345678,Kim'} />
+          <Form.Item name="content" hidden rules={[{ required: true, message: '请上传 Leads 文件' }]}><input /></Form.Item>
+          <Form.Item label="上传 leads" required>
+            <Upload.Dragger
+              accept=".csv,.txt,text/csv,text/plain"
+              maxCount={1}
+              showUploadList={false}
+              beforeUpload={(file) => { void readFile(file); return false }}
+              style={{ width: 360 }}
+            >
+              <p className="ant-upload-drag-icon"><InboxOutlined style={{ color: '#bfc7d5' }} /></p>
+              <p className="ant-upload-text">拖动至此处 <span style={{ color: '#ff4d4f' }}>点击上传</span></p>
+              <p className="ant-upload-hint">Excel（CSV 格式）</p>
+            </Upload.Dragger>
+            <div style={{ color: '#8c8c8c', fontSize: 12, marginTop: 8 }}>仅导入手机号与姓名；重复手机号会自动跳过。{fileName ? '已读取：' + fileName : ''}</div>
           </Form.Item>
         </Form>
       </Modal>
