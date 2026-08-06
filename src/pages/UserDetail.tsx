@@ -23,7 +23,7 @@ const STATUS_COLOR: Record<UserStatus, string> = {
 }
 const USER_TYPE_COLOR: Record<UserType, string> = { 正式用户: 'green', 测试用户: 'gold' }
 
-export default function UserDetail({ backPath = '/users-v2', backText }: { backPath?: string; backText?: string }) {
+export default function UserDetail({ backPath = '/users-v2', backText, variant = 'user' }: { backPath?: string; backText?: string; variant?: 'user' | 'sales' }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const { studentId = '' } = useParams()
@@ -116,42 +116,30 @@ export default function UserDetail({ backPath = '/users-v2', backText }: { backP
         extra={back}
       >
         <Descriptions column={2} bordered size="small">
-          <Descriptions.Item label={t('user.col.id')}>{student.studentId}</Descriptions.Item>
-          <Descriptions.Item label={t('user.col.name')}>{student.localName || student.name}</Descriptions.Item>
+          <Descriptions.Item label="用户ID">{student.studentId}</Descriptions.Item>
+          <Descriptions.Item label="学生姓名">{student.localName || student.name}</Descriptions.Item>
+          {variant === 'sales' && <Descriptions.Item label="购买意向">{student.purchaseIntention || <Text type="secondary">—</Text>}</Descriptions.Item>}
           <Descriptions.Item label={t('user.col.status')}>
             {(() => {
-              const st = resolveUserStatus(student, lessons)
-              return <Tag color={STATUS_COLOR[st]}>{t(`enum.status.${st}`)}</Tag>
+              const status = resolveUserStatus(student, lessons)
+              return <Tag color={STATUS_COLOR[status]}>{t(`enum.status.${status}`)}</Tag>
             })()}
           </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.userType')}>
-            <Tag color={USER_TYPE_COLOR[resolveUserType(student)]}>{t(`enum.userType.${resolveUserType(student)}`)}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.ageGroup')}>
-            {student.ageGroup ? <Tag color="geekblue">{student.ageGroup}</Tag> : <Text type="secondary">—</Text>}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.method')}>
-            {t(`enum.method.${student.loginMethod as LoginMethod}`)}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.account')}>{student.account}</Descriptions.Item>
-          <Descriptions.Item label={t('user.col.channelSourceLp')}>
-            {lpChannelSourceText(channels, student) === '—' ? <Text type="secondary">—</Text> : lpChannelSourceText(channels, student)}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.code')}>
-            {student.channelCode ? <Text code>{student.channelCode}</Text> : <Text type="secondary">-</Text>}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.channelSourceApp')}>
-            {appChannelSourceText(student) === '—' ? <Text type="secondary">—</Text> : appChannelSourceText(student)}
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.country')}>
-            <Tag>{lineLabel(student)}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.regTime')}>
-            <LocalTime time={student.registerTime} country={student.country || student.businessLine} />
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.expireTime')}>
-            <LocalTime time={student.expireTime} country={student.country || student.businessLine} />
-          </Descriptions.Item>
+          <Descriptions.Item label={t('user.col.userType')}><Tag color={USER_TYPE_COLOR[resolveUserType(student)]}>{t(`enum.userType.${resolveUserType(student)}`)}</Tag></Descriptions.Item>
+          <Descriptions.Item label={t('user.col.ageGroup')}>{student.ageGroup ? <Tag color="geekblue">{student.ageGroup}</Tag> : <Text type="secondary">—</Text>}</Descriptions.Item>
+          <Descriptions.Item label="课程等级">{student.courseLevel || <Text type="secondary">—</Text>}</Descriptions.Item>
+          {variant === 'user' && <Descriptions.Item label={t('user.col.method')}>{t(`enum.method.${student.loginMethod as LoginMethod}`)}</Descriptions.Item>}
+          <Descriptions.Item label={t('user.col.account')}>{student.account || <Text type="secondary">—</Text>}</Descriptions.Item>
+          <Descriptions.Item label={t('user.col.channelSourceLp')}>{lpChannelSourceText(channels, student) === '—' ? <Text type="secondary">—</Text> : lpChannelSourceText(channels, student)}</Descriptions.Item>
+          <Descriptions.Item label={t('user.col.code')}>{student.channelCode ? <Text code>{student.channelCode}</Text> : <Text type="secondary">—</Text>}</Descriptions.Item>
+          <Descriptions.Item label={t('user.col.channelSourceApp')}>{appChannelSourceText(student) === '—' ? <Text type="secondary">—</Text> : appChannelSourceText(student)}</Descriptions.Item>
+          <Descriptions.Item label={t('user.col.country')}><Tag>{lineLabel(student)}</Tag></Descriptions.Item>
+          <Descriptions.Item label={t('user.col.regTime')}><LocalTime time={student.registerTime} country={student.country || student.businessLine} /></Descriptions.Item>
+          {variant === 'user' ? <>
+            <Descriptions.Item label={t('user.col.expireTime')}><LocalTime time={student.expireTime} country={student.country || student.businessLine} /></Descriptions.Item>
+            <Descriptions.Item label="优惠码">{student.couponCode ? <Tag color="blue">{student.couponCode}</Tag> : <Text type="secondary">—</Text>}</Descriptions.Item>
+          </> : <Descriptions.Item label="最新备注">{student.salesLatestNote || <Text type="secondary">—</Text>}</Descriptions.Item>}
+          <Descriptions.Item label="CC">{student.ccName || <Text type="secondary">—</Text>}</Descriptions.Item>
         </Descriptions>
       </Card>
 

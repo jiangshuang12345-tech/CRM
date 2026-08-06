@@ -77,9 +77,9 @@ export default function App() {
           <Route path="landing" element={<Guard module="landing"><LandingPageManagement /></Guard>} />
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
           <Route path="sales" element={<Guard module="sales"><SalesCenter /></Guard>} />
-          <Route path="sales/:studentId" element={<Guard module="sales"><UserDetail backPath="/sales" backText="返回销售中心" /></Guard>} />
+          <Route path="sales/:studentId" element={<Guard module="sales"><UserDetail variant="sales" backPath="/sales" backText="返回销售中心" /></Guard>} />
           <Route path="sales-v3" element={<Guard module="salesV3"><SalesCenterP3 /></Guard>} />
-          <Route path="sales-v3/:studentId" element={<Guard module="salesV3"><UserDetail backPath="/sales-v3" backText="返回销售中心" /></Guard>} />
+          <Route path="sales-v3/:studentId" element={<Guard module="salesV3"><UserDetail variant="sales" backPath="/sales-v3" backText="返回销售中心" /></Guard>} />
           <Route path="users-v2" element={<Guard module="usersV2"><UserCenter phase3 /></Guard>} />
           <Route path="users-v2/:studentId" element={<Guard module="usersV2"><UserDetail /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
