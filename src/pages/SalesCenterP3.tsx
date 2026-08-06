@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Button, Form, Modal, Upload, message } from 'antd'
 import { ImportOutlined, InboxOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import * as XLSX from 'xlsx'
 import SalesCenter from './SalesCenter'
 import { setState, uid, useStore } from '../store'
 import type { BusinessLine, Student } from '../types'
@@ -74,7 +75,25 @@ function LeadImportButton() {
   const [fileName, setFileName] = useState('')
 
   const readFile = async (file: File) => {
-    form.setFieldValue('content', await file.text())
+    const isExcel = /\.(xlsx|xls)$/i.test(file.name)
+    const isCsv = /\.csv$/i.test(file.name)
+    if (!isExcel && !isCsv) {
+      message.error('仅支持 CSV 或 Excel（.xlsx/.xls）文件。')
+      return
+    }
+    let content = ''
+    if (isExcel) {
+      const workbook = XLSX.read(await file.arrayBuffer(), { type: 'array' })
+      const firstSheet = workbook.Sheets[workbook.SheetNames[0]]
+      content = firstSheet ? XLSX.utils.sheet_to_csv(firstSheet) : ''
+    } else {
+      content = await file.text()
+    }
+    if (!content.trim()) {
+      message.warning('文件中没有可导入的数据。')
+      return
+    }
+    form.setFieldValue('content', content)
     setFileName(file.name)
   }
 
@@ -155,7 +174,7 @@ function LeadImportButton() {
           <Form.Item name="content" hidden rules={[{ required: true, message: '请上传 Leads 文件' }]}><input /></Form.Item>
           <Form.Item label="上传 leads" required>
             <Upload.Dragger
-              accept=".csv,.txt,text/csv,text/plain"
+              accept=".csv,.xlsx,.xls,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
               maxCount={1}
               showUploadList={false}
               beforeUpload={(file) => { void readFile(file); return false }}
@@ -163,7 +182,7 @@ function LeadImportButton() {
             >
               <p className="ant-upload-drag-icon"><InboxOutlined style={{ color: '#bfc7d5' }} /></p>
               <p className="ant-upload-text">拖动至此处 <span style={{ color: '#ff4d4f' }}>点击上传</span></p>
-              <p className="ant-upload-hint">Excel（CSV 格式）</p>
+              <p className="ant-upload-hint">支持 CSV 或 Excel（.xlsx / .xls）</p>
             </Upload.Dragger>
             <div style={{ color: '#8c8c8c', fontSize: 12, marginTop: 8 }}>表头：Phone Number、Phone Country Code、Channel Code、FOLLOW Remark；系统将按手机区号自动映射国家与业务线，重复手机号会自动跳过。{fileName ? '已读取：' + fileName : ''}</div>
           </Form.Item>
