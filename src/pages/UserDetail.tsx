@@ -8,7 +8,7 @@ import type { LessonRecord, LoginMethod, UserStatus, UserType } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
-import { completedLessons, openReplayVideo, reportKind, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
+import { openReplayVideo, reportKind, resolveUserStatus, studentLessons, TRIAL_REPORT_URL } from '../lessons'
 import { appChannelSourceText, lineLabel, lpChannelSourceText } from '../channel'
 import LocalTime from '../components/LocalTime'
 
@@ -35,7 +35,10 @@ export default function UserDetail({ backPath = '/users-v2', backText }: { backP
 
   const student = useMemo(() => students.find((s) => s.studentId === studentId), [students, studentId])
   const inScope = student && (!scope || scope.includes(student.businessLine))
-  const courseData = useMemo(() => completedLessons(lessons, studentId), [lessons, studentId])
+  const courseData = useMemo(
+    () => studentLessons(lessons, studentId).sort((a, b) => (b.startedAt ?? b.completedAt ?? '').localeCompare(a.startedAt ?? a.completedAt ?? '')),
+    [lessons, studentId],
+  )
 
   const back = (
     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(backPath)}>
@@ -52,21 +55,26 @@ export default function UserDetail({ backPath = '/users-v2', backText }: { backP
   }
 
   const courseColumns: ColumnsType<LessonRecord> = [
-    { title: t('lesson.col.label'), dataIndex: 'courseLabel', width: 200, render: (v) => <Text code>{v}</Text> },
+    { title: '课程名称', dataIndex: 'courseLabel', width: 220, render: (v) => <Text>{v}</Text> },
     {
-      title: t('lesson.col.type'),
-      dataIndex: 'lessonType',
+      title: '课程状态',
+      dataIndex: 'status',
       width: 110,
-      render: (v: LessonRecord['lessonType']) => (
-        <Tag color={v === '体验课' ? 'purple' : 'blue'}>{t(`lesson.type.${v}`)}</Tag>
-      ),
+      render: (v: LessonRecord['status']) => <Tag color={v === '已完课' ? 'green' : 'processing'}>{v}</Tag>,
     },
     { title: t('lesson.col.teacher'), dataIndex: 'teacher', width: 130, render: (v) => v || <Text type="secondary">—</Text> },
+    {
+      title: '上课时间',
+      key: 'startedAt',
+      width: 200,
+      render: (_: unknown, r: LessonRecord) => <LocalTime time={r.startedAt ?? r.completedAt} country={student.country || student.businessLine} />,
+    },
     {
       title: t('lesson.col.completedAt'),
       dataIndex: 'completedAt',
       width: 200,
-      render: (v: string | undefined) => <LocalTime time={v} country={student.country || student.businessLine} />,
+      render: (v: string | undefined, r: LessonRecord) =>
+        r.status === '进行中' ? <Text type="secondary">—</Text> : <LocalTime time={v} country={student.country || student.businessLine} />,
     },
     {
       title: t('lesson.col.report'),

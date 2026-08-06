@@ -196,6 +196,7 @@ export type LessonRecord = {
   lessonType: LessonType // 体验课 / 正式课
   status: LessonStatus
   teacher?: string // 授课老师
+  startedAt?: string // 上课时间（UTC）
   completedAt?: string // 完课时间（已完课才有，UTC）
   replayUrl?: string // 回放链接
   report?: LessonReport // Trial Report / Lesson Report 内容

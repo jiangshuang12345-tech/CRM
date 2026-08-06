@@ -1164,7 +1164,7 @@ function seed(): AppState {
     // 김지우（付费）：1 节体验课 + 3 节正式课，均已完课
     {
       id: uid('ls_'), studentId: '2060199610824355842', courseLabel: 'T1-U10-LC1-L2', lessonType: '体验课', status: '已完课',
-      teacher: 'Emma W.', completedAt: now.subtract(20, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Kim', completedAt: now.subtract(20, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: '首次体验课，学生能听懂课堂指令并完成基础问答，对动物主题词汇表现出浓厚兴趣。',
         ratings: [
@@ -1179,7 +1179,7 @@ function seed(): AppState {
     },
     {
       id: uid('ls_'), studentId: '2060199610824355842', courseLabel: 'TCELA-L1-U2-LC1-11', lessonType: '正式课', status: '已完课',
-      teacher: 'Emma W.', completedAt: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Max', completedAt: now.subtract(6, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: '本节围绕 “My Family” 主题展开，学生能用完整句型介绍家庭成员，语音语调自然。',
         ratings: [
@@ -1194,7 +1194,7 @@ function seed(): AppState {
     },
     {
       id: uid('ls_'), studentId: '2060199610824355842', courseLabel: 'TCELA-L1-U2-LC1-12', lessonType: '正式课', status: '已完课',
-      teacher: 'Liam K.', completedAt: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Kim', completedAt: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: '复习 Unit 2 核心句型并完成小测，学生词汇掌握牢固，能主动发起对话。',
         ratings: [
@@ -1210,7 +1210,7 @@ function seed(): AppState {
     // Abdullah（付费）：体验课 + 正式课
     {
       id: uid('ls_'), studentId: '2060199610824355843', courseLabel: 'T1-U3-LC1-L1', lessonType: '体验课', status: '已完课',
-      teacher: 'Sophia R.', completedAt: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Max', completedAt: now.subtract(4, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: 'Trial lesson on greetings. Student is shy at first but warms up quickly and imitates pronunciation well.',
         ratings: [
@@ -1225,7 +1225,7 @@ function seed(): AppState {
     },
     {
       id: uid('ls_'), studentId: '2060199610824355843', courseLabel: 'TCELA-L1-U1-LC1-03', lessonType: '正式课', status: '已完课',
-      teacher: 'Sophia R.', completedAt: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Kim', completedAt: now.subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: '本节学习颜色与数字，学生能准确认读 1-10 并说出常见颜色。',
         ratings: [
@@ -1241,7 +1241,7 @@ function seed(): AppState {
     // Seo-yeon（付费逾期）：仅体验课
     {
       id: uid('ls_'), studentId: '2060199610824355846', courseLabel: 'T1-U1-LC1-L1', lessonType: '体验课', status: '已完课',
-      teacher: 'Olivia M.', completedAt: now.subtract(10, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Max', completedAt: now.subtract(10, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: '体验课表现活跃，能跟读并模仿老师的语音语调，具备一定听说基础。',
         ratings: [
@@ -1257,7 +1257,7 @@ function seed(): AppState {
     // Somchai（未付费）：已完成 1 节体验课 → 用户状态显示「未付费-已体验」
     {
       id: uid('ls_'), studentId: '2060199610824355848', courseLabel: 'T1-U2-LC1-L1', lessonType: '体验课', status: '已完课',
-      teacher: 'Noah T.', completedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Kim', completedAt: now.subtract(2, 'hour').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: '体验课完成，学生能跟读简单问候语并认读部分主题词汇，尚未付费购课。',
         ratings: [
@@ -1273,7 +1273,7 @@ function seed(): AppState {
     // Aisha（未付费）：体验课「进行中」且无完课体验课 → 用户状态显示「未付费-体验中」
     {
       id: uid('ls_'), studentId: '2060199610824355849', courseLabel: 'T1-U1-LC1-L1', lessonType: '体验课', status: '进行中',
-      teacher: 'Mia L.', replayUrl: '#replay',
+      teacher: 'Max', startedAt: now.subtract(30, 'minute').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
     },
   ]
 
