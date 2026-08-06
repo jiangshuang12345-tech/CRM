@@ -113,11 +113,11 @@ export default function AppLayout() {
 
   const NAV = [
     ...topNav,
-    ...ordersV3Nav,
     ...salesNav,
-    ...salesV3Nav,
     ...systemNav,
+    ...lifecycleNav,
     ...usersV2Nav,
+    ...ordersV3Nav,
     ...(marketingChildren.length
       ? [
           {
@@ -128,7 +128,7 @@ export default function AppLayout() {
           },
         ]
       : []),
-    ...lifecycleNav,
+    ...salesV3Nav,
   ]
 
   const TITLES: Record<string, string> = {
