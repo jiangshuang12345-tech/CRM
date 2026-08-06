@@ -591,9 +591,9 @@ export default function SystemConfig() {
         destroyOnClose
       >
         {roleModal && (
-          <div style={{ marginTop: 8 }}>
+            <div style={{ marginTop: 8 }}>
             <div style={{ marginBottom: 8 }}>
-              <Text strong>{t('sys.role.col.name')}</Text>
+              <Text strong><span style={{ color: '#ff4d4f', marginRight: 4 }}>*</span>{t('sys.role.col.name')}</Text>
             </div>
             <Input
               value={draftName}
