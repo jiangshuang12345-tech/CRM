@@ -6,6 +6,7 @@ import {
   DatePicker,
   Form,
   Input,
+  InputNumber,
   Modal,
   Select,
   Space,
@@ -14,7 +15,7 @@ import {
   Typography,
   message,
 } from 'antd'
-import { DownloadOutlined, EditOutlined, HistoryOutlined, SearchOutlined } from '@ant-design/icons'
+import { DownloadOutlined, EditOutlined, HistoryOutlined, PlusCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -72,6 +73,8 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
   const [editing, setEditing] = useState<Student | null>(null)
   const [historyOf, setHistoryOf] = useState<Student | null>(null)
   const [form] = Form.useForm()
+  const [addingMembership, setAddingMembership] = useState<Student | null>(null)
+  const [membershipForm] = Form.useForm()
 
   // 业务线筛选选项：渠道业务线 + 数据中出现的业务线（无渠道归因的空业务线不入选项）
   const lineOptions = useMemo(
@@ -133,6 +136,29 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
       businessLine: s.businessLine,
       userType: resolveUserType(s),
     })
+  }
+
+  const openAddMembership = (s: Student) => {
+    setAddingMembership(s)
+    membershipForm.resetFields()
+  }
+
+  const addMembership = async () => {
+    if (!addingMembership) return
+    const { days } = await membershipForm.validateFields()
+    if (typeof days !== 'number' || days <= 0) return
+    setState((prev) => ({
+      ...prev,
+      students: prev.students.map((student) => {
+        if (student.studentId !== addingMembership.studentId) return student
+        const now = dayjs()
+        const current = student.expireTime ? dayjs(student.expireTime) : now
+        const base = current.isAfter(now) ? current : now
+        return { ...student, expireTime: base.add(days, 'day').format('YYYY-MM-DD HH:mm:ss'), lastModifier: actor }
+      }),
+    }))
+    message.success(t('user.addMembership'))
+    setAddingMembership(null)
   }
 
   const submitEdit = async () => {
@@ -338,6 +364,7 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
       },
     },
     { title: t('user.col.ageGroup'), dataIndex: 'ageGroup', width: 100, render: (v) => v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text> },
+    { title: t('user.col.courseLevel'), dataIndex: 'courseLevel', width: 110, render: (v) => v || <Text type="secondary">—</Text> },
     { title: t('user.col.method'), dataIndex: 'loginMethod', width: 120, render: (v: LoginMethod) => <Tag color={METHOD_COLOR[v]}>{t(`enum.method.${v}`)}</Tag> },
     { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v || '—'}</Text> },
     {
@@ -358,6 +385,17 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
     { title: t('user.col.country'), dataIndex: 'country', width: 120, render: (v) => v ? <Tag>{v}</Tag> : <Text type="secondary">—</Text> },
     { title: t('user.col.regTime'), dataIndex: 'registerTime', width: 200, render: (v, r) => <LocalTime time={v} country={r.country || r.businessLine} /> },
     { title: t('user.col.expireTime'), dataIndex: 'expireTime', width: 200, render: (v, r) => <LocalTime time={v} country={r.country || r.businessLine} /> },
+    { title: t('user.col.couponCode'), dataIndex: 'couponCode', width: 140, render: (v) => v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text> },
+    { title: t('user.col.cc'), dataIndex: 'ccName', width: 150, render: (v) => v || <Text type="secondary">—</Text> },
+    {
+      title: t('common.action'), key: 'action', width: 210, fixed: 'right',
+      render: (_: unknown, r) => canEdit ? (
+        <Space size={0}>
+          <Button type="link" icon={<EditOutlined />} onClick={() => openEdit(r)}>{t('user.editInfo')}</Button>
+          <Button type="link" icon={<PlusCircleOutlined />} onClick={() => openAddMembership(r)}>{t('user.addMembership')}</Button>
+        </Space>
+      ) : <Text type="secondary">—</Text>,
+    },
   ]
 
   return (
@@ -404,7 +442,7 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
           rowKey="studentId"
           columns={phase3 ? phase3Columns : columns}
           dataSource={data}
-          scroll={{ x: phase3 ? 2400 : 3250 }}
+          scroll={{ x: phase3 ? 3050 : 3250 }}
           pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 
@@ -486,6 +524,22 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
             { title: t('user.hist.col.modifier'), dataIndex: 'modifier', width: 190 },
           ]}
         />
+      </Modal>
+
+      <Modal
+        open={!!addingMembership}
+        title={t('user.addMembership.title')}
+        onCancel={() => setAddingMembership(null)}
+        onOk={addMembership}
+        okText={t('common.save')}
+        cancelText={t('common.cancel')}
+        destroyOnClose
+      >
+        <Form form={membershipForm} layout="vertical" preserve={false}>
+          <Form.Item name="days" label={t('user.addMembership.days')} rules={[{ required: true, message: '请输入增加天数' }]}>
+            <InputNumber min={1} max={365} addonAfter="天" style={{ width: '100%' }} />
+          </Form.Item>
+        </Form>
       </Modal>
     </Card>
   )
