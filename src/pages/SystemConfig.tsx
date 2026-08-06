@@ -38,22 +38,39 @@ const LEVEL_META: Record<PermLevel, { color: string }> = {
   operate: { color: 'green' },
 }
 
-const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
-  { key: 'users', sub: ['users_edit', 'users_phone_view', 'users_export'] },
-  { key: 'sales', sub: ['sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config'] },
-  { key: 'orders', sub: ['orders_export'] },
-  { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
-  { key: 'usersV2', sub: ['usersV2_edit', 'usersV2_phone_view', 'usersV2_export', 'usersV2_view_report', 'usersV2_view_replay'] },
-  { key: 'ordersV3', sub: ['ordersV3_export'] },
-  { key: 'salesV3', sub: ['salesV3_claim', 'salesV3_dial', 'salesV3_update', 'salesV3_reassign', 'salesV3_config', 'salesV3_import_leads', 'salesV3_view_report', 'salesV3_view_replay'] },
-  { key: 'channels', sub: ['channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params'] },
-  { key: 'landing', sub: ['landing_create', 'landing_edit'] },
-  { key: 'packages', sub: ['packages_create', 'packages_edit', 'packages_status'] },
-  { key: 'coupons', sub: ['coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit'] },
+type ModuleNode = { key: ModuleKey; children?: ModuleNode[] }
+type ModuleRow = { key: ModuleKey; depth: number; ancestors: ModuleKey[] }
+
+const MODULE_HIERARCHY: ModuleNode[] = [
+  { key: 'users', children: [{ key: 'users_edit' }, { key: 'users_phone_view' }, { key: 'users_export' }] },
+  { key: 'sales', children: [{ key: 'sales_claim' }, { key: 'sales_dial' }, { key: 'sales_update' }, { key: 'sales_reassign' }, { key: 'sales_config' }] },
+  { key: 'orders', children: [{ key: 'orders_export' }] },
+  { key: 'system', children: [{ key: 'system_role_add' }, { key: 'system_role_edit' }, { key: 'system_role_delete' }, { key: 'system_acc_add' }, { key: 'system_acc_edit' }] },
+  { key: 'usersV2', children: [{ key: 'usersV2_edit' }, { key: 'usersV2_phone_view' }, { key: 'usersV2_export' }, { key: 'usersV2_view_report' }, { key: 'usersV2_view_replay' }] },
+  { key: 'ordersV3', children: [{ key: 'ordersV3_export' }] },
+  { key: 'salesV3', children: [{ key: 'salesV3_claim' }, { key: 'salesV3_dial' }, { key: 'salesV3_update' }, { key: 'salesV3_reassign' }, { key: 'salesV3_config' }, { key: 'salesV3_import_leads' }, { key: 'salesV3_view_report' }, { key: 'salesV3_view_replay' }] },
+  {
+    key: 'marketing',
+    children: [
+      { key: 'channels', children: [{ key: 'channels_create' }, { key: 'channels_edit' }, { key: 'channels_delete' }, { key: 'channels_gen_code' }, { key: 'channels_params' }] },
+      { key: 'landing', children: [{ key: 'landing_create' }, { key: 'landing_edit' }] },
+      { key: 'packages', children: [{ key: 'packages_create' }, { key: 'packages_edit' }, { key: 'packages_status' }] },
+      { key: 'coupons', children: [{ key: 'coupons_create' }, { key: 'coupons_extend' }, { key: 'coupons_revoke' }, { key: 'coupons_edit' }] },
+    ],
+  },
 ]
 
+const flattenModules = (nodes: ModuleNode[], depth = 0, ancestors: ModuleKey[] = []): ModuleRow[] =>
+  nodes.flatMap((node) => [
+    { key: node.key, depth, ancestors },
+    ...flattenModules(node.children ?? [], depth + 1, [...ancestors, node.key]),
+  ])
+
+const MODULE_ROWS = flattenModules(MODULE_HIERARCHY)
+const descendantsOf = (key: ModuleKey) => MODULE_ROWS.filter((row) => row.ancestors.includes(key)).map((row) => row.key)
+
 const EMPTY_PERMS = (): Record<ModuleKey, PermLevel> =>
-  MODULE_HIERARCHY.flatMap(m => [m.key, ...(m.sub || [])]).reduce(
+  MODULE_ROWS.map((m) => m.key).reduce(
     (acc, m) => ({ ...acc, [m]: 'none' }),
     {} as Record<ModuleKey, PermLevel>,
   )
@@ -214,16 +231,16 @@ export default function SystemConfig() {
   const isPhase3 = (m: string) => PHASE3_MODULES.some(p => m === p || m.startsWith(p + '_'))
 
   // 权限矩阵：行=模块（主模块+子模块平铺），列=角色
-  const matrixData = MODULE_HIERARCHY.flatMap((m) => [m.key, ...(m.sub || [])]).map((m: ModuleKey) => ({ key: m }))
+  const matrixData = MODULE_ROWS
 
-  const matrixColumns: ColumnsType<{ key: ModuleKey }> = [
+  const matrixColumns: ColumnsType<ModuleRow> = [
     {
       title: t('sys.module'),
       dataIndex: 'key',
       fixed: 'left',
       width: 150,
-      render: (m: ModuleKey) => {
-        const isSub = m.includes('_')
+      render: (m: ModuleKey, row) => {
+        const isSub = row.depth > 0
         const p3 = isPhase3(m)
         return (
           <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0, color: p3 ? '#bfbfbf' : undefined }}>
@@ -238,7 +255,7 @@ export default function SystemConfig() {
       key: r.id,
       width: 130,
       align: 'center' as const,
-      render: (_: unknown, row: { key: ModuleKey }) => {
+      render: (_: unknown, row: ModuleRow) => {
         const lv = r.perms[row.key] ?? 'none'
         return <Tag color={LEVEL_META[lv].color}>{levelLabel(lv)}</Tag>
       },
@@ -616,18 +633,15 @@ export default function SystemConfig() {
                 pageSizeOptions: ['10', '20', '50']
               }}
               dataSource={matrixData.filter((m) => {
-                const isSub = m.key.includes('_')
-                if (!isSub) return true
-                const parentKey = MODULE_HIERARCHY.find((h) => h.sub?.includes(m.key))?.key
-                return parentKey ? draftPerms[parentKey] === 'operate' : true
+                return m.ancestors.every((parent) => draftPerms[parent] === 'operate')
               })}
               columns={[
-                { title: t('sys.module'), dataIndex: 'key', render: (m: ModuleKey) => {
-                  const isSub = m.includes('_')
+                { title: t('sys.module'), dataIndex: 'key', render: (m: ModuleKey, row: ModuleRow) => {
+                  const isSub = row.depth > 0
                   const p3 = isPhase3(m)
                   return (
-                    <span style={{ marginLeft: isSub ? 16 : 0, color: p3 ? '#bfbfbf' : (isSub ? '#8c8c8c' : 'inherit') }}>
-                      {isSub ? `└ ${moduleLabel(m)}` : moduleLabel(m)}
+                    <span style={{ marginLeft: row.depth * 16, color: p3 ? '#bfbfbf' : (isSub ? '#8c8c8c' : 'inherit') }}>
+                    {isSub ? `└ ${moduleLabel(m)}` : moduleLabel(m)}
                       {p3 && !isSub && <Tag color="default" style={{ marginLeft: 6, transform: 'scale(0.8)', color: '#8c8c8c' }}>{t('app.phase3')}</Tag>}
                     </span>
                   )
@@ -636,8 +650,8 @@ export default function SystemConfig() {
                   title: t('sys.permission'),
                   key: 'lv',
                   width: 280,
-                  render: (_, row: { key: ModuleKey }) => {
-                    const isSub = row.key.includes('_')
+                  render: (_, row: ModuleRow) => {
+                    const isAction = row.key.includes('_')
                     return (
                       <Radio.Group
                         size="small"
@@ -646,18 +660,15 @@ export default function SystemConfig() {
                           const val = e.target.value
                           setDraftPerms((prev) => {
                             const next = { ...prev, [row.key]: val }
-                            // 当主模块切换为不可操作时，将其下所有子权限重置为 none
-                            if (!isSub && val !== 'operate') {
-                              const h = MODULE_HIERARCHY.find((x) => x.key === row.key)
-                              if (h?.sub) {
-                                h.sub.forEach((s) => (next[s] = 'none'))
-                              }
+                            // 模块未处于可操作状态时，其下所有层级的权限均不可见且重置。
+                            if (!isAction && val !== 'operate') {
+                              descendantsOf(row.key).forEach((child) => (next[child] = 'none'))
                             }
                             return next
                           })
                         }}
                         optionType="button"
-                        options={(isSub ? ['none', 'operate'] : ['none', 'view', 'operate'] as PermLevel[]).map((lv) => ({
+                        options={(isAction ? ['none', 'operate'] : ['none', 'view', 'operate'] as PermLevel[]).map((lv) => ({
                           label: levelLabel(lv as PermLevel),
                           value: lv,
                         }))}

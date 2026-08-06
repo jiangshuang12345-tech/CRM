@@ -22,7 +22,7 @@ import type {
 import { LINE_CURRENCY } from './types'
 
 // 原型权限和导航发生结构性更新时，升级版本以避免浏览器继续使用旧的演示权限数据。
-const KEY = 'dinoai_crm_state_v69'
+const KEY = 'dinoai_crm_state_v70'
 
 export type AppState = {
   channels: ChannelLine[]
@@ -733,6 +733,7 @@ function seed(): AppState {
       builtin: true,
       dataScope: 'line',
       perms: {
+        marketing: 'operate',
         channels: 'operate',
         channels_create: 'operate',
         channels_edit: 'operate',
@@ -796,6 +797,7 @@ function seed(): AppState {
       builtin: true,
       dataScope: 'line',
       perms: {
+        marketing: 'operate',
         channels: 'view',
         channels_create: 'view',
         channels_edit: 'view',
@@ -859,6 +861,7 @@ function seed(): AppState {
       builtin: true,
       dataScope: 'line',
       perms: {
+        marketing: 'none',
         channels: 'none',
         channels_create: 'none',
         channels_edit: 'none',
@@ -922,6 +925,7 @@ function seed(): AppState {
       builtin: true,
       dataScope: 'all',
       perms: {
+        marketing: 'operate',
         channels: 'operate',
         channels_create: 'operate',
         channels_edit: 'operate',
@@ -985,6 +989,7 @@ function seed(): AppState {
       builtin: true,
       dataScope: 'line',
       perms: {
+        marketing: 'none',
         channels: 'none',
         channels_create: 'none',
         channels_edit: 'none',
