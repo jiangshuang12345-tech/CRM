@@ -27,7 +27,7 @@ import { hasPhoneLogin, resolveUserType } from '../userType'
 import { resolveUserStatus } from '../lessons'
 import { inUserCenter } from '../funnel'
 import { useLineScope } from '../useLineScope'
-import { businessLineOf, lineLabel, registerChannelText } from '../channel'
+import { appChannelSourceText, businessLineOf, lineLabel, lpChannelSourceText, registerChannelText } from '../channel'
 import LineFilter from '../components/LineFilter'
 import LocalTime from '../components/LocalTime'
 import { downloadCsv, maskPhone } from '../export'
@@ -317,6 +317,49 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
     },
   ]
 
+  const phase3Columns: ColumnsType<Student> = [
+    {
+      title: t('user.col.id'), dataIndex: 'studentId', width: 190, fixed: 'left',
+      render: (v: string) => <Link to={`/users-v2/${v}`}>{v}</Link>,
+    },
+    { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_: unknown, r) => r.localName || r.name },
+    {
+      title: t('user.col.status'), dataIndex: 'status', width: 130,
+      render: (_: UserStatus, r) => {
+        const status = resolveUserStatus(r, lessons)
+        return <Tag color={STATUS_COLOR[status]}>{t(`enum.status.${status}`)}</Tag>
+      },
+    },
+    {
+      title: t('user.col.userType'), dataIndex: 'userType', width: 110,
+      render: (_: UserType, r) => {
+        const userType = resolveUserType(r)
+        return <Tag color={USER_TYPE_COLOR[userType]}>{t(`enum.userType.${userType}`)}</Tag>
+      },
+    },
+    { title: t('user.col.ageGroup'), dataIndex: 'ageGroup', width: 100, render: (v) => v ? <Tag color="geekblue">{v}</Tag> : <Text type="secondary">—</Text> },
+    { title: t('user.col.method'), dataIndex: 'loginMethod', width: 120, render: (v: LoginMethod) => <Tag color={METHOD_COLOR[v]}>{t(`enum.method.${v}`)}</Tag> },
+    { title: t('user.col.account'), dataIndex: 'account', width: 200, render: (v) => <Text>{v || '—'}</Text> },
+    {
+      title: t('user.col.channelSourceLp'), key: 'landingSource', width: 220,
+      render: (_: unknown, r) => {
+        const value = lpChannelSourceText(channels, r)
+        return value === '—' ? <Text type="secondary">—</Text> : value
+      },
+    },
+    { title: t('user.col.code'), dataIndex: 'channelCode', width: 160, render: (v) => v ? <Text code>{v}</Text> : <Text type="secondary">—</Text> },
+    {
+      title: t('user.col.channelSourceApp'), key: 'appSource', width: 220,
+      render: (_: unknown, r) => {
+        const value = appChannelSourceText(r)
+        return value === '—' ? <Text type="secondary">—</Text> : value
+      },
+    },
+    { title: t('user.col.country'), dataIndex: 'country', width: 120, render: (v) => v ? <Tag>{v}</Tag> : <Text type="secondary">—</Text> },
+    { title: t('user.col.regTime'), dataIndex: 'registerTime', width: 200, render: (v, r) => <LocalTime time={v} country={r.country || r.businessLine} /> },
+    { title: t('user.col.expireTime'), dataIndex: 'expireTime', width: 200, render: (v, r) => <LocalTime time={v} country={r.country || r.businessLine} /> },
+  ]
+
   return (
     <Card className="page-card" bordered={false} title={<span className="section-title">{t('user.titleV2')}</span>}>
       <Alert type="info" showIcon style={{ marginBottom: 16 }} message={t('user.funnelTip')} />
@@ -359,9 +402,9 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
 
         <Table
           rowKey="studentId"
-          columns={columns}
+          columns={phase3 ? phase3Columns : columns}
           dataSource={data}
-          scroll={{ x: 3250 }}
+          scroll={{ x: phase3 ? 2400 : 3250 }}
           pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
       />
 

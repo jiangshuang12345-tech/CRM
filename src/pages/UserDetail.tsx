@@ -9,7 +9,7 @@ import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { resolveUserType } from '../userType'
 import { completedLessons, openReplayVideo, reportKind, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
-import { businessLineOf, lineLabel, registerChannelText } from '../channel'
+import { appChannelSourceText, lineLabel, lpChannelSourceText } from '../channel'
 import LocalTime from '../components/LocalTime'
 
 const { Text } = Typography
@@ -126,19 +126,17 @@ export default function UserDetail({ backPath = '/users-v2', backText }: { backP
             {t(`enum.method.${student.loginMethod as LoginMethod}`)}
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.account')}>{student.account}</Descriptions.Item>
-          <Descriptions.Item label={t('user.col.line')}>
-            {businessLineOf(channels, student) ? (
-              <Tag>{businessLineOf(channels, student)}</Tag>
-            ) : (
-              <Text type="secondary">-</Text>
-            )}
+          <Descriptions.Item label={t('user.col.channelSourceLp')}>
+            {lpChannelSourceText(channels, student) === '—' ? <Text type="secondary">—</Text> : lpChannelSourceText(channels, student)}
+          </Descriptions.Item>
+          <Descriptions.Item label={t('user.col.code')}>
+            {student.channelCode ? <Text code>{student.channelCode}</Text> : <Text type="secondary">-</Text>}
+          </Descriptions.Item>
+          <Descriptions.Item label={t('user.col.channelSourceApp')}>
+            {appChannelSourceText(student) === '—' ? <Text type="secondary">—</Text> : appChannelSourceText(student)}
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.country')}>
             <Tag>{lineLabel(student)}</Tag>
-          </Descriptions.Item>
-          <Descriptions.Item label={t('user.col.channel')}>{registerChannelText(channels, student)}</Descriptions.Item>
-          <Descriptions.Item label={t('user.col.code')}>
-            {student.channelCode ? <Text code>{student.channelCode}</Text> : <Text type="secondary">-</Text>}
           </Descriptions.Item>
           <Descriptions.Item label={t('user.col.regTime')}>
             <LocalTime time={student.registerTime} country={student.country || student.businessLine} />
