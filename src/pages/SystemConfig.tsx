@@ -44,6 +44,8 @@ const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
   { key: 'orders', sub: ['orders_export'] },
   { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
   { key: 'usersV2' },
+  { key: 'ordersV3' },
+  { key: 'salesV3' },
   { key: 'lifecycle' },
   { key: 'channels', sub: ['channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params'] },
   { key: 'landing', sub: ['landing_create', 'landing_delete'] },
@@ -74,7 +76,12 @@ export default function SystemConfig() {
   const logs = useStore((s) => s.logs)
   const lines = BUSINESS_LINES
 
-  const moduleLabel = (m: ModuleKey) => (m.includes('_') ? t(`perm.${m}`) : t(`app.nav.${m}`))
+  const moduleLabel = (m: ModuleKey) => {
+    if (m === 'usersV2') return t('app.nav.users')
+    if (m === 'ordersV3') return t('app.nav.orders')
+    if (m === 'salesV3') return t('app.nav.sales')
+    return m.includes('_') ? t(`perm.${m}`) : t(`app.nav.${m}`)
+  }
   const levelLabel = (lv: PermLevel) => t(`sys.level.${lv}`)
   const scopeLabel = (sc: DataScope) => t(`sys.scope.${sc}`)
   const roleName = (id: string) => roles.find((r) => r.id === id)?.name ?? id
@@ -204,7 +211,7 @@ export default function SystemConfig() {
       : []),
   ]
 
-  const PHASE3_MODULES = ['usersV2', 'channels', 'landing', 'packages', 'coupons']
+  const PHASE3_MODULES = ['usersV2', 'ordersV3', 'salesV3']
   const PHASE4_MODULES = ['lifecycle']
   const isPhase3 = (m: string) => PHASE3_MODULES.some(p => m === p || m.startsWith(p + '_'))
   const isPhase4 = (m: string) => PHASE4_MODULES.includes(m)
@@ -225,7 +232,7 @@ export default function SystemConfig() {
         return (
           <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0, color: p3 || p4 ? '#bfbfbf' : undefined }}>
             {moduleLabel(m)}
-            {p3 && !isSub && <Tag style={{ marginLeft: 6, transform: 'scale(0.8)' }}>{t('app.phase3')}</Tag>}
+            {p3 && !isSub && <Tag color="default" style={{ marginLeft: 6, transform: 'scale(0.8)', color: '#8c8c8c' }}>{t('app.phase3')}</Tag>}
             {p4 && <Tag color="cyan" style={{ marginLeft: 6, transform: 'scale(0.8)' }}>四期</Tag>}
           </Text>
         )
@@ -625,7 +632,7 @@ export default function SystemConfig() {
                   return (
                     <span style={{ marginLeft: isSub ? 16 : 0, color: p3 ? '#bfbfbf' : (isSub ? '#8c8c8c' : 'inherit') }}>
                       {isSub ? `└ ${moduleLabel(m)}` : moduleLabel(m)}
-                      {p3 && !isSub && <Tag style={{ marginLeft: 6, transform: 'scale(0.8)' }}>{t('app.phase3')}</Tag>}
+                      {p3 && !isSub && <Tag color="default" style={{ marginLeft: 6, transform: 'scale(0.8)', color: '#8c8c8c' }}>{t('app.phase3')}</Tag>}
                     </span>
                   )
                 } },
@@ -638,7 +645,7 @@ export default function SystemConfig() {
                     return (
                       <Radio.Group
                         size="small"
-                        value={draftPerms[row.key]}
+                        value={draftPerms[row.key] ?? 'none'}
                         onChange={(e) => {
                           const val = e.target.value
                           setDraftPerms((prev) => {

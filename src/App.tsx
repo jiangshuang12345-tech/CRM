@@ -29,9 +29,9 @@ const MODULE_PATH: { module: ModuleKey; path: string }[] = [
   { module: 'users', path: '/users' },
   { module: 'usersV2', path: '/users-v2' },
   { module: 'sales', path: '/sales' },
-  { module: 'sales', path: '/sales-v3' },
+  { module: 'salesV3', path: '/sales-v3' },
   { module: 'orders', path: '/orders' },
-  { module: 'orders', path: '/orders-v3' },
+  { module: 'ordersV3', path: '/orders-v3' },
   { module: 'channels', path: '/channels' },
   { module: 'packages', path: '/packages' },
   { module: 'coupons', path: '/coupons' },
@@ -80,14 +80,14 @@ export default function App() {
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
           <Route path="sales" element={<Guard module="sales"><SalesCenter /></Guard>} />
           <Route path="sales/:studentId" element={<Guard module="sales"><UserDetail backPath="/sales" backText="返回销售中心" /></Guard>} />
-          <Route path="sales-v3" element={<Guard module="sales"><SalesCenterP3 /></Guard>} />
-          <Route path="sales-v3/:studentId" element={<Guard module="sales"><UserDetail backPath="/sales-v3" backText="返回销售中心" /></Guard>} />
+          <Route path="sales-v3" element={<Guard module="salesV3"><SalesCenterP3 /></Guard>} />
+          <Route path="sales-v3/:studentId" element={<Guard module="salesV3"><UserDetail backPath="/sales-v3" backText="返回销售中心" /></Guard>} />
           <Route path="users-v2" element={<Guard module="usersV2"><UserCenter /></Guard>} />
           <Route path="users-v2/:studentId" element={<Guard module="usersV2"><UserDetail /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
           <Route path="orders/:orderId" element={<Guard module="orders"><OrderDetail /></Guard>} />
-          <Route path="orders-v3" element={<Guard module="orders"><OrderCenterP3 /></Guard>} />
-          <Route path="orders-v3/:orderId" element={<Guard module="orders"><OrderDetail backPath="/orders-v3" /></Guard>} />
+          <Route path="orders-v3" element={<Guard module="ordersV3"><OrderCenterP3 /></Guard>} />
+          <Route path="orders-v3/:orderId" element={<Guard module="ordersV3"><OrderDetail backPath="/orders-v3" /></Guard>} />
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />
           <Route path="coupons" element={<Guard module="coupons"><CouponPage /></Guard>} />
           <Route path="system" element={<Guard module="system"><SystemConfig /></Guard>} />

@@ -64,6 +64,9 @@ export function usePerm() {
       if (role.id === 'role_admin' || role.id === 'role_ops') return 'operate'
       if (role.id === 'role_support' || role.id === 'role_sales_leader') return 'view'
     }
+    // 兼容三期权限新增前已保存在 localStorage 的角色数据。
+    if (m === 'ordersV3') return role.perms.orders
+    if (m === 'salesV3') return role.perms.sales
     return 'none'
   }
   const isOperate = (m: ModuleKey) => can(m) === 'operate'
