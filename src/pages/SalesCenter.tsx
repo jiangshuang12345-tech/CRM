@@ -433,12 +433,6 @@ export default function SalesCenter() {
       render: (v: string | undefined, r: Student) => <LocalTime time={v} country={r.country || r.businessLine} />,
     },
     {
-      title: t('user.col.couponCode'),
-      dataIndex: 'couponCode',
-      width: 140,
-      render: (v: string | undefined) => (v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text>),
-    },
-    {
       title: t('user.col.cc'),
       dataIndex: 'salesOwner',
       width: 140,
@@ -610,7 +604,7 @@ export default function SalesCenter() {
                 rowKey="studentId"
                 columns={poolColumns}
                 dataSource={poolData}
-                scroll={{ x: 2320 + 90 }}
+                scroll={{ x: 2180 + 90 }}
                 locale={{ emptyText: t('sales.emptyPool') }}
                 pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
               />
@@ -628,7 +622,7 @@ export default function SalesCenter() {
                   rowKey="studentId"
                   columns={followColumns}
                   dataSource={followData}
-                  scroll={{ x: canReassign ? 2320 + 200 + 130 + 100 : 2320 + 200 + 130 }}
+                  scroll={{ x: canReassign ? 2180 + 200 + 130 + 100 : 2180 + 200 + 130 }}
                   locale={{ emptyText: t('sales.emptyFollow') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
@@ -1112,5 +1106,4 @@ function ModalWrapper(props: {
     </Modal>
   )
 }
-
 
