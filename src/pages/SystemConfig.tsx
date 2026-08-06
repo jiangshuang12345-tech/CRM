@@ -44,7 +44,7 @@ const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
   { key: 'orders', sub: ['orders_export'] },
   { key: 'system', sub: ['system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit'] },
   { key: 'usersV2', sub: ['usersV2_edit', 'usersV2_phone_view', 'usersV2_export', 'usersV2_view_report', 'usersV2_view_replay'] },
-  { key: 'ordersV3', sub: ['ordersV3_export', 'ordersV3_detail'] },
+  { key: 'ordersV3', sub: ['ordersV3_export'] },
   { key: 'salesV3', sub: ['salesV3_claim', 'salesV3_dial', 'salesV3_update', 'salesV3_reassign', 'salesV3_config', 'salesV3_import_leads', 'salesV3_user_detail', 'salesV3_view_report', 'salesV3_view_replay'] },
   { key: 'channels', sub: ['channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params'] },
   { key: 'landing', sub: ['landing_create', 'landing_edit'] },
@@ -608,6 +608,7 @@ export default function SystemConfig() {
               style={{ marginTop: 16 }}
               size="small"
               rowKey="key"
+              scroll={{ y: 400 }}
               pagination={{
                 showTotal: (n) => t('common.total', { n }),
                 showSizeChanger: true,

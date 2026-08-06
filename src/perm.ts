@@ -74,7 +74,6 @@ export function usePerm() {
       usersV2_view_report: 'usersV2',
       usersV2_view_replay: 'usersV2',
       ordersV3_export: 'orders_export',
-      ordersV3_detail: 'orders',
       salesV3_claim: 'sales_claim',
       salesV3_dial: 'sales_dial',
       salesV3_update: 'sales_update',

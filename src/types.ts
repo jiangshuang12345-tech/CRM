@@ -325,7 +325,7 @@ export type ModuleKey =
   // 子权限 - orders
   | 'orders_export'
   // 子权限 - ordersV3（三期）
-  | 'ordersV3_export' | 'ordersV3_detail'
+  | 'ordersV3_export'
   // 子权限 - system
   | 'system_role_add' | 'system_role_edit' | 'system_role_delete' | 'system_acc_add' | 'system_acc_edit'
 
@@ -336,7 +336,7 @@ export const PERMISSION_MODULES: ModuleKey[] = [
   'coupons', 'coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit',
   'users', 'users_edit', 'users_phone_view', 'users_export', 'usersV2', 'usersV2_edit', 'usersV2_phone_view', 'usersV2_export', 'usersV2_view_report', 'usersV2_view_replay',
   'sales', 'sales_claim', 'sales_dial', 'sales_update', 'sales_reassign', 'sales_config', 'salesV3', 'salesV3_claim', 'salesV3_dial', 'salesV3_update', 'salesV3_reassign', 'salesV3_config', 'salesV3_import_leads', 'salesV3_user_detail', 'salesV3_view_report', 'salesV3_view_replay',
-  'orders', 'orders_export', 'ordersV3', 'ordersV3_export', 'ordersV3_detail',
+  'orders', 'orders_export', 'ordersV3', 'ordersV3_export',
   'lifecycle',
   'system', 'system_role_add', 'system_role_edit', 'system_role_delete', 'system_acc_add', 'system_acc_edit',
 ]
