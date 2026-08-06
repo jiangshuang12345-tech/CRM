@@ -56,7 +56,6 @@ export default function OrderDetail({ backPath = '/orders' }: { backPath?: strin
     { title: '状态', dataIndex: 'status', width: 120, render: (status: OrderStatus) => <Tag color={STATUS_COLOR[status]}>{STATUS_CODE[status]}</Tag> },
     { title: '金额', dataIndex: 'amount', width: 150, align: 'right', render: (amount) => <Text type={amount < 0 ? 'danger' : undefined}>{money(amount, order.currency)}</Text> },
     { title: '支付方式', dataIndex: 'paymentMethod', width: 130, render: (method) => method || <Text type="secondary">—</Text> },
-    { title: '备注', dataIndex: 'note', render: (note) => note || <Text type="secondary">—</Text> },
   ]
 
   return (
