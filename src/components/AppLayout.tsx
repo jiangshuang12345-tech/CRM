@@ -81,7 +81,7 @@ export default function AppLayout() {
     { key: '/orders-v3', icon: <ProfileOutlined />, label: phase3Label('订单中心') },
   ].filter((n) => visible(n.key))
 
-  // 营销中心（三期）子菜单
+  // 营销中心（四期）子菜单
   const marketingChildren = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
     { key: '/landing', icon: <LinkOutlined />, label: t('app.nav.landing') },
@@ -98,9 +98,9 @@ export default function AppLayout() {
   const salesV3Nav = [
     { key: '/sales-v3', icon: <SolutionOutlined />, label: phase3Label(t('app.nav.sales')) },
   ].filter((n) => visible(n.key))
-  // 用户中心二期（三期）
+  // 用户中心（三期）
   const usersV2Nav = [
-    { key: '/users-v2', icon: <TeamOutlined />, label: phase3Label(t('app.nav.usersV2')) },
+    { key: '/users-v2', icon: <TeamOutlined />, label: phase3Label(t('app.nav.users')) },
   ].filter((n) => visible(n.key))
   // 系统配置（二期）
   const systemNav = [
@@ -117,17 +117,17 @@ export default function AppLayout() {
     ...systemNav,
     ...usersV2Nav,
     ...ordersV3Nav,
+    ...salesV3Nav,
     ...(marketingChildren.length
       ? [
           {
             key: 'marketing',
             icon: <ShopOutlined />,
-            label: phase3Label(t('app.nav.marketing')),
+            label: phase4Label(t('app.nav.marketing')),
             children: marketingChildren,
           },
         ]
       : []),
-    ...salesV3Nav,
     ...lifecycleNav,
   ]
 
