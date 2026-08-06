@@ -50,7 +50,7 @@ export default function OrderDetail({ backPath = '/orders' }: { backPath?: strin
   const country = student?.country || student?.businessLine
   const transactions = [...(order.transactions ?? [])].sort((a, b) => b.time.localeCompare(a.time))
   const columns: ColumnsType<OrderTransaction> = [
-    { title: '流水号', dataIndex: 'id', width: 190, render: (id) => <Text code>{id}</Text> },
+    { title: '子订单号', dataIndex: 'id', width: 190, render: (id) => <Text code>{id}</Text> },
     { title: '发生时间', dataIndex: 'time', width: 190, render: (time) => <LocalTime time={time} country={country} /> },
     { title: '流水事件', dataIndex: 'event', width: 130 },
     { title: '状态', dataIndex: 'status', width: 120, render: (status: OrderStatus) => <Tag color={STATUS_COLOR[status]}>{STATUS_CODE[status]}</Tag> },
