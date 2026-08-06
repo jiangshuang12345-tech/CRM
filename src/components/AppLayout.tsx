@@ -33,8 +33,10 @@ const NAV_MODULE: Record<string, ModuleKey> = {
   '/landing': 'landing',
   '/users': 'users',
   '/sales': 'sales',
+  '/sales-v3': 'sales',
   '/users-v2': 'usersV2',
   '/orders': 'orders',
+  '/orders-v3': 'orders',
   '/packages': 'packages',
   '/coupons': 'coupons',
   '/system': 'system',
@@ -75,6 +77,10 @@ export default function AppLayout() {
     { key: '/orders', icon: <ProfileOutlined />, label: t('app.nav.orders') },
   ].filter((n) => visible(n.key))
 
+  const ordersV3Nav = [
+    { key: '/orders-v3', icon: <ProfileOutlined />, label: phase3Label('订单中心') },
+  ].filter((n) => visible(n.key))
+
   // 营销中心（三期）子菜单
   const marketingChildren = [
     { key: '/channels', icon: <ApartmentOutlined />, label: t('app.nav.channels') },
@@ -89,6 +95,9 @@ export default function AppLayout() {
   ].filter((n) =>
     visible(n.key),
   )
+  const salesV3Nav = [
+    { key: '/sales-v3', icon: <SolutionOutlined />, label: phase3Label(t('app.nav.sales')) },
+  ].filter((n) => visible(n.key))
   // 用户中心二期（三期）
   const usersV2Nav = [
     { key: '/users-v2', icon: <TeamOutlined />, label: phase3Label(t('app.nav.usersV2')) },
@@ -104,7 +113,9 @@ export default function AppLayout() {
 
   const NAV = [
     ...topNav,
+    ...ordersV3Nav,
     ...salesNav,
+    ...salesV3Nav,
     ...systemNav,
     ...usersV2Nav,
     ...(marketingChildren.length
@@ -125,8 +136,10 @@ export default function AppLayout() {
     '/landing': t('app.nav.landing'),
     '/users': t('app.nav.users'),
     '/sales': t('app.nav.sales'),
+    '/sales-v3': t('app.nav.sales'),
     '/users-v2': t('app.nav.usersV2'),
     '/orders': t('app.nav.orders'),
+    '/orders-v3': '订单中心',
     '/packages': t('app.nav.packages'),
     '/coupons': t('app.nav.coupons'),
     '/system': t('app.nav.system'),

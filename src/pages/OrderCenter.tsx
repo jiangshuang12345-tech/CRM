@@ -51,7 +51,7 @@ function fmtMoney(amount: number, currency: string) {
   return `${currency} ${amount.toLocaleString()}`
 }
 
-export default function OrderCenter() {
+export default function OrderCenter({ detailsPath }: { detailsPath?: string }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const { can } = usePerm()
@@ -136,7 +136,7 @@ export default function OrderCenter() {
       dataIndex: 'orderId',
       width: 180,
       fixed: 'left',
-      render: (id: string) => <a onClick={() => navigate(`/orders/${id}`)}>{id}</a>,
+      render: (id: string) => detailsPath ? <a onClick={() => navigate(`${detailsPath}/${id}`)}>{id}</a> : <Text code>{id}</Text>,
     },
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
     { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },

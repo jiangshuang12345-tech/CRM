@@ -9,7 +9,9 @@ import UserCenter from './pages/UserCenter'
 import UserCenterP1 from './pages/UserCenterP1'
 import UserDetail from './pages/UserDetail'
 import SalesCenter from './pages/SalesCenter'
+import SalesCenterP3 from './pages/SalesCenterP3'
 import OrderCenter from './pages/OrderCenter'
+import OrderCenterP3 from './pages/OrderCenterP3'
 import OrderDetail from './pages/OrderDetail'
 import CoursePackagePage from './pages/CoursePackage'
 import CouponPage from './pages/Coupon'
@@ -27,7 +29,9 @@ const MODULE_PATH: { module: ModuleKey; path: string }[] = [
   { module: 'users', path: '/users' },
   { module: 'usersV2', path: '/users-v2' },
   { module: 'sales', path: '/sales' },
+  { module: 'sales', path: '/sales-v3' },
   { module: 'orders', path: '/orders' },
+  { module: 'orders', path: '/orders-v3' },
   { module: 'channels', path: '/channels' },
   { module: 'packages', path: '/packages' },
   { module: 'coupons', path: '/coupons' },
@@ -75,10 +79,13 @@ export default function App() {
           <Route path="landing" element={<Guard module="landing"><LandingPageManagement /></Guard>} />
           <Route path="users" element={<Guard module="users"><UserCenterP1 /></Guard>} />
           <Route path="sales" element={<Guard module="sales"><SalesCenter /></Guard>} />
+          <Route path="sales-v3" element={<Guard module="sales"><SalesCenterP3 /></Guard>} />
           <Route path="users-v2" element={<Guard module="usersV2"><UserCenter /></Guard>} />
           <Route path="users-v2/:studentId" element={<Guard module="usersV2"><UserDetail /></Guard>} />
           <Route path="orders" element={<Guard module="orders"><OrderCenter /></Guard>} />
           <Route path="orders/:orderId" element={<Guard module="orders"><OrderDetail /></Guard>} />
+          <Route path="orders-v3" element={<Guard module="orders"><OrderCenterP3 /></Guard>} />
+          <Route path="orders-v3/:orderId" element={<Guard module="orders"><OrderDetail backPath="/orders-v3" /></Guard>} />
           <Route path="packages" element={<Guard module="packages"><CoursePackagePage /></Guard>} />
           <Route path="coupons" element={<Guard module="coupons"><CouponPage /></Guard>} />
           <Route path="system" element={<Guard module="system"><SystemConfig /></Guard>} />

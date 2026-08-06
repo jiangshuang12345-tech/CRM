@@ -27,7 +27,7 @@ function money(amount: number, currency: string) {
   return `${currency} ${amount.toLocaleString()}`
 }
 
-export default function OrderDetail() {
+export default function OrderDetail({ backPath = '/orders' }: { backPath?: string }) {
   const navigate = useNavigate()
   const { orderId = '' } = useParams()
   const orders = useStore((s) => s.orders)
@@ -37,7 +37,7 @@ export default function OrderDetail() {
   const order = useMemo(() => orders.find((item) => item.orderId === orderId), [orders, orderId])
   const student = useMemo(() => students.find((item) => item.studentId === order?.studentId), [students, order?.studentId])
   const inScope = order && (!scope || (student && scope.includes(student.businessLine)))
-  const back = <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/orders')}>返回订单中心</Button>
+  const back = <Button icon={<ArrowLeftOutlined />} onClick={() => navigate(backPath)}>返回订单中心</Button>
 
   if (!order || !inScope) {
     return (
