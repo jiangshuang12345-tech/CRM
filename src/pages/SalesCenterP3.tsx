@@ -45,15 +45,15 @@ function parseLeads(raw: string): LeadRow[] {
   if (!rows.length) return []
   const normalizeHeader = (value: string) => value.replace(/^\uFEFF/, '').replace(/[\s_-]/g, '').toLowerCase()
   const header = rows[0].map(normalizeHeader)
-  const hasHeader = header.includes('手机号') || header.includes('phone')
+  const hasHeader = header.includes('手机号') || header.includes('phone') || header.includes('phonenumber')
   const indexOf = (names: string[], fallback: number) => {
     const found = header.findIndex((value) => names.includes(value))
     return found >= 0 ? found : fallback
   }
-  const phoneIndex = indexOf(['手机号', 'phone'], 0)
-  const areaCodeIndex = indexOf(['手机区号', '区号', 'areacode'], 1)
+  const phoneIndex = indexOf(['手机号', 'phone', 'phonenumber'], 0)
+  const areaCodeIndex = indexOf(['手机区号', '区号', 'areacode', 'phonecountrycode'], 1)
   const channelCodeIndex = indexOf(['渠道code', 'channelcode'], 2)
-  const followNoteIndex = indexOf(['follow备注', 'followremark', 'follow备注信息'], 3)
+  const followNoteIndex = indexOf(['follow备注', 'followremark', 'follow备注信息', 'follownote'], 3)
   return rows
     .slice(hasHeader ? 1 : 0)
     .map((row) => ({
@@ -81,7 +81,7 @@ function LeadImportButton() {
   const downloadTemplate = () =>
     downloadCsv(
       'Leads导入模板.csv',
-      ['手机号', '手机区号', '渠道Code', 'FOLLOW备注'],
+      ['Phone Number', 'Phone Country Code', 'Channel Code', 'FOLLOW Remark'],
       [['0012313331115', '852', 'HK000Fq', 'follow备注信息']],
     )
 
@@ -165,7 +165,7 @@ function LeadImportButton() {
               <p className="ant-upload-text">拖动至此处 <span style={{ color: '#ff4d4f' }}>点击上传</span></p>
               <p className="ant-upload-hint">Excel（CSV 格式）</p>
             </Upload.Dragger>
-            <div style={{ color: '#8c8c8c', fontSize: 12, marginTop: 8 }}>表头：手机号、手机区号、渠道Code、FOLLOW备注；系统将按手机区号自动映射国家与业务线，重复手机号会自动跳过。{fileName ? '已读取：' + fileName : ''}</div>
+            <div style={{ color: '#8c8c8c', fontSize: 12, marginTop: 8 }}>表头：Phone Number、Phone Country Code、Channel Code、FOLLOW Remark；系统将按手机区号自动映射国家与业务线，重复手机号会自动跳过。{fileName ? '已读取：' + fileName : ''}</div>
           </Form.Item>
         </Form>
       </Modal>
