@@ -193,6 +193,7 @@ export type LessonRecord = {
   id: string
   studentId: string
   courseLabel: string // 课标，如 TCELA-L1-U2-LC1-11
+  courseName?: string // 课程名称
   lessonType: LessonType // 体验课 / 正式课
   status: LessonStatus
   teacher?: string // 授课老师

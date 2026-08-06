@@ -36,7 +36,14 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
   const student = useMemo(() => students.find((s) => s.studentId === studentId), [students, studentId])
   const inScope = student && (!scope || scope.includes(student.businessLine))
   const courseData = useMemo(
-    () => studentLessons(lessons, studentId).sort((a, b) => (b.startedAt ?? b.completedAt ?? '').localeCompare(a.startedAt ?? a.completedAt ?? '')),
+    () => studentLessons(lessons, studentId)
+      .filter((lesson) => lesson.status === '进行中' || lesson.status === '已完课')
+      .sort((a, b) => {
+        if (a.status !== b.status) return a.status === '进行中' ? -1 : 1
+        const aTime = a.status === '进行中' ? a.startedAt : a.completedAt
+        const bTime = b.status === '进行中' ? b.startedAt : b.completedAt
+        return (bTime ?? '').localeCompare(aTime ?? '')
+      }),
     [lessons, studentId],
   )
 
@@ -55,13 +62,14 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
   }
 
   const courseColumns: ColumnsType<LessonRecord> = [
-    { title: '课程名称', dataIndex: 'courseLabel', width: 220, render: (v) => <Text>{v}</Text> },
+    { title: '课标', dataIndex: 'courseLabel', width: 190, render: (v) => <Text code>{v}</Text> },
     {
       title: '课程状态',
       dataIndex: 'status',
       width: 110,
-      render: (v: LessonRecord['status']) => <Tag color={v === '已完课' ? 'green' : 'processing'}>{v}</Tag>,
+      render: (v: LessonRecord['status']) => <Tag color={v === '已完课' ? 'green' : 'processing'}>{v === '已完课' ? '已完成' : '进行中'}</Tag>,
     },
+    { title: '课程名称', dataIndex: 'courseName', width: 180, render: (v: string | undefined, r) => v || `Dino English${r.lessonType}` },
     { title: t('lesson.col.teacher'), dataIndex: 'teacher', width: 130, render: (v) => v || <Text type="secondary">—</Text> },
     {
       title: '上课时间',
@@ -80,24 +88,24 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
       title: t('lesson.col.report'),
       key: 'report',
       width: 150,
-      render: (_: unknown, r: LessonRecord) => (
-        // Trial Report / Lesson Report 交互一致：均跳转外部原型页（内容暂复用 Trial Report）
-        <Button
-          type="link"
-          style={{ padding: 0 }}
-          icon={<FileTextOutlined />}
-          onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
-        >
-          {reportKind(r)}
-        </Button>
-      ),
+      render: (_: unknown, r: LessonRecord) =>
+        r.status === '已完课' && r.report ? (
+          <Button
+            type="link"
+            style={{ padding: 0 }}
+            icon={<FileTextOutlined />}
+            onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
+          >
+            {reportKind(r)}
+          </Button>
+        ) : <Text type="secondary">—</Text>,
     },
     {
       title: t('lesson.col.replay'),
       key: 'replay',
       width: 110,
       render: (_: unknown, r: LessonRecord) =>
-        r.replayUrl ? (
+        r.status === '已完课' && r.replayUrl ? (
           <Button type="link" style={{ padding: 0 }} icon={<PlayCircleOutlined />} onClick={() => openReplayVideo(r.replayUrl)}>
             {t('lesson.viewReplay')}
           </Button>

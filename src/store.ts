@@ -1194,7 +1194,7 @@ function seed(): AppState {
     },
     {
       id: uid('ls_'), studentId: '2060199610824355842', courseLabel: 'TCELA-L1-U2-LC1-12', lessonType: '正式课', status: '已完课',
-      teacher: 'Kim', completedAt: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
+      teacher: 'Luna', completedAt: now.subtract(2, 'day').format('YYYY-MM-DD HH:mm:ss'), replayUrl: '#replay',
       report: {
         summary: '复习 Unit 2 核心句型并完成小测，学生词汇掌握牢固，能主动发起对话。',
         ratings: [
