@@ -69,7 +69,7 @@ function parseLeads(raw: string): LeadRow[] {
 function LeadImportButton() {
   const students = useStore((s) => s.students)
   const { can, actor } = usePerm()
-  const canImport = can('sales') === 'operate'
+  const canImport = can('salesV3_import_leads') === 'operate'
   const [open, setOpen] = useState(false)
   const [form] = Form.useForm()
   const [fileName, setFileName] = useState('')
@@ -193,5 +193,5 @@ function LeadImportButton() {
 }
 
 export default function SalesCenterP3() {
-  return <SalesCenter detailPath="/sales-v3" importAction={<LeadImportButton />} />
+  return <SalesCenter phase3 detailPath="/sales-v3" importAction={<LeadImportButton />} />
 }

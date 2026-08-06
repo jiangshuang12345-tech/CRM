@@ -55,15 +55,15 @@ const USER_TYPE_COLOR: Record<UserType, string> = {
   测试用户: 'gold',
 }
 
-export default function UserCenter() {
+export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
   const { t } = useI18n()
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
   const lessons = useStore((s) => s.lessons ?? [])
   const { can, actor } = usePerm()
-  const canEdit = can('users_edit') === 'operate'
-  const canViewPhone = can('users_phone_view') !== 'none'
-  const canExport = can('users_export') !== 'none'
+  const canEdit = can(phase3 ? 'usersV2_edit' : 'users_edit') === 'operate'
+  const canViewPhone = can(phase3 ? 'usersV2_phone_view' : 'users_phone_view') !== 'none'
+  const canExport = can(phase3 ? 'usersV2_export' : 'users_export') !== 'none'
   const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   const [keyword, setKeyword] = useState('')
   const [statusFilter, setStatusFilter] = useState<string | undefined>()

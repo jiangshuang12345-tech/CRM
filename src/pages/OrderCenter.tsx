@@ -51,11 +51,12 @@ function fmtMoney(amount: number, currency: string) {
   return `${currency} ${amount.toLocaleString()}`
 }
 
-export default function OrderCenter({ detailsPath }: { detailsPath?: string }) {
+export default function OrderCenter({ detailsPath, exportPermission = 'orders_export', detailPermission }: { detailsPath?: string; exportPermission?: 'orders_export' | 'ordersV3_export'; detailPermission?: 'ordersV3_detail' }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const { can } = usePerm()
-  const canExport = can('orders_export') === 'operate'
+  const canExport = can(exportPermission) === 'operate'
+  const canViewDetail = !detailPermission || can(detailPermission) !== 'none'
   const orders = useStore((s) => s.orders)
   const students = useStore((s) => s.students)
   const channels = useStore((s) => s.channels)
@@ -137,7 +138,7 @@ export default function OrderCenter({ detailsPath }: { detailsPath?: string }) {
       dataIndex: 'orderId',
       width: 180,
       fixed: 'left',
-      render: (id: string) => detailsPath ? <a onClick={() => navigate(`${detailsPath}/${id}`)}>{id}</a> : <Text code>{id}</Text>,
+      render: (id: string) => detailsPath && canViewDetail ? <a onClick={() => navigate(`${detailsPath}/${id}`)}>{id}</a> : <Text code>{id}</Text>,
     },
     { title: t('order.col.product'), dataIndex: 'productName', width: 180 },
     { title: t('order.col.studentId'), dataIndex: 'studentId', width: 190 },

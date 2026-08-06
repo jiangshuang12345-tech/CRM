@@ -73,7 +73,7 @@ const PROGRESS_COLOR: Record<string, string> = {
 // 更新跟进弹窗里可选的进度
 const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 
-export default function SalesCenter({ importAction, detailPath }: { importAction?: ReactNode; detailPath?: string }) {
+export default function SalesCenter({ importAction, detailPath, phase3 = false }: { importAction?: ReactNode; detailPath?: string; phase3?: boolean }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const students = useStore((s) => s.students)
@@ -84,11 +84,12 @@ export default function SalesCenter({ importAction, detailPath }: { importAction
   const accounts = useStore((s) => s.accounts)
   const roles = useStore((s) => s.roles)
   const { can, allowedLines, actor, account } = usePerm()
-  const canEdit = can('sales_update') === 'operate'
-  const canClaim = can('sales_claim') === 'operate'
-  const canDial = can('sales_dial') === 'operate'
-  const canReassign = can('sales_reassign') === 'operate'
-  const canManageSettings = can('sales_config') === 'operate'
+  const canEdit = can(phase3 ? 'salesV3_update' : 'sales_update') === 'operate'
+  const canClaim = can(phase3 ? 'salesV3_claim' : 'sales_claim') === 'operate'
+  const canDial = can(phase3 ? 'salesV3_dial' : 'sales_dial') === 'operate'
+  const canReassign = can(phase3 ? 'salesV3_reassign' : 'sales_reassign') === 'operate'
+  const canManageSettings = can(phase3 ? 'salesV3_config' : 'sales_config') === 'operate'
+  const canViewDetail = !phase3 || can('salesV3_user_detail') !== 'none'
   // 全业务线（超管）或拥有重新分配权限的主管可见范围内全部领取记录
   const seeAllOwners = allowedLines() === null || canReassign
   // 当拥有分配与掉库设置权限时，视为 Leader 身份以显示横幅和设置入口
@@ -374,7 +375,7 @@ export default function SalesCenter({ importAction, detailPath }: { importAction
       width: 190,
       fixed: 'left',
       render: (id: string) =>
-        detailPath ? <Button type="link" style={{ padding: 0 }} onClick={() => navigate(detailPath + '/' + id)}>{id}</Button> : id,
+        detailPath && canViewDetail ? <Button type="link" style={{ padding: 0 }} onClick={() => navigate(detailPath + '/' + id)}>{id}</Button> : id,
     },
     { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
     {

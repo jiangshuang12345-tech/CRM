@@ -67,6 +67,22 @@ export function usePerm() {
     // 兼容三期权限新增前已保存在 localStorage 的角色数据。
     if (m === 'ordersV3') return role.perms.orders
     if (m === 'salesV3') return role.perms.sales
+    const phase3Copy: Partial<Record<ModuleKey, ModuleKey>> = {
+      usersV2_edit: 'users_edit',
+      usersV2_phone_view: 'users_phone_view',
+      usersV2_export: 'users_export',
+      ordersV3_export: 'orders_export',
+      ordersV3_detail: 'orders',
+      salesV3_claim: 'sales_claim',
+      salesV3_dial: 'sales_dial',
+      salesV3_update: 'sales_update',
+      salesV3_reassign: 'sales_reassign',
+      salesV3_config: 'sales_config',
+      salesV3_import_leads: 'sales',
+      salesV3_user_detail: 'sales',
+    }
+    const copiedFrom = phase3Copy[m]
+    if (copiedFrom) return role.perms[copiedFrom]
     return 'none'
   }
   const isOperate = (m: ModuleKey) => can(m) === 'operate'
