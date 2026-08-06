@@ -239,7 +239,7 @@ export type Order = {
   orderStatus: OrderStatus
   originalPrice: number
   paidAmount: number
-  payMethod: 'App Store' | 'Google Play' | 'Stripe' | 'PayPal'
+  payMethod: 'App Store' | 'Google Play' | 'Airwallex - Card' | 'Airwallex - Kakaopay'
   currency: string
   paidTime?: string
   validUntil?: string // 有效期到期时间

@@ -208,14 +208,34 @@ function load(): AppState {
     if (raw) {
       // 合并种子默认值：即使旧数据缺少新增字段（如 callRecords），也不会因 undefined 而崩溃
       const merged = { ...seeded, ...(JSON.parse(raw) as Partial<AppState>) }
-      return autoAllocate(merged)
+      return autoAllocate(normalizePaymentMethods(merged))
     }
   } catch {
     /* ignore */
   }
-  const finalSeeded = autoAllocate(seeded)
+  const finalSeeded = autoAllocate(normalizePaymentMethods(seeded))
   localStorage.setItem(KEY, JSON.stringify(finalSeeded))
   return finalSeeded
+}
+
+// 兼容已保存的旧原型数据：Stripe / PayPal 统一迁移为 Airwallex 支付方式。
+function normalizePaymentMethods(st: AppState): AppState {
+  const normalize = (method: string | undefined) => {
+    if (method === 'Stripe') return 'Airwallex - Card'
+    if (method === 'PayPal') return 'Airwallex - Kakaopay'
+    return method
+  }
+  return {
+    ...st,
+    orders: st.orders.map((order) => ({
+      ...order,
+      payMethod: normalize(order.payMethod) as Order['payMethod'],
+      transactions: order.transactions.map((transaction) => ({
+        ...transaction,
+        paymentMethod: normalize(transaction.paymentMethod),
+      })),
+    })),
+  }
 }
 
 function save(s: AppState) {
@@ -602,18 +622,18 @@ function seed(): AppState {
     },
     {
       orderId: 'DN2026061700015', productName: 'Dino English 年度会员', studentId: '2060199610824355845', userStatus: '付费逾期',
-      orderStatus: '已退款', originalPrice: 388, paidAmount: 388, payMethod: 'Stripe', currency: 'MYR',
+      orderStatus: '已退款', originalPrice: 388, paidAmount: 388, payMethod: 'Airwallex - Card', currency: 'MYR',
       paidTime: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'),
       validUntil: now.add(357, 'day').format('YYYY-MM-DD HH:mm:ss'),
       transactions: [
         { id: 'TXN-20260616-0015', time: now.subtract(9, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单创建', status: '待支付', amount: 388, note: '等待用户支付' },
-        { id: 'TXN-20260617-0015', time: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '支付成功', status: '已支付', amount: 388, paymentMethod: 'Stripe' },
-        { id: 'TXN-20260618-0015', time: now.subtract(7, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '退款成功', status: '已退款', amount: -388, paymentMethod: 'Stripe', note: '原路退回' },
+        { id: 'TXN-20260617-0015', time: now.subtract(8, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '支付成功', status: '已支付', amount: 388, paymentMethod: 'Airwallex - Card' },
+        { id: 'TXN-20260618-0015', time: now.subtract(7, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '退款成功', status: '已退款', amount: -388, paymentMethod: 'Airwallex - Card', note: '原路退回' },
       ],
     },
     {
       orderId: 'DN2026061600008', productName: 'Dino English 年度会员', studentId: '2060199610824355846', userStatus: '付费逾期',
-      orderStatus: '已取消', originalPrice: 119000, paidAmount: 0, payMethod: 'App Store', currency: 'KRW',
+      orderStatus: '已取消', originalPrice: 119000, paidAmount: 0, payMethod: 'Airwallex - Kakaopay', currency: 'KRW',
       transactions: [
         { id: 'TXN-20260616-0008', time: now.subtract(15, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单创建', status: '待支付', amount: 119000, note: '等待用户支付' },
         { id: 'TXN-20260616-0009', time: now.subtract(14, 'day').format('YYYY-MM-DD HH:mm:ss'), event: '订单取消', status: '已取消', amount: 0, note: '超时未支付，系统自动取消' },
