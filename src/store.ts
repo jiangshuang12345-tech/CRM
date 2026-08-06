@@ -21,7 +21,8 @@ import type {
 } from './types'
 import { LINE_CURRENCY } from './types'
 
-const KEY = 'dinoai_crm_state_v68' // 改变 key 触发重新加载 seed
+// 原型权限和导航发生结构性更新时，升级版本以避免浏览器继续使用旧的演示权限数据。
+const KEY = 'dinoai_crm_state_v69'
 
 export type AppState = {
   channels: ChannelLine[]
