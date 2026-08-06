@@ -15,7 +15,6 @@ import {
   UserSwitchOutlined,
   ShopOutlined,
   SolutionOutlined,
-  ThunderboltOutlined,
 } from '@ant-design/icons'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { logout, useSession } from '../auth'
@@ -40,7 +39,6 @@ const NAV_MODULE: Record<string, ModuleKey> = {
   '/packages': 'packages',
   '/coupons': 'coupons',
   '/system': 'system',
-  '/lifecycle': 'lifecycle',
 }
 
 export default function AppLayout() {
@@ -107,10 +105,6 @@ export default function AppLayout() {
     { key: '/system', icon: <SafetyOutlined />, label: phase2Label(t('app.nav.system')) },
   ].filter((n) => visible(n.key))
 
-  const lifecycleNav = [
-    { key: '/lifecycle', icon: <ThunderboltOutlined />, label: phase4Label('消息中心') },
-  ].filter((n) => visible(n.key))
-
   const NAV = [
     ...topNav,
     ...salesNav,
@@ -128,7 +122,6 @@ export default function AppLayout() {
           },
         ]
       : []),
-    ...lifecycleNav,
   ]
 
   const TITLES: Record<string, string> = {
@@ -143,7 +136,6 @@ export default function AppLayout() {
     '/packages': t('app.nav.packages'),
     '/coupons': t('app.nav.coupons'),
     '/system': t('app.nav.system'),
-    '/lifecycle': '消息中心',
   }
 
   const onLogout = () => {

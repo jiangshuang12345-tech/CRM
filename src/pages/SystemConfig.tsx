@@ -46,9 +46,8 @@ const MODULE_HIERARCHY: { key: ModuleKey; sub?: ModuleKey[] }[] = [
   { key: 'usersV2' },
   { key: 'ordersV3' },
   { key: 'salesV3' },
-  { key: 'lifecycle' },
   { key: 'channels', sub: ['channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params'] },
-  { key: 'landing', sub: ['landing_create', 'landing_delete'] },
+  { key: 'landing', sub: ['landing_create', 'landing_edit'] },
   { key: 'packages', sub: ['packages_create', 'packages_edit', 'packages_status'] },
   { key: 'coupons', sub: ['coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit'] },
 ]
@@ -212,9 +211,7 @@ export default function SystemConfig() {
   ]
 
   const PHASE3_MODULES = ['usersV2', 'ordersV3', 'salesV3']
-  const PHASE4_MODULES = ['lifecycle']
   const isPhase3 = (m: string) => PHASE3_MODULES.some(p => m === p || m.startsWith(p + '_'))
-  const isPhase4 = (m: string) => PHASE4_MODULES.includes(m)
 
   // 权限矩阵：行=模块（主模块+子模块平铺），列=角色
   const matrixData = MODULE_HIERARCHY.flatMap((m) => [m.key, ...(m.sub || [])]).map((m: ModuleKey) => ({ key: m }))
@@ -228,12 +225,10 @@ export default function SystemConfig() {
       render: (m: ModuleKey) => {
         const isSub = m.includes('_')
         const p3 = isPhase3(m)
-        const p4 = isPhase4(m)
         return (
-          <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0, color: p3 || p4 ? '#bfbfbf' : undefined }}>
+          <Text strong={!isSub} style={{ marginLeft: isSub ? 16 : 0, color: p3 ? '#bfbfbf' : undefined }}>
             {moduleLabel(m)}
             {p3 && !isSub && <Tag color="default" style={{ marginLeft: 6, transform: 'scale(0.8)', color: '#8c8c8c' }}>{t('app.phase3')}</Tag>}
-            {p4 && <Tag color="cyan" style={{ marginLeft: 6, transform: 'scale(0.8)' }}>四期</Tag>}
           </Text>
         )
       },

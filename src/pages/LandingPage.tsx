@@ -113,7 +113,7 @@ export default function LandingPageManagement() {
   const { t } = useI18n()
   const { can, actor } = usePerm()
   const canCreate = can('landing_create') === 'operate'
-  const canEdit = canCreate
+  const canEdit = can('landing_edit') === 'operate' || canCreate
   const { selected: lineSel, setSelected: setLineSel, matchLine, disabled: lineDisabled, filterOptions } = useLineScope()
   const channels = useStore((s) => s.channels)
   const packages = useStore((s) => s.packages)

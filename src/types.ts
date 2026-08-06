@@ -307,7 +307,7 @@ export type ModuleKey =
   // 子权限 - channels
   | 'channels_create' | 'channels_edit' | 'channels_delete' | 'channels_gen_code' | 'channels_params'
   // 子权限 - landing
-  | 'landing_create' | 'landing_delete'
+  | 'landing_create' | 'landing_edit'
   // 子权限 - packages
   | 'packages_create' | 'packages_edit' | 'packages_status'
   // 子权限 - coupons
@@ -323,7 +323,7 @@ export type ModuleKey =
 
 export const PERMISSION_MODULES: ModuleKey[] = [
   'channels', 'channels_create', 'channels_edit', 'channels_delete', 'channels_gen_code', 'channels_params',
-  'landing', 'landing_create', 'landing_delete',
+  'landing', 'landing_create', 'landing_edit',
   'packages', 'packages_create', 'packages_edit', 'packages_status',
   'coupons', 'coupons_create', 'coupons_extend', 'coupons_revoke', 'coupons_edit',
   'users', 'users_edit', 'users_phone_view', 'users_export', 'usersV2',
