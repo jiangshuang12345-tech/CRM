@@ -1,18 +1,39 @@
-import { useMemo, useState } from 'react'
-import { Button, Form, Modal, Select, Upload, message } from 'antd'
+import { useState } from 'react'
+import { Button, Form, Modal, Upload, message } from 'antd'
 import { ImportOutlined, InboxOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import SalesCenter from './SalesCenter'
 import { setState, uid, useStore } from '../store'
 import type { BusinessLine, Student } from '../types'
-import { BUSINESS_LINES } from '../types'
 import { usePerm } from '../perm'
 import { downloadCsv } from '../export'
 
 type LeadRow = { phone: string; areaCode?: string; channelCode?: string; followNote?: string }
 
+const AREA_CODE_LOCATION: Record<string, { country: string; businessLine: BusinessLine }> = {
+  '60': { country: '马来西亚', businessLine: '马来' },
+  '62': { country: '印尼', businessLine: '印尼' },
+  '66': { country: '泰国', businessLine: '泰国' },
+  '65': { country: '新加坡', businessLine: '新加坡' },
+  '84': { country: '越南', businessLine: '越南' },
+  '82': { country: '韩国', businessLine: '韩国' },
+  '966': { country: '沙特', businessLine: '沙特' },
+  '852': { country: '中国香港', businessLine: '其他' },
+  '886': { country: '中国台湾', businessLine: '其他' },
+  '86': { country: '中国', businessLine: '其他' },
+  '1': { country: '美国/加拿大', businessLine: '其他' },
+}
+
 function phoneKey(phone: string) {
   return phone.replace(/[^\d+]/g, '')
+}
+
+function locationOf(areaCode?: string) {
+  const code = (areaCode ?? '').replace(/\D/g, '')
+  return {
+    countryCode: code ? '+' + code : '',
+    ...(AREA_CODE_LOCATION[code] ?? { country: '其他', businessLine: '其他' as BusinessLine }),
+  }
 }
 
 function parseLeads(raw: string): LeadRow[] {
@@ -46,13 +67,11 @@ function parseLeads(raw: string): LeadRow[] {
 
 function LeadImportButton() {
   const students = useStore((s) => s.students)
-  const { can, allowedLines, actor } = usePerm()
+  const { can, actor } = usePerm()
   const canImport = can('sales') === 'operate'
   const [open, setOpen] = useState(false)
   const [form] = Form.useForm()
   const [fileName, setFileName] = useState('')
-  const scope = allowedLines()
-  const lines = useMemo(() => BUSINESS_LINES.filter((line) => !scope || scope.includes(line)), [scope])
 
   const readFile = async (file: File) => {
     form.setFieldValue('content', await file.text())
@@ -90,10 +109,10 @@ function LeadImportButton() {
       return
     }
     const now = dayjs.utc().format('YYYY-MM-DD HH:mm:ss')
-    const businessLine = value.businessLine as BusinessLine
     const created: Student[] = uniqueRows.map((row) => {
       const phone = displayPhone(row)
       const note = row.followNote || '【静默注册】通过 Leads 导入创建'
+      const location = locationOf(row.areaCode)
       return {
         studentId: uid('lead_'),
         name: '导入 Leads',
@@ -101,10 +120,10 @@ function LeadImportButton() {
         loginMethod: '手机号',
         account: phone,
         phone,
-        businessLine,
+        businessLine: location.businessLine,
         registerChannel: '导入 Leads（静默注册）',
-        countryCode: row.areaCode ? (row.areaCode.startsWith('+') ? row.areaCode : '+' + row.areaCode) : businessLine,
-        country: businessLine,
+        countryCode: location.countryCode,
+        country: location.country,
         channelCode: row.channelCode || 'IMPORTED_LEAD',
         channelSource: '线索导入',
         registerTime: now,
@@ -133,9 +152,6 @@ function LeadImportButton() {
         destroyOnClose
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="businessLine" label="业务线" rules={[{ required: true, message: '请选择业务线' }]}>
-            <Select placeholder="请选择业务线" options={lines.map((line) => ({ label: line, value: line }))} />
-          </Form.Item>
           <Form.Item name="content" hidden rules={[{ required: true, message: '请上传 Leads 文件' }]}><input /></Form.Item>
           <Form.Item label="上传 leads" required>
             <Upload.Dragger
@@ -149,7 +165,7 @@ function LeadImportButton() {
               <p className="ant-upload-text">拖动至此处 <span style={{ color: '#ff4d4f' }}>点击上传</span></p>
               <p className="ant-upload-hint">Excel（CSV 格式）</p>
             </Upload.Dragger>
-            <div style={{ color: '#8c8c8c', fontSize: 12, marginTop: 8 }}>表头：手机号、手机区号、渠道Code、FOLLOW备注；重复手机号会自动跳过。{fileName ? '已读取：' + fileName : ''}</div>
+            <div style={{ color: '#8c8c8c', fontSize: 12, marginTop: 8 }}>表头：手机号、手机区号、渠道Code、FOLLOW备注；系统将按手机区号自动映射国家与业务线，重复手机号会自动跳过。{fileName ? '已读取：' + fileName : ''}</div>
           </Form.Item>
         </Form>
       </Modal>
