@@ -3,7 +3,6 @@ import {
   Alert,
   Button,
   Card,
-  DatePicker,
   Form,
   Input,
   InputNumber,
@@ -21,7 +20,7 @@ import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 import { setState, useStore } from '../store'
 import type { LoginMethod, Student, StudentEditLog, StudentFieldChange, UserStatus, UserType } from '../types'
-import { USER_STATUSES, USER_TYPES } from '../types'
+import { AGE_GROUPS, USER_STATUSES, USER_TYPES } from '../types'
 import { useI18n } from '../i18n'
 import { usePerm } from '../perm'
 import { hasPhoneLogin, resolveUserType } from '../userType'
@@ -131,9 +130,7 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
     setEditing(s)
     form.setFieldsValue({
       localName: s.localName,
-      gender: s.gender,
-      birthday: s.birthday ? dayjs(s.birthday) : undefined,
-      businessLine: s.businessLine,
+      ageGroup: s.ageGroup,
       userType: resolveUserType(s),
     })
   }
@@ -165,6 +162,14 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
     const v = await form.validateFields()
     if (!editing) return
     const locked = hasPhoneLogin(editing)
+    const changes: StudentFieldChange[] = []
+    if ((v.localName || '') !== (editing.localName || ''))
+      changes.push({ field: t('user.label.localName'), before: editing.localName || '', after: v.localName || '' })
+    if ((v.ageGroup || '') !== (editing.ageGroup || ''))
+      changes.push({ field: t('user.label.ageGroup'), before: editing.ageGroup || '', after: v.ageGroup || '' })
+    if (!locked && v.userType !== resolveUserType(editing))
+      changes.push({ field: t('user.col.userType'), before: t(`enum.userType.${resolveUserType(editing)}`), after: t(`enum.userType.${v.userType}`) })
+    const entry: StudentEditLog = { time: dayjs().format('YYYY-MM-DD HH:mm:ss'), action: 'user.hist.edit', changes, modifier: actor }
     setState((prev) => ({
       ...prev,
       students: prev.students.map((s) =>
@@ -172,11 +177,11 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
           ? {
               ...s,
               localName: v.localName,
-              gender: v.gender,
-              birthday: v.birthday ? v.birthday.format('YYYY-MM-DD') : undefined,
+              ageGroup: v.ageGroup,
               // 手机号/kakao 由规则自动判定，不接受手动修改
               userType: locked ? s.userType : v.userType,
-              lastModifier: actor,
+              lastModifier: changes.length ? actor : s.lastModifier,
+              editHistory: changes.length ? [entry, ...(s.editHistory || [])] : s.editHistory,
             }
           : s,
       ),
@@ -459,15 +464,12 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
           <Form.Item name="localName" label={t('user.label.localName')}>
             <Input placeholder={t('user.localNamePlaceholder')} />
           </Form.Item>
-          <Form.Item name="gender" label={t('user.label.gender')}>
+          <Form.Item name="ageGroup" label={t('user.label.ageGroup')}>
             <Select
               allowClear
               placeholder={t('common.pleaseSelect')}
-              options={(['男', '女', '其他'] as const).map((g) => ({ label: t(`enum.gender.${g}`), value: g }))}
+              options={AGE_GROUPS.map((ageGroup) => ({ label: ageGroup, value: ageGroup }))}
             />
-          </Form.Item>
-          <Form.Item name="birthday" label={t('user.label.birthday')}>
-            <DatePicker style={{ width: '100%' }} placeholder={t('user.birthdayPlaceholder')} />
           </Form.Item>
           <Form.Item
             name="userType"
@@ -479,8 +481,8 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
               options={USER_TYPES.map((tp) => ({ label: t(`enum.userType.${tp}`), value: tp }))}
             />
           </Form.Item>
-          <Form.Item label={t('user.col.line')} tooltip={t('user.lineReadonly')}>
-            <Input value={editing?.businessLine} disabled />
+          <Form.Item label={t('user.col.country')}>
+            <Input value={editing?.country} disabled />
           </Form.Item>
         </Form>
       </Modal>
