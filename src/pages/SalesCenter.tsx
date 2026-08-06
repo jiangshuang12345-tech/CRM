@@ -73,7 +73,7 @@ const PROGRESS_COLOR: Record<string, string> = {
 // 更新跟进弹窗里可选的进度
 const FOLLOW_PROGRESS = ['跟进中', '已付费', '暂不跟进'] as const
 
-export default function SalesCenter({ importAction, detailPath = '/sales' }: { importAction?: ReactNode; detailPath?: string }) {
+export default function SalesCenter({ importAction, detailPath }: { importAction?: ReactNode; detailPath?: string }) {
   const { t } = useI18n()
   const navigate = useNavigate()
   const students = useStore((s) => s.students)
@@ -373,7 +373,8 @@ export default function SalesCenter({ importAction, detailPath = '/sales' }: { i
       dataIndex: 'studentId',
       width: 190,
       fixed: 'left',
-      render: (id: string) => <Button type="link" style={{ padding: 0 }} onClick={() => navigate(detailPath + '/' + id)}>{id}</Button>,
+      render: (id: string) =>
+        detailPath ? <Button type="link" style={{ padding: 0 }} onClick={() => navigate(detailPath + '/' + id)}>{id}</Button> : id,
     },
     { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
     {
