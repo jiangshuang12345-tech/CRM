@@ -80,7 +80,6 @@ export function usePerm() {
       salesV3_reassign: 'sales_reassign',
       salesV3_config: 'sales_config',
       salesV3_import_leads: 'sales',
-      salesV3_user_detail: 'sales',
       salesV3_view_report: 'sales',
       salesV3_view_replay: 'sales',
     }

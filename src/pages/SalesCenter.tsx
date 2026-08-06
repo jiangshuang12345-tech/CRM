@@ -89,7 +89,6 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
   const canDial = can(phase3 ? 'salesV3_dial' : 'sales_dial') === 'operate'
   const canReassign = can(phase3 ? 'salesV3_reassign' : 'sales_reassign') === 'operate'
   const canManageSettings = can(phase3 ? 'salesV3_config' : 'sales_config') === 'operate'
-  const canViewDetail = !phase3 || can('salesV3_user_detail') !== 'none'
   // 全业务线（超管）或拥有重新分配权限的主管可见范围内全部领取记录
   const seeAllOwners = allowedLines() === null || canReassign
   // 当拥有分配与掉库设置权限时，视为 Leader 身份以显示横幅和设置入口
@@ -375,7 +374,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
       width: 190,
       fixed: 'left',
       render: (id: string) =>
-        detailPath && canViewDetail ? <Button type="link" style={{ padding: 0 }} onClick={() => navigate(detailPath + '/' + id)}>{id}</Button> : id,
+        detailPath ? <Button type="link" style={{ padding: 0 }} onClick={() => navigate(detailPath + '/' + id)}>{id}</Button> : id,
     },
     { title: t('user.col.name'), dataIndex: 'localName', width: 140, render: (_, r) => r.localName || r.name },
     {
