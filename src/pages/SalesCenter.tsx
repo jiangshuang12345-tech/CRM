@@ -219,6 +219,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
     setEditing(s)
     form.setFieldsValue({
       note: '',
+      purchaseIntention: s.purchaseIntention || '未填写',
     })
   }
 
@@ -235,6 +236,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
           const currentProgress = x.salesProgress || '跟进中'
           return {
             ...x,
+            purchaseIntention: v.purchaseIntention,
             salesLatestNote: note,
             salesUpdatedAt: now,
             salesHistory: [{ progress: currentProgress, note, time: now, owner }, ...(x.salesHistory || [])],
@@ -875,6 +877,13 @@ function Modal_Follow({
             <Input value={editing?.salesOwner} disabled />
           </Form.Item>
         </div>
+        <Form.Item name="purchaseIntention" label={t('user.col.purchaseIntention')}>
+          <Select>
+            <Select.Option value="未填写">{t('sales.purchaseIntention.none')}</Select.Option>
+            <Select.Option value="有意向">{t('sales.purchaseIntention.yes')}</Select.Option>
+            <Select.Option value="无意向">{t('sales.purchaseIntention.no')}</Select.Option>
+          </Select>
+        </Form.Item>
         <Form.Item name="note" label={t('sales.f.note')} rules={[{ required: true, message: t('sales.f.noteRequired') }]}>
           <Input.TextArea rows={3} placeholder={t('sales.f.notePlaceholder')} />
         </Form.Item>
