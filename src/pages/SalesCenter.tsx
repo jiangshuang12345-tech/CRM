@@ -482,7 +482,6 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
       render: (v: string | undefined) => v || <Text type="secondary">—</Text>,
     },
     { title: t('sales.col.updatedAt'), dataIndex: 'salesUpdatedAt', width: 170, render: (v) => v || <Text type="secondary">—</Text> },
-    { title: t('sales.col.owner'), dataIndex: 'salesOwner', width: 190, render: (v) => v || <Text type="secondary">—</Text> },
     ...(canEdit || canDial || canReassign
       ? [
           {
