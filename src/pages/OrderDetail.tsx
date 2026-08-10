@@ -16,11 +16,11 @@ const STATUS_COLOR: Record<OrderStatus, string> = {
   已退款: 'red',
   已取消: 'default',
 }
-const STATUS_CODE: Record<OrderStatus, string> = {
-  已退款: 'REFUNDED',
-  已取消: 'CANCELED',
-  已支付: 'PAID',
-  待支付: 'PENDING',
+const STATUS_LABEL: Record<OrderStatus, string> = {
+  已退款: '已退费',
+  已取消: '已取消',
+  已支付: '已支付',
+  待支付: '待支付',
 }
 
 function money(amount: number, currency: string) {
@@ -52,8 +52,7 @@ export default function OrderDetail({ backPath = '/orders' }: { backPath?: strin
   const columns: ColumnsType<OrderTransaction> = [
     { title: '子订单号', dataIndex: 'id', width: 190, render: (id) => <Text code>{id}</Text> },
     { title: '发生时间', dataIndex: 'time', width: 190, render: (time) => <LocalTime time={time} country={country} /> },
-    { title: '流水事件', dataIndex: 'event', width: 130 },
-    { title: '状态', dataIndex: 'status', width: 120, render: (status: OrderStatus) => <Tag color={STATUS_COLOR[status]}>{STATUS_CODE[status]}</Tag> },
+    { title: '订单状态', dataIndex: 'status', width: 120, render: (status: OrderStatus) => <Tag color={STATUS_COLOR[status]}>{STATUS_LABEL[status]}</Tag> },
     { title: '金额', dataIndex: 'amount', width: 150, align: 'right', render: (amount) => <Text type={amount < 0 ? 'danger' : undefined}>{money(amount, order.currency)}</Text> },
     { title: '支付方式', dataIndex: 'paymentMethod', width: 130, render: (method) => method || <Text type="secondary">—</Text> },
   ]
@@ -63,7 +62,7 @@ export default function OrderDetail({ backPath = '/orders' }: { backPath?: strin
       <Card className="page-card" bordered={false} title={<span className="section-title">订单详情</span>} extra={back}>
         <Descriptions column={2} bordered size="small">
           <Descriptions.Item label="订单 ID"><Text code>{order.orderId}</Text></Descriptions.Item>
-          <Descriptions.Item label="订单状态"><Tag color={STATUS_COLOR[order.orderStatus]}>{STATUS_CODE[order.orderStatus]}</Tag></Descriptions.Item>
+          <Descriptions.Item label="订单状态"><Tag color={STATUS_COLOR[order.orderStatus]}>{STATUS_LABEL[order.orderStatus]}</Tag></Descriptions.Item>
           <Descriptions.Item label="商品名称">{order.productName}</Descriptions.Item>
           <Descriptions.Item label="用户 ID"><Text code>{order.studentId}</Text></Descriptions.Item>
           <Descriptions.Item label="用户姓名">{student?.localName || student?.name || '—'}</Descriptions.Item>
@@ -76,7 +75,7 @@ export default function OrderDetail({ backPath = '/orders' }: { backPath?: strin
       </Card>
 
       <Card className="page-card" bordered={false} title={<span className="section-title">订单流水</span>}>
-        <Table rowKey="id" columns={columns} dataSource={transactions} scroll={{ x: 1080 }} pagination={false} />
+        <Table rowKey="id" columns={columns} dataSource={transactions} scroll={{ x: 900 }} pagination={false} />
       </Card>
     </Space>
   )
