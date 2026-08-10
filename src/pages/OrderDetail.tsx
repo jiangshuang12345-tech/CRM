@@ -4,9 +4,10 @@ import { Button, Card, Descriptions, Space, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useStore } from '../store'
-import type { OrderStatus, OrderTransaction } from '../types'
+import type { OrderStatus, OrderTransaction, UserStatus, UserType } from '../types'
 import { usePerm } from '../perm'
 import LocalTime from '../components/LocalTime'
+import { resolveUserType } from '../userType'
 
 const { Text } = Typography
 
@@ -21,6 +22,19 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
   已取消: '已取消',
   已支付: '已支付',
   待支付: '待支付',
+}
+
+const USER_STATUS_COLOR: Record<UserStatus, string> = {
+  '未付费-未体验': 'default',
+  '未付费-体验中': 'gold',
+  '未付费-已体验': 'blue',
+  付费: 'green',
+  付费逾期: 'red',
+}
+
+const USER_TYPE_COLOR: Record<UserType, string> = {
+  测试用户: 'gold',
+  正式用户: 'green',
 }
 
 function money(amount: number, currency: string) {
@@ -48,6 +62,8 @@ export default function OrderDetail({ backPath = '/orders' }: { backPath?: strin
   }
 
   const country = student?.country || student?.businessLine
+  const couponCode = order.payMethod.startsWith('Airwallex') ? student?.couponCode : undefined
+  const userType = student ? resolveUserType(student) : undefined
   const transactions = [...(order.transactions ?? [])].sort((a, b) => b.time.localeCompare(a.time))
   const columns: ColumnsType<OrderTransaction> = [
     { title: '子订单号', dataIndex: 'id', width: 190, render: (id) => <Text code>{id}</Text> },
@@ -62,13 +78,16 @@ export default function OrderDetail({ backPath = '/orders' }: { backPath?: strin
       <Card className="page-card" bordered={false} title={<span className="section-title">订单详情</span>} extra={back}>
         <Descriptions column={2} bordered size="small">
           <Descriptions.Item label="订单 ID"><Text code>{order.orderId}</Text></Descriptions.Item>
-          <Descriptions.Item label="订单状态"><Tag color={STATUS_COLOR[order.orderStatus]}>{STATUS_LABEL[order.orderStatus]}</Tag></Descriptions.Item>
           <Descriptions.Item label="商品名称">{order.productName}</Descriptions.Item>
           <Descriptions.Item label="用户 ID"><Text code>{order.studentId}</Text></Descriptions.Item>
-          <Descriptions.Item label="用户姓名">{student?.localName || student?.name || '—'}</Descriptions.Item>
-          <Descriptions.Item label="支付方式">{order.payMethod}</Descriptions.Item>
+          <Descriptions.Item label="优惠码">{couponCode ? <Tag color="blue">{couponCode}</Tag> : '—'}</Descriptions.Item>
+          <Descriptions.Item label="用户类型">{userType ? <Tag color={USER_TYPE_COLOR[userType]}>{userType}</Tag> : '—'}</Descriptions.Item>
+          <Descriptions.Item label="国家">{country ? <Tag>{country}</Tag> : '—'}</Descriptions.Item>
+          <Descriptions.Item label="用户状态"><Tag color={USER_STATUS_COLOR[order.userStatus]}>{order.userStatus}</Tag></Descriptions.Item>
+          <Descriptions.Item label="订单状态"><Tag color={STATUS_COLOR[order.orderStatus]}>{STATUS_LABEL[order.orderStatus]}</Tag></Descriptions.Item>
           <Descriptions.Item label="原价">{money(order.originalPrice, order.currency)}</Descriptions.Item>
-          <Descriptions.Item label="实际付款">{money(order.paidAmount, order.currency)}</Descriptions.Item>
+          <Descriptions.Item label="实际付款金额">{money(order.paidAmount, order.currency)}</Descriptions.Item>
+          <Descriptions.Item label="支付方式">{order.payMethod}</Descriptions.Item>
           <Descriptions.Item label="成功支付时间"><LocalTime time={order.paidTime} country={country} /></Descriptions.Item>
           <Descriptions.Item label="有效期到期时间"><LocalTime time={order.validUntil} country={country} /></Descriptions.Item>
         </Descriptions>
