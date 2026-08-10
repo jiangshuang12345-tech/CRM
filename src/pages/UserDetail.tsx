@@ -158,9 +158,6 @@ export default function UserDetail({ backPath = '/users-v2', backText, variant =
       </Card>
 
       <Card className="page-card" bordered={false} title={<span className="section-title">{t('user.courseInfo')}</span>}>
-        <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-          {t('user.courseInfoTip')}
-        </Text>
         <Table
           rowKey="id"
           columns={courseColumns}
