@@ -3,6 +3,7 @@ import {
   Alert,
   Button,
   Card,
+  Dropdown,
   Form,
   Input,
   InputNumber,
@@ -14,7 +15,7 @@ import {
   Typography,
   message,
 } from 'antd'
-import { DownloadOutlined, EditOutlined, HistoryOutlined, PlusCircleOutlined, SearchOutlined } from '@ant-design/icons'
+import { DownloadOutlined, DownOutlined, EditOutlined, HistoryOutlined, PlusCircleOutlined, SearchOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
@@ -74,6 +75,8 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
   const [form] = Form.useForm()
   const [addingMembership, setAddingMembership] = useState<Student | null>(null)
   const [membershipForm] = Form.useForm()
+  const [trialLevelStudent, setTrialLevelStudent] = useState<Student | null>(null)
+  const [trialLevelForm] = Form.useForm()
 
   // 业务线筛选选项：渠道业务线 + 数据中出现的业务线（无渠道归因的空业务线不入选项）
   const lineOptions = useMemo(
@@ -138,6 +141,41 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
   const openAddMembership = (s: Student) => {
     setAddingMembership(s)
     membershipForm.resetFields()
+  }
+
+  const openTrialLevel = (s: Student) => {
+    setTrialLevelStudent(s)
+    trialLevelForm.setFieldsValue({ courseLevel: s.courseLevel })
+  }
+
+  const saveTrialLevel = async () => {
+    if (!trialLevelStudent) return
+    const { courseLevel } = await trialLevelForm.validateFields()
+    const before = trialLevelStudent.courseLevel || ''
+    const changes: StudentFieldChange[] = before === courseLevel
+      ? []
+      : [{ field: '试听课等级', before, after: courseLevel }]
+    const entry: StudentEditLog = {
+      time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+      action: 'user.hist.edit',
+      changes,
+      modifier: actor,
+    }
+    setState((prev) => ({
+      ...prev,
+      students: prev.students.map((student) =>
+        student.studentId === trialLevelStudent.studentId
+          ? {
+              ...student,
+              courseLevel,
+              lastModifier: changes.length ? actor : student.lastModifier,
+              editHistory: changes.length ? [entry, ...(student.editHistory || [])] : student.editHistory,
+            }
+          : student,
+      ),
+    }))
+    setTrialLevelStudent(null)
+    message.success('试听课等级已修改')
   }
 
   const addMembership = async () => {
@@ -393,12 +431,20 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
     { title: t('user.col.couponCode'), dataIndex: 'couponCode', width: 140, render: (v) => v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text> },
     { title: t('user.col.cc'), dataIndex: 'ccName', width: 150, render: (v) => v || <Text type="secondary">—</Text> },
     {
-      title: t('common.action'), key: 'action', width: 210, fixed: 'right',
+      title: t('common.action'), key: 'action', width: 120, fixed: 'right',
       render: (_: unknown, r) => canEdit ? (
-        <Space size={0}>
-          <Button type="link" icon={<EditOutlined />} onClick={() => openEdit(r)}>{t('user.editInfo')}</Button>
-          <Button type="link" icon={<PlusCircleOutlined />} onClick={() => openAddMembership(r)}>{t('user.addMembership')}</Button>
-        </Space>
+        <Dropdown
+          trigger={['click']}
+          menu={{
+            items: [
+              { key: 'edit', icon: <EditOutlined />, label: t('user.editInfo'), onClick: () => openEdit(r) },
+              { key: 'membership', icon: <PlusCircleOutlined />, label: t('user.addMembership'), onClick: () => openAddMembership(r) },
+              { key: 'trialLevel', label: '修改试听课等级', onClick: () => openTrialLevel(r) },
+            ],
+          }}
+        >
+          <Button>操作 <DownOutlined /></Button>
+        </Dropdown>
       ) : <Text type="secondary">—</Text>,
     },
   ]
@@ -540,6 +586,22 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
         <Form form={membershipForm} layout="vertical" preserve={false}>
           <Form.Item name="days" label={t('user.addMembership.days')} rules={[{ required: true, message: '请输入增加天数' }]}>
             <InputNumber min={1} max={365} addonAfter="天" style={{ width: '100%' }} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={!!trialLevelStudent}
+        title={`修改试听课等级 · ${trialLevelStudent?.studentId ?? ''}`}
+        onCancel={() => setTrialLevelStudent(null)}
+        onOk={saveTrialLevel}
+        okText={t('common.save')}
+        cancelText={t('common.cancel')}
+        destroyOnClose
+      >
+        <Form form={trialLevelForm} layout="vertical" preserve={false}>
+          <Form.Item name="courseLevel" label="试听课等级" rules={[{ required: true, message: '请选择试听课等级' }]}>
+            <Select options={['L1', 'L2', 'L3', 'L4', 'L5'].map((value) => ({ label: value, value }))} />
           </Form.Item>
         </Form>
       </Modal>
