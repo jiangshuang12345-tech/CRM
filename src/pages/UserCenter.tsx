@@ -430,6 +430,7 @@ export default function UserCenter({ phase3 = false }: { phase3?: boolean }) {
     { title: t('user.col.expireTime'), dataIndex: 'expireTime', width: 200, render: (v, r) => <LocalTime time={v} country={r.country || r.businessLine} /> },
     { title: t('user.col.couponCode'), dataIndex: 'couponCode', width: 140, render: (v) => v ? <Tag color="blue">{v}</Tag> : <Text type="secondary">—</Text> },
     { title: t('user.col.cc'), dataIndex: 'ccName', width: 150, render: (v) => v || <Text type="secondary">—</Text> },
+    { title: '最新修改人', dataIndex: 'lastModifier', width: 160, render: (v) => v || <Text type="secondary">—</Text> },
     {
       title: t('common.action'), key: 'action', width: 120, fixed: 'right',
       render: (_: unknown, r) => canEdit ? (
