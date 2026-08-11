@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   DatePicker,
+  Dropdown,
   Form,
   Input,
   InputNumber,
@@ -19,7 +20,7 @@ import {
   Typography,
   message,
 } from 'antd'
-import { CheckOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined, RollbackOutlined } from '@ant-design/icons'
+import { CheckOutlined, DownOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined, RollbackOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { genCallId, setState, updateSalesSettings, useStore } from '../store'
@@ -110,10 +111,12 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
   const [dialing, setDialing] = useState<Student | null>(null)
   const [reassigning, setReassigning] = useState<Student | null>(null)
   const [dropping, setDropping] = useState<Student | null>(null)
+  const [trialLevelStudent, setTrialLevelStudent] = useState<Student | null>(null)
   const [reassignTo, setReassignTo] = useState<string | undefined>()
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [form] = Form.useForm()
   const [dropForm] = Form.useForm()
+  const [trialLevelForm] = Form.useForm()
 
   // 无业务线（无渠道归因）的用户不参与业务线过滤（不再强制展示，需受筛选器控制）
   const lineHit = (s: Student) => {
@@ -257,6 +260,26 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
   const openDrop = (s: Student) => {
     setDropping(s)
     dropForm.resetFields()
+  }
+
+  const openTrialLevel = (s: Student) => {
+    setTrialLevelStudent(s)
+    trialLevelForm.setFieldsValue({ courseLevel: s.courseLevel })
+  }
+
+  const saveTrialLevel = async () => {
+    if (!trialLevelStudent) return
+    const { courseLevel } = await trialLevelForm.validateFields()
+    setState((prev) => ({
+      ...prev,
+      students: prev.students.map((student) =>
+        student.studentId === trialLevelStudent.studentId
+          ? { ...student, courseLevel, salesUpdatedAt: dayjs().format('YYYY-MM-DD HH:mm:ss') }
+          : student,
+      ),
+    }))
+    setTrialLevelStudent(null)
+    message.success('试听课等级已修改')
   }
 
   const doDrop = async () => {
@@ -489,9 +512,32 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
           {
             title: t('common.action'),
             key: 'op',
-            width: canReassign ? 350 : 250,
+            width: phase3 ? 220 : canReassign ? 350 : 250,
             fixed: 'right' as const,
-            render: (_: unknown, r: Student) => (
+            render: (_: unknown, r: Student) => phase3 ? (
+              <Space size={8}>
+                {canDial && (
+                  <Button type="link" icon={<PhoneOutlined />} disabled={!r.phone} onClick={() => setDialing(r)}>
+                    外呼
+                  </Button>
+                )}
+                <Dropdown
+                  trigger={['click']}
+                  menu={{
+                    items: [
+                      ...(canEdit ? [{ key: 'follow', icon: <EditOutlined />, label: '更新跟进', onClick: () => openFollow(r) }] : []),
+                      ...(canReassign ? [{ key: 'reassign', icon: <SwapOutlined />, label: '重新分配线索', onClick: () => openReassign(r) }] : []),
+                      ...(canEdit ? [
+                        { key: 'drop', danger: true, icon: <RollbackOutlined />, label: '退回公海', onClick: () => openDrop(r) },
+                        { key: 'trialLevel', label: '修改试听课等级', onClick: () => openTrialLevel(r) },
+                      ] : []),
+                    ],
+                  }}
+                >
+                  <Button>更多 <DownOutlined /></Button>
+                </Dropdown>
+              </Space>
+            ) : (
               <Space size={0}>
                 {canDial && (
                   <Button type="link" icon={<PhoneOutlined />} disabled={!r.phone} onClick={() => setDialing(r)}>
@@ -720,6 +766,22 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
             rules={[{ required: true, message: t('sales.drop.reasonRequired') }]}
           >
             <Input.TextArea rows={3} placeholder={t('sales.drop.reasonPlaceholder')} />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        open={!!trialLevelStudent}
+        title={`修改试听课等级 · ${trialLevelStudent?.studentId ?? ''}`}
+        onCancel={() => setTrialLevelStudent(null)}
+        onOk={saveTrialLevel}
+        okText={t('common.save')}
+        cancelText={t('common.cancel')}
+        destroyOnClose
+      >
+        <Form form={trialLevelForm} layout="vertical" preserve={false}>
+          <Form.Item name="courseLevel" label="试听课等级" rules={[{ required: true, message: '请选择试听课等级' }]}>
+            <Select options={['L1', 'L2', 'L3', 'L4', 'L5'].map((value) => ({ label: value, value }))} />
           </Form.Item>
         </Form>
       </Modal>
