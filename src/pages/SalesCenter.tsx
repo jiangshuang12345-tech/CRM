@@ -179,7 +179,10 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
     () =>
       callScoped.filter((c) => {
         const kw = keyword.trim().toLowerCase()
-        const text = `${c.phone} ${c.studentId} ${c.customer}`.toLowerCase()
+        const student = students.find((item) => item.studentId === c.studentId)
+        const text = phase3
+          ? `${c.studentId} ${c.customer} ${student?.account ?? ''}`.toLowerCase()
+          : `${c.phone} ${c.studentId} ${c.customer}`.toLowerCase()
         const matchResult = !callResultFilter || c.result === callResultFilter
         let matchDate = true
         if (callDateRange && callDateRange.length === 2) {
@@ -193,7 +196,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
         }
         return (!kw || text.includes(kw)) && matchResult && matchDate
       }),
-    [callScoped, keyword, callResultFilter, callDateRange],
+    [callScoped, keyword, callResultFilter, callDateRange, students, phase3],
   )
 
   const claim = (s: Student) => {
@@ -569,6 +572,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
   const callColumns: ColumnsType<CallRecord> = [
     { title: t('sales.call.time'), dataIndex: 'time', width: 180 },
     { title: t('sales.call.customer'), dataIndex: 'customer', width: 140 },
+    ...(phase3 ? [{ title: '用户ID', dataIndex: 'studentId', width: 190, render: (v: string) => <Text code>{v}</Text> }] : []),
     { title: t('user.col.phone'), dataIndex: 'phone', width: 160 },
     {
       title: t('sales.call.result'),
@@ -641,7 +645,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
         <Input
           allowClear
           prefix={<SearchOutlined />}
-          placeholder={tab === 'calls' ? t('sales.searchCalls') : t('sales.searchFollow')}
+          placeholder={tab === 'calls' ? (phase3 ? '搜索用户ID / 姓名 / 登录账号' : t('sales.searchCalls')) : t('sales.searchFollow')}
           style={{ width: 340 }}
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
