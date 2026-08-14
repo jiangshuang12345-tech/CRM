@@ -581,7 +581,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
       render: (v: CallResult) => <Tag color={CALL_RESULT_COLOR[v]}>{t(`sales.callResult.${v}`)}</Tag>,
     }] : []),
     { title: t('sales.call.duration'), dataIndex: 'duration', width: 90 },
-    ...(phase3 ? [{ title: '录音', key: 'recording', width: 100, render: () => <Text type="secondary">同步中</Text> }] : []),
+    { title: '录音', key: 'recording', width: 100, render: () => <Text type="secondary">同步中</Text> },
     {
       title: t('sales.call.note'),
       dataIndex: 'note',
