@@ -571,8 +571,8 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
 
   const callColumns: ColumnsType<CallRecord> = [
     { title: t('sales.call.time'), dataIndex: 'time', width: 180 },
-    { title: t('sales.call.customer'), dataIndex: 'customer', width: 140 },
-    ...(phase3 ? [{ title: '用户ID', dataIndex: 'studentId', width: 190, render: (v: string) => <Text code>{v}</Text> }] : []),
+    { title: '用户ID', dataIndex: 'studentId', width: 190, render: (v: string) => <Text code>{v}</Text> },
+    { title: '姓名', dataIndex: 'customer', width: 140 },
     { title: t('user.col.phone'), dataIndex: 'phone', width: 160 },
     ...(!phase3 ? [{
       title: t('sales.call.result'),
