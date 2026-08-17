@@ -20,7 +20,7 @@ import {
   Typography,
   message,
 } from 'antd'
-import { CheckOutlined, DownOutlined, EditOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined, RollbackOutlined } from '@ant-design/icons'
+import { CheckOutlined, DownOutlined, EditOutlined, FileTextOutlined, PhoneOutlined, SearchOutlined, SettingOutlined, SwapOutlined, RollbackOutlined } from '@ant-design/icons'
 import type { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { genCallId, setState, updateSalesSettings, useStore } from '../store'
@@ -31,7 +31,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePerm } from '../perm'
 import { isClaimedLead, isPoolLead, isSalesLead } from '../funnel'
 import { resolveUserType } from '../userType'
-import { resolveUserStatus } from '../lessons'
+import { latestTrialReport, resolveUserStatus, TRIAL_REPORT_URL } from '../lessons'
 import { useLineScope } from '../useLineScope'
 import { businessLineOf, lineLabel, lpChannelSourceText, appChannelSourceText } from '../channel'
 import LineFilter from '../components/LineFilter'
@@ -542,6 +542,15 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
               </Space>
             ) : (
               <Space size={0}>
+                {latestTrialReport(lessons, r.studentId) && (
+                  <Button
+                    type="link"
+                    icon={<FileTextOutlined />}
+                    onClick={() => window.open(TRIAL_REPORT_URL, '_blank', 'noopener,noreferrer')}
+                  >
+                    {t('user.trialReport')}
+                  </Button>
+                )}
                 {canDial && (
                   <Button type="link" icon={<PhoneOutlined />} disabled={!r.phone} onClick={() => setDialing(r)}>
                     {t('perm.sales_dial')}
