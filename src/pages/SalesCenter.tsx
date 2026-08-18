@@ -583,12 +583,12 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
     { title: '用户ID', dataIndex: 'studentId', width: 190, render: (v: string) => <Text code>{v}</Text> },
     { title: '姓名', dataIndex: 'customer', width: 140 },
     { title: t('user.col.phone'), dataIndex: 'phone', width: 160 },
-    ...(!phase3 ? [{
+    {
       title: t('sales.call.result'),
       dataIndex: 'result',
       width: 110,
       render: (v: CallResult) => <Tag color={CALL_RESULT_COLOR[v]}>{t(`sales.callResult.${v}`)}</Tag>,
-    }] : []),
+    },
     { title: t('sales.call.duration'), dataIndex: 'duration', width: 90 },
     { title: '录音', key: 'recording', width: 100, render: () => <Text type="secondary">同步中</Text> },
     {
@@ -637,14 +637,14 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
         <LineFilter value={lineSel} onChange={setLineSel} options={filterOptions(lineOptions)} placeholder={t('user.col.country')} disabled={lineDisabled} />
         {tab === 'calls' && (
           <>
-            {!phase3 && <Select
+            <Select
               allowClear
               placeholder={t('sales.call.result')}
               style={{ width: 150 }}
               value={callResultFilter}
               onChange={setCallResultFilter}
               options={CALL_RESULTS.map((r) => ({ label: t(`sales.callResult.${r}`), value: r }))}
-            />}
+            />
             <DatePicker.RangePicker 
               onChange={setCallDateRange} 
               allowClear 
@@ -710,7 +710,7 @@ export default function SalesCenter({ importAction, detailPath, phase3 = false }
                   rowKey="id"
                   columns={callColumns}
                   dataSource={callData}
-                  scroll={{ x: 1210 }}
+                  scroll={{ x: 1500 }}
                   locale={{ emptyText: t('sales.emptyCalls') }}
                   pagination={{ showTotal: (n) => t('common.total', { n }), showSizeChanger: true }}
                 />
